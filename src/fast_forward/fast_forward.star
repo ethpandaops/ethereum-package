@@ -71,6 +71,7 @@ def launch(
     network_params,
     el_cl_data,
     jwt_file,
+    all_el_contexts,
     all_cl_contexts,
     participants,
     validator_count,
@@ -117,8 +118,18 @@ def launch(
     )
     nodes = " ".join(
         [
-            "{0}={1}".format(ctx.beacon_service_name, ctx.beacon_http_url)
+            "{0}={1}@{2}".format(
+                cl.beacon_service_name, cl.beacon_http_url, el.rpc_http_url
+            )
+            for cl, el in zip(all_cl_contexts, all_el_contexts)
+        ]
+    )
+    # Prysm sends its post-envelope forkchoice update from a goroutine, so updates reorder unless each payload lands first.
+    el_confirm = ",".join(
+        [
+            ctx.beacon_service_name
             for ctx in all_cl_contexts
+            if ctx.client_name == constants.CL_TYPE.prysm
         ]
     )
     run = " && ".join(
@@ -141,11 +152,12 @@ def launch(
             "cp {0}/interchange.json {0}/summary.json {1}/".format(
                 CHAIN_DIR, HANDOVER_DIR
             ),
-            "python3 {0}/insert.py --chain {1} --report {2}/insert.json --seconds-per-slot {3} {4}".format(
+            "python3 {0}/insert.py --chain {1} --report {2}/insert.json --seconds-per-slot {3} --el-confirm={4} {5}".format(
                 SCRIPTS_DIR,
                 CHAIN_DIR,
                 HANDOVER_DIR,
                 network_params.seconds_per_slot,
+                el_confirm,
                 nodes,
             ),
             "echo insert_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",

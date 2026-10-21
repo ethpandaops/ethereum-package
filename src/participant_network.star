@@ -653,6 +653,7 @@ def launch_participant_network(
             network_params,
             el_cl_data,
             jwt_file,
+            all_el_contexts,
             all_cl_contexts,
             args_with_right_defaults.participants,
             total_number_of_validator_keys,

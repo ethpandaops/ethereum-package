@@ -2216,6 +2216,7 @@ FAST_FORWARD_GENERATED_FORKS = (
     "deneb",
     "electra",
     "fulu",
+    "gloas",
     "bpo_1",
     "bpo_2",
     "bpo_3",

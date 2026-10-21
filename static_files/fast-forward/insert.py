@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Publish an ff-gen chain into every beacon node, in slot order, until each one's head is the generated head.
 
-usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] name=http://beacon:port [...]
+usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] [--el-confirm name,...]
+                 name=http://beacon:port[@http://el:port] [...]
 
 A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
 from a peer that is already ahead, so that node only gets polled from then on.
-A block's payload envelope (envelopes/<slot>.ssz, Gloas onwards) is posted right after the block.
+A Gloas block's payload envelope (envelopes/<slot>.ssz) is posted right after the block, with empty
+blobs under `Eth-Blob-Data-Included: true` and `broadcast_validation=consensus`, and counts as imported
+once the node serves it back. Nodes in --el-confirm wait for their EL head to reach the payload
+instead, which also keeps their forkchoice updates in order.
 """
 import argparse
 import json
-import os
 import struct
 import threading
 import time
@@ -20,6 +23,7 @@ CONFIRM_TIMEOUT = 15
 RESENDS = 2
 POLL = 0.02
 MAX_GAP_SLOTS = 32
+BARE_BLOCK_FORKS = ("gloas", "heze")
 
 
 def http(method, url, body=None, headers=None, timeout=30):
@@ -49,70 +53,102 @@ def finality(url):
     return {"justified": int(data["current_justified"]["epoch"]), "finalized": int(data["finalized"]["epoch"])}
 
 
-def block_contents(block_ssz):
-    # SignedBlockContents with empty kzg_proofs and blobs: three offsets, then the block.
-    end = 12 + len(block_ssz)
-    return struct.pack("<III", 12, end, end) + block_ssz
+def el_head(url):
+    if not url:
+        return None
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBlockByNumber", "params": ["latest", False]}).encode()
+    st, raw = http("POST", url, body=body, headers={"Content-Type": "application/json"}, timeout=10)
+    if st != 200:
+        return None
+    r = json.loads(raw).get("result")
+    return {"number": int(r["number"], 16), "hash": r["hash"]} if r else None
+
+
+def with_empty_blobs(ssz):
+    # Container of the object plus empty kzg_proofs and blobs: three offsets, then the object.
+    end = 12 + len(ssz)
+    return struct.pack("<III", 12, end, end) + ssz
 
 
 class Node:
-    def __init__(self, name, url):
-        self.name, self.url = name, url
+    def __init__(self, spec, el_confirm):
+        self.name, rest = spec.split("=", 1)
+        self.url, _, self.el = rest.partition("@")
+        self.el_confirm = self.name in el_confirm
         self.codes = {}
+        self.envelope_codes = {}
         self.posts = 0
+        self.envelopes = 0
+        self.envelope_s = 0.0
         self.stopped_at = None
         self.unconfirmed = []
+        self.unconfirmed_envelopes = []
         self.publish_done = None
         self.at_head = None
 
 
-def wait_slot(node, slot, timeout):
+def wait_until(check, timeout):
     end = time.time() + timeout
     while time.time() < end:
-        s, _ = head(node.url)
-        if s is not None and s >= slot:
+        if check():
             return True
         time.sleep(POLL)
     return False
 
 
+def block_imported(node, slot):
+    s, _ = head(node.url)
+    return s is not None and s >= slot
+
+
+def envelope_imported(node, b):
+    if node.el_confirm:
+        h = el_head(node.el)
+        return h is not None and h["hash"] == b["el_block_hash"]
+    st, _ = http("GET", f"{node.url}/eth/v1/beacon/execution_payload_envelopes/{b['root']}", headers={"Accept": "application/json"}, timeout=10)
+    return st == 200
+
+
+# Posts until confirmed; returns False when the node should get no more posts.
+def post(node, url, body, headers, codes, confirm, slot):
+    for _ in range(RESENDS + 1):
+        st, _ = http("POST", url, body=body, headers=headers)
+        node.posts += 1
+        codes[st] = codes.get(st, 0) + 1
+        if st == 503:
+            node.stopped_at = slot
+            return False
+        if wait_until(confirm, CONFIRM_TIMEOUT):
+            return True
+    return False
+
+
 def publish(node, chain, blocks):
+    block_url = node.url + "/eth/v2/beacon/blocks"
+    envelope_url = node.url + "/eth/v1/beacon/execution_payload_envelopes?broadcast_validation=consensus"
     for b in blocks:
-        slot = b["slot"]
+        slot, version = b["slot"], b["version"]
         with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
-            body = block_contents(f.read())
-        headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": b["version"]}
-        for _ in range(RESENDS + 1):
-            st, _ = http("POST", node.url + "/eth/v2/beacon/blocks", body=body, headers=headers)
-            node.posts += 1
-            node.codes[st] = node.codes.get(st, 0) + 1
-            if st == 503:
-                node.stopped_at = slot
-                node.publish_done = time.time()
-                return
-            if wait_slot(node, slot, CONFIRM_TIMEOUT):
-                break
-        else:
-            node.unconfirmed.append(slot)
-        envelope = f"{chain}/envelopes/{slot}.ssz"
-        if os.path.exists(envelope):
-            with open(envelope, "rb") as f:
-                st, _ = http(
-                    "POST",
-                    node.url + "/eth/v1/beacon/execution_payload_envelopes",
-                    body=f.read(),
-                    headers={
-                        "Content-Type": "application/octet-stream",
-                        "Eth-Consensus-Version": b["version"],
-                        "Eth-Blob-Data-Included": "false",
-                    },
-                )
-            node.posts += 1
-            node.codes[st] = node.codes.get(st, 0) + 1
-            if st == 503:
-                node.stopped_at = slot
-                node.publish_done = time.time()
-                return
+            block = f.read()
+        body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
+        headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
+        if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
+            if node.stopped_at is None:
+                node.unconfirmed.append(slot)
+            break
+        if b.get("envelope_ssz_bytes") is None:
+            continue
+        with open(f"{chain}/envelopes/{slot}.ssz", "rb") as f:
+            body = with_empty_blobs(f.read())
+        headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version, "Eth-Blob-Data-Included": "true"}
+        t = time.time()
+        ok = post(node, envelope_url, body, headers, node.envelope_codes, lambda: envelope_imported(node, b), slot)
+        node.envelopes += 1
+        node.envelope_s += time.time() - t
+        if not ok:
+            if node.stopped_at is None:
+                node.unconfirmed_envelopes.append(slot)
+            break
     node.publish_done = time.time()
 
 
@@ -122,13 +158,16 @@ def main():
     ap.add_argument("--report", required=True)
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--seconds-per-slot", type=int, required=True)
+    ap.add_argument("--el-confirm", default="", help="comma-separated nodes whose envelopes are confirmed by their EL head")
     ap.add_argument("nodes", nargs="+")
     args = ap.parse_args()
 
     blocks = json.load(open(f"{args.chain}/manifest.json"))
     summary = json.load(open(f"{args.chain}/summary.json"))
     target = summary["head_root"]
-    nodes = [Node(*spec.split("=", 1)) for spec in args.nodes]
+    el_target = summary.get("el_head", {}).get("hash")
+    el_confirm = set(filter(None, args.el_confirm.split(",")))
+    nodes = [Node(spec, el_confirm) for spec in args.nodes]
 
     started = time.time()
     threads = [threading.Thread(target=publish, args=(n, args.chain, blocks), daemon=True) for n in nodes]
@@ -138,25 +177,33 @@ def main():
     deadline = started + args.timeout
     while time.time() < deadline:
         for n in nodes:
-            if n.at_head is None and head(n.url)[1] == target:
+            if n.at_head is None and n.publish_done is not None and head(n.url)[1] == target:
                 n.at_head = time.time()
         if all(n.at_head is not None for n in nodes):
             break
         time.sleep(0.1)
 
-    report = {"started": started, "blocks": len(blocks), "head_slot": summary["head_slot"], "head_root": target, "nodes": {}}
+    report = {"started": started, "blocks": len(blocks), "head_slot": summary["head_slot"], "head_root": target, "el_head": el_target, "nodes": {}}
     for n in nodes:
         slot, root = head(n.url)
+        el = el_head(n.el)
         report["nodes"][n.name] = {
             "at_head_s": None if n.at_head is None else round(n.at_head - started, 2),
             "publish_s": None if n.publish_done is None else round(n.publish_done - started, 2),
             "posts": n.posts,
             "codes": {str(k): v for k, v in n.codes.items()},
+            "envelope_codes": {str(k): v for k, v in n.envelope_codes.items()},
+            "envelopes": n.envelopes,
+            "envelope_mean_s": round(n.envelope_s / n.envelopes, 3) if n.envelopes else None,
+            "envelope_confirm": "el_head" if n.el_confirm else "get_envelope",
             "stopped_at_503": n.stopped_at,
             "unconfirmed": n.unconfirmed,
+            "unconfirmed_envelopes": n.unconfirmed_envelopes,
             "head_slot": slot,
             "head_root": root,
             "finality": finality(n.url),
+            "el_head": el,
+            "el_at_head": None if el is None or el_target is None else el["hash"] == el_target,
         }
         print(f"ff-insert {n.name}: {json.dumps(report['nodes'][n.name])}", flush=True)
     report["finished"] = time.time()
@@ -169,7 +216,7 @@ def main():
     missing = [n.name for n in nodes if n.at_head is None]
     if missing:
         raise SystemExit(f"ff-insert: {missing} did not reach head {target} within {args.timeout}s")
-    print(f"ff-insert: all {len(nodes)} nodes at slot {summary['head_slot']} {target} after {report['finished'] - started:.1f}s", flush=True)
+    print(f"ff-insert: all {len(nodes)} nodes at slot {summary['head_slot']} {target} after {report['finished'] - started:.1f}s, gap {report['gap_slots']} slots", flush=True)
 
 
 if __name__ == "__main__":
