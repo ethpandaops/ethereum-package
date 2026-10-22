@@ -77,7 +77,7 @@ def drip_node(node, chain, drip):
         body = block if version in insert.BARE_BLOCK_FORKS else insert.with_empty_blobs(block)
         headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
         posted = time.time()
-        if not post_until_confirmed(node, block_url, body, headers, node.codes, lambda: insert.block_imported(node, slot)):
+        if not post_until_confirmed(node, block_url, body, headers, node.codes, lambda: insert.block_imported(node, slot, b["root"])):
             node.unconfirmed.append(slot)
             return
         if b.get("envelope_ssz_bytes") is not None:
@@ -102,8 +102,12 @@ def caught_up(nodes, roots, genesis, sps, last_slot):
 
 
 # One record per key: its last generated block at or before X, and its last attestation published in a block at or before X.
+# Without per-slot attester records, the generated tip's watermark is used as is: safe, but it may skip duties up to X.
 def interchange_for(chain, handover_slot):
     full = json.load(open(f"{chain}/interchange.json"))
+    if not os.path.exists(f"{chain}/attesters.json"):
+        print("ff-drip: no attesters.json, using the watermark at the generated tip", flush=True)
+        return full
     manifest = json.load(open(f"{chain}/manifest.json"))
     attesters = json.load(open(f"{chain}/attesters.json"))
     blocks = {}

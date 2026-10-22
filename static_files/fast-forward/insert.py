@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Publish an ff-gen chain into every beacon node, in slot order, until each one's head is the generated head.
+"""Publish a timeskip chain into every beacon node, in slot order, until each one's head is the generated head.
 
 usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--until-slot SLOT] [--timeout S] [--el-confirm name,...]
                  name=http://beacon:port[@http://el:port] [...]
 
 With --until-slot, only blocks up to that slot are published and the last of them is the target head.
 
-A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
+A block counts as imported once the node's head slot reaches it or the node serves its root. A 503 means the node is syncing
 from a peer that is already ahead, so that node only gets polled from then on. No node runs more than
 WINDOW blocks ahead of the slowest one still being published to, so none sees a peer far enough ahead
 to fall back to range sync (Prysm then answers 503, Lighthouse stays in head-chain sync).
+A manifest entry marked envelope_only (a checkpoint anchor the node already has) gets only its envelope.
 A Gloas block's payload envelope (envelopes/<slot>.ssz) is posted right after the block, with empty
 blobs under `Eth-Blob-Data-Included: true` and `broadcast_validation=consensus`, and counts as imported
 once the node serves it back. Nodes in --el-confirm wait for their EL head to reach the payload
@@ -58,10 +59,10 @@ def finality(url):
     return {"justified": int(data["current_justified"]["epoch"]), "finalized": int(data["finalized"]["epoch"])}
 
 
-def el_head(url):
+def el_head(url, tag="latest"):
     if not url:
         return None
-    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBlockByNumber", "params": ["latest", False]}).encode()
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBlockByNumber", "params": [tag, False]}).encode()
     st, raw = http("POST", url, body=body, headers={"Content-Type": "application/json"}, timeout=10)
     if st != 200:
         return None
@@ -109,6 +110,7 @@ class Node:
         self.unconfirmed = []
         self.unconfirmed_envelopes = []
         self.publish_done = None
+        self.anchor_envelope_rejected = False
         self.at_head = None
 
 
@@ -121,29 +123,39 @@ def wait_until(check, timeout):
     return False
 
 
-def block_imported(node, slot):
+# A node may import a block without making it head: right after checkpoint sync, the anchor's children
+# carry an older justified checkpoint than the anchor and stay out of fork choice's viable heads.
+def block_imported(node, slot, root):
     s, _ = head(node.url)
-    return s is not None and s >= slot
+    if s is not None and s >= slot:
+        return True
+    st, _ = http("GET", f"{node.url}/eth/v1/beacon/blocks/{root}/root", headers={"Accept": "application/json"}, timeout=10)
+    return st == 200
 
 
 def envelope_imported(node, b):
     if node.el_confirm:
+        # The head may already be past this payload when later blocks arrive by gossip.
         h = el_head(node.el)
+        if h is None or h["number"] < b["el_block_number"]:
+            return False
+        if h["number"] > b["el_block_number"]:
+            h = el_head(node.el, hex(b["el_block_number"]))
         return h is not None and h["hash"] == b["el_block_hash"]
     st, _ = http("GET", f"{node.url}/eth/v1/beacon/execution_payload_envelopes/{b['root']}", headers={"Accept": "application/json"}, timeout=10)
     return st == 200
 
 
 # Posts until confirmed; returns False when the node should get no more posts.
-def post(node, url, body, headers, codes, confirm, slot):
-    for _ in range(RESENDS + 1):
+def post(node, url, body, headers, codes, confirm, slot, resends=RESENDS, timeout=CONFIRM_TIMEOUT):
+    for _ in range(resends + 1):
         st, _ = http("POST", url, body=body, headers=headers)
         node.posts += 1
         codes[st] = codes.get(st, 0) + 1
         if st == 503:
             node.stopped_at = slot
             return False
-        if wait_until(confirm, CONFIRM_TIMEOUT):
+        if wait_until(confirm, timeout):
             return True
     return False
 
@@ -162,14 +174,15 @@ def publish_blocks(node, chain, blocks, pace):
     for i, b in enumerate(blocks):
         pace.wait_turn(i)
         slot, version = b["slot"], b["version"]
-        with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
-            block = f.read()
-        body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
-        headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
-        if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
-            if node.stopped_at is None:
-                node.unconfirmed.append(slot)
-            return
+        if not b.get("envelope_only"):
+            with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
+                block = f.read()
+            body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
+            headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
+            if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot, b["root"]), slot):
+                if node.stopped_at is None:
+                    node.unconfirmed.append(slot)
+                return
         if b.get("envelope_ssz_bytes") is None:
             pace.confirmed(node, i)
             continue
@@ -177,6 +190,12 @@ def publish_blocks(node, chain, blocks, pace):
             body = with_empty_blobs(f.read())
         headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version, "Eth-Blob-Data-Included": "true"}
         t = time.time()
+        if b.get("envelope_only"):
+            # Nodes that checkpoint-synced from the state alone have no anchor block to attach it to.
+            if not post(node, envelope_url, body, headers, node.envelope_codes, lambda: envelope_imported(node, b), slot, resends=0, timeout=3):
+                node.anchor_envelope_rejected = True
+            pace.confirmed(node, i)
+            continue
         ok = post(node, envelope_url, body, headers, node.envelope_codes, lambda: envelope_imported(node, b), slot)
         node.envelopes += 1
         node.envelope_s += time.time() - t
@@ -239,6 +258,7 @@ def main():
             "stopped_at_503": n.stopped_at,
             "unconfirmed": n.unconfirmed,
             "unconfirmed_envelopes": n.unconfirmed_envelopes,
+            "anchor_envelope_rejected": n.anchor_envelope_rejected,
             "head_slot": slot,
             "head_root": root,
             "finality": finality(n.url),
