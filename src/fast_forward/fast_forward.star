@@ -224,7 +224,7 @@ def generate_checkpoint(
             "set -e",
             "mkdir -p {0} {1}".format(HANDOVER_DIR, TAIL_DIR),
             "echo gen_start=$(date +%s.%N) > " + HANDOVER_DIR + "/timing.txt",
-            "python3 {0}/checkpoint.py feed --chain {1} --jwt {2} --slots-per-epoch {3} --report {4}/feed.json {5} > {4}/feed.log 2>&1 &".format(
+            "python3 {0}/checkpoint.py feed --prune --chain {1} --jwt {2} --slots-per-epoch {3} --report {4}/feed.json {5} > {4}/feed.log 2>&1 &".format(
                 SCRIPTS_DIR,
                 CHAIN_DIR,
                 constants.JWT_MOUNT_PATH_ON_CONTAINER,

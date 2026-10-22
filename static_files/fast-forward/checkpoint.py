@@ -134,6 +134,7 @@ def feed_el(engine, chain, feed, stats):
                     stats["fed_at_gen_end"] = next_slot - 1
                     stats["gen_end_at_s"] = round(time.time() - started, 2)
                 next_slot += 1
+                stats["fed"] = next_slot - 1
         if last_hash is None:
             raise RuntimeError(f"{engine.name}: nothing to feed")
         result = engine.call(last_fcu, [{"headBlockHash": last_hash, "safeBlockHash": ZERO_HASH, "finalizedBlockHash": ZERO_HASH}, None])
@@ -149,6 +150,16 @@ def feed_el(engine, chain, feed, stats):
     finally:
         stats["seconds"] = round(time.time() - started, 2)
         stats.setdefault("fed_at_gen_end", next_slot - 1)
+
+
+def prune(chain, done, keep_from):
+    for slot in range(done + 1, keep_from):
+        for path in (f"{chain}/payloads/{slot}.json", f"{chain}/blocks/{slot}.ssz", f"{chain}/envelopes/{slot}.ssz"):
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                pass
+    return max(done, keep_from - 1)
 
 
 def read_json(path):
@@ -173,7 +184,13 @@ def cmd_feed(args):
         t.start()
 
     started = time.time()
+    pruned = 0
     while not feed.failed:
+        # Every EL has these payloads and the anchor lies at or after the finalized slot, so the
+        # files before both are never read again; dropping them keeps disk use flat over long runs.
+        keep_from = min([s.get("fed", 0) for s in stats.values()] + [feed.limit])
+        if args.prune:
+            pruned = prune(args.chain, pruned, keep_from)
         summary = read_json(f"{args.chain}/summary.json")
         if summary is not None:
             anchor = summary.get("anchor")
@@ -400,6 +417,7 @@ def main():
     p.add_argument("--jwt", required=True)
     p.add_argument("--slots-per-epoch", type=int, required=True)
     p.add_argument("--report", required=True)
+    p.add_argument("--prune", action="store_true", help="delete payload, block and envelope files once every EL is past them")
     p.add_argument("els", nargs="+")
     p = sub.add_parser("tail")
     p.add_argument("--chain", required=True)
