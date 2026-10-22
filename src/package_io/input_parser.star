@@ -2386,9 +2386,7 @@ def resolve_fast_forward(fast_forward, network_params):
     )
 
 
-# Fast-forward keeps keys out of every beacon node until handover: separate VCs, except Grandine, whose
-# in-process validators load their keys through the keymanager. Also flags that let nodes take blocks over
-# the API without peers and start duties at once.
+# Fast-forward keeps keys out of beacon nodes until handover (separate VCs; Grandine loads them via keymanager), plus API-import flags.
 def apply_fast_forward_participant_defaults(participant):
     cl_type = participant["cl_type"]
     if (

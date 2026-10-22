@@ -111,8 +111,7 @@ FF_INTERCHANGE_FILE = FF_HANDOVER_MOUNT + "/interchange.json"
 FF_VC_DATA_DIR = "/tmp/ff-vc-data"
 
 
-# Import the fast-forward slashing-protection watermark, wait for the handover start time, then exec the VC;
-# a failed import keeps the VC down.
+# Import the fast-forward watermark, sleep until the handover start time, then exec the VC; a failed import keeps it down.
 def apply_ff_handover(config_args, cmd, exec_command, import_command, ff_handover):
     if ff_handover == None:
         return
