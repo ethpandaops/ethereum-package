@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    supernode: true
+  - el_type: geth
+    cl_type: prysm
+network_params:
+  gloas_fork_epoch: 0
+fast_forward:
+  enabled: true
+  until: finalized
+wait_for_finalization: true
