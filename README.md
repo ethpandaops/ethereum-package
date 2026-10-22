@@ -1751,8 +1751,9 @@ checkpoint_sync_url: ""
 fast_forward:
   # Defaults to false
   enabled: false
-  # Where the generated history ends: fork or epoch, and state (activated, justified, finalized), e.g.
-  #   until: {fork: gloas, state: finalized}
+  # Where the generated history ends, e.g.
+  #   until: {fork: gloas, state: activated}   # hand over as gloas activates
+  #   until: {fork: gloas, state: finalized}   # hand over once a gloas checkpoint is finalized
   #   until: {epoch: 10, state: justified}
   # Forks after that activate live. Defaults to the last scheduled fork, finalized
   until: null
