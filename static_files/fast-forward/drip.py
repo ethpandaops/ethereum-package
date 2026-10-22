@@ -2,12 +2,14 @@
 """Publish the generated blocks after the inserted history at their own slot times, then hand over to the validators.
 
 usage: drip.py --chain DIR --history-head SLOT --out DIR --seconds-per-slot N --go-file FILE
-               [--lead-slots L] [--vc-lead-seconds S] [--el-confirm name,...] name=http://beacon:port[@http://el:port] ...
+               [--lead-slots L] [--vc-lead-seconds S] [--handover-slot X] [--el-confirm name,...]
+               name=http://beacon:port[@http://el:port] ...
 
 Every node already holds the chain up to --history-head. Each later block (and its envelope) goes to every node at
 the start of its slot; a node that is down or answers 503 is retried until it takes it. Once --go-file exists, the
-script waits for every node to be at the current block, picks the handover slot X = wall slot + L, stops publishing
-after X, and writes the slashing-protection interchange for X with handover.json/handover.env into --out.
+script waits for every node to be at the current block, picks the handover slot X = wall slot + L (or the fixed
+--handover-slot, if the wall clock is at least L slots before it), stops publishing after X, and writes the
+slashing-protection interchange for X with handover.json/handover.env into --out.
 """
 import argparse
 import json
@@ -142,6 +144,7 @@ def main():
     ap.add_argument("--go-file", required=True)
     ap.add_argument("--lead-slots", type=int, default=4)
     ap.add_argument("--vc-lead-seconds", type=int, default=6)
+    ap.add_argument("--handover-slot", type=int, default=None)
     ap.add_argument("--el-confirm", default="")
     ap.add_argument("nodes", nargs="+")
     args = ap.parse_args()
@@ -174,7 +177,13 @@ def main():
     else:
         chosen_wall = wall_slot(genesis, sps)
         handover_slot = chosen_wall + args.lead_slots
-        if handover_slot > last_slot:
+        if args.handover_slot is not None:
+            if handover_slot > args.handover_slot:
+                status["error"] = f"launch overran: wall slot {chosen_wall} is less than {args.lead_slots} slots before the handover slot {args.handover_slot}"
+            handover_slot = args.handover_slot
+        if "error" in status:
+            pass
+        elif handover_slot > last_slot:
             status["error"] = f"handover slot {handover_slot} is past the generated history (last slot {last_slot})"
         else:
             drip.stop_at(handover_slot)

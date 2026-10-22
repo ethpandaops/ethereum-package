@@ -1752,9 +1752,11 @@ fast_forward:
   # Defaults to false
   enabled: false
   # Where the generated history ends, e.g.
-  #   until: {fork: gloas, state: activated}   # hand over as gloas activates
-  #   until: {fork: gloas, state: finalized}   # hand over once a gloas checkpoint is finalized
-  #   until: {epoch: 10, state: justified}
+  #   until: {fork: gloas, state: activating}                    # you start 10 slots before gloas; the transition runs live
+  #   until: {fork: gloas, state: activating, slots_before: 20}  # 20 slots before instead
+  #   until: {fork: gloas, state: activated}                     # gloas already active
+  #   until: {fork: gloas, state: finalized}                     # a gloas checkpoint already finalized
+  #   until: {epoch: 10, state: justified}                       # epoch works instead of fork for every state
   # Forks after that activate live. Defaults to the last scheduled fork, finalized
   until: null
   # checkpoint: nodes checkpoint-sync from the generated finalized checkpoint

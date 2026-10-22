@@ -79,6 +79,6 @@ def launch(
     )
 
 
-# Genesis goes far enough back that the target slot has passed by the time the generator runs.
+# Genesis goes far enough back that the genesis slot has passed by the time the generator runs.
 def fast_forward_genesis_age(network_params, fast_forward):
-    return (fast_forward.target_slot + 1) * network_params.seconds_per_slot
+    return (fast_forward.genesis_slot + 1) * network_params.seconds_per_slot

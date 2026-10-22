@@ -37,26 +37,28 @@ def wall_slot_command(network_params, final_genesis_timestamp):
     )
 
 
-# Generate GENERATE_AHEAD_SLOTS past the wall slot; with a later fork meant to activate live, stop before it.
+# Generate GENERATE_AHEAD_SLOTS past the wall slot (an activating handover reaches further ahead), never past max_slot.
 def generate_command(fast_forward, network_params, final_genesis_timestamp):
-    command = "timeskip --ahead-slots={0}".format(GENERATE_AHEAD_SLOTS)
-    if fast_forward.cutoff_epoch == None:
+    ahead = GENERATE_AHEAD_SLOTS
+    if fast_forward.handover_slot != None:
+        ahead += fast_forward.handover_slot - fast_forward.genesis_slot
+    command = "timeskip --ahead-slots={0}".format(ahead)
+    if fast_forward.max_slot == None:
         return command
-    slots_per_epoch = 8 if network_params.preset == "minimal" else 32
-    cutoff_slot = fast_forward.cutoff_epoch * slots_per_epoch
     return (
         "wall={0}; ".format(wall_slot_command(network_params, final_genesis_timestamp))
-        + 'if [ "$wall" -ge {0} ]; then echo "fast_forward: launch overran, wall slot $wall is already past the start of epoch {1}, where {2} should activate live" >&2; exit 1; fi; '.format(
-            cutoff_slot, fast_forward.cutoff_epoch, fast_forward.cutoff_fork
+        + 'if [ "$wall" -gt {0} ]; then echo "fast_forward: launch overran, wall slot $wall is already past slot {0}, the last one to generate" >&2; exit 1; fi; '.format(
+            fast_forward.max_slot
         )
         + command
-        + " --max-slot={0}".format(cutoff_slot - 1)
+        + " --max-slot={0}".format(fast_forward.max_slot)
     )
 
 
 # Fails unless the generator's summary shows the target state requested by fast_forward.until.
 def assert_target_command(fast_forward, summary_path):
     checks = {
+        "activating": "s['head_slot'] >= {0}".format(fast_forward.target_slot),
         "activated": "s['head_slot'] >= {0}".format(fast_forward.target_slot),
         "justified": "int(s['finality_checkpoints']['current_justified']['epoch']) >= {0}".format(
             fast_forward.target_epoch
@@ -100,6 +102,19 @@ def check_participants(participants):
 
 
 def describe(plan, fast_forward):
+    if fast_forward.state == "activating":
+        plan.print(
+            "fast_forward: generating up to slot {0}; validators take over {1} slots before {2} activates live at epoch {3}; beacon nodes get the history {4}".format(
+                fast_forward.handover_slot,
+                fast_forward.slots_before,
+                fast_forward.until_name,
+                fast_forward.target_epoch,
+                "from its last finalized checkpoint (history: checkpoint)"
+                if fast_forward.history == "checkpoint"
+                else "block by block from genesis (history: full)",
+            )
+        )
+        return
     plan.print(
         "fast_forward: generating until {0} at epoch {1}; history runs to the start of epoch {2}{3}; beacon nodes get it {4}".format(
             fast_forward.state,
@@ -508,7 +523,7 @@ def drip(
             },
             entrypoint=["sh", "-c"],
             cmd=[
-                "exec python3 -u {0}/drip.py --chain {1} --history-head $(python3 -c \"import json; print(json.load(open('{2}/insert.json'))['head_slot'])\") --out {3} --seconds-per-slot {4} --go-file {5} --lead-slots {6} --vc-lead-seconds {7} --el-confirm={8} {9}".format(
+                "exec python3 -u {0}/drip.py --chain {1} --history-head $(python3 -c \"import json; print(json.load(open('{2}/insert.json'))['head_slot'])\") --out {3} --seconds-per-slot {4} --go-file {5} --lead-slots {6} --vc-lead-seconds {7} --el-confirm={8}{9} {10}".format(
                     SCRIPTS_DIR,
                     CHAIN_DIR,
                     REPORT_DIR,
@@ -518,6 +533,9 @@ def drip(
                     HANDOVER_LEAD_SLOTS,
                     VC_LEAD_SECONDS,
                     el_confirm,
+                    ""
+                    if fast_forward.handover_slot == None
+                    else " --handover-slot {0}".format(fast_forward.handover_slot),
                     nodes,
                 )
             ],
@@ -600,6 +618,11 @@ def load_in_process_keys(
 # Fails unless every beacon node shows the target state requested by fast_forward.until.
 def wait_for_target(plan, fast_forward, all_cl_contexts, port_id):
     endpoint, extract, target = {
+        "activating": (
+            "/eth/v1/beacon/headers/head",
+            ".data.header.message.slot | tonumber",
+            fast_forward.target_slot,
+        ),
         "activated": (
             "/eth/v1/beacon/headers/head",
             ".data.header.message.slot | tonumber",

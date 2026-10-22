@@ -2216,6 +2216,13 @@ FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH = 3
 # Epochs of history past the target epoch before the head state shows each target state.
 FAST_FORWARD_STATES = {"activated": 0, "justified": 1, "finalized": 2}
 
+# state: activating hands over this many slots before the until epoch, so it activates live.
+FAST_FORWARD_ACTIVATING = "activating"
+FAST_FORWARD_ACTIVATING_SLOTS_BEFORE = 10
+
+# Time from genesis placement to the activating handover, covering generation, insertion and VC start.
+FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS = 240
+
 # Scheduled forks the generator can build through; anything else has to activate live, after the cut-off.
 FAST_FORWARD_GENERATED_FORKS = (
     "altair",
@@ -2258,6 +2265,11 @@ def fast_forward_disabled(fast_forward):
         end_epoch=None,
         cutoff_epoch=None,
         cutoff_fork=None,
+        genesis_slot=None,
+        max_slot=None,
+        handover_slot=None,
+        slots_before=None,
+        until_name=None,
         history=None,
         checkpoint_sync_url=None,
         image=fast_forward["image"],
@@ -2294,9 +2306,9 @@ def resolve_fast_forward(fast_forward, network_params):
             )
         )
     for key in until:
-        if key not in ("fork", "epoch", "state"):
+        if key not in ("fork", "epoch", "state", "slots_before"):
             fail(
-                "fast_forward.until: unknown key '{0}', expected fork, epoch or state".format(
+                "fast_forward.until: unknown key '{0}', expected fork, epoch, state or slots_before".format(
                     key
                 )
             )
@@ -2311,12 +2323,22 @@ def resolve_fast_forward(fast_forward, network_params):
             )
         )
     state = until.get("state", "finalized")
-    if state not in FAST_FORWARD_STATES:
+    if state not in FAST_FORWARD_STATES and state != FAST_FORWARD_ACTIVATING:
         fail(
             "fast_forward.until.state must be one of {0}, got '{1}'".format(
-                FAST_FORWARD_STATES.keys(), state
+                [FAST_FORWARD_ACTIVATING] + list(FAST_FORWARD_STATES.keys()), state
             )
         )
+    slots_before = until.get("slots_before", FAST_FORWARD_ACTIVATING_SLOTS_BEFORE)
+    if "slots_before" in until:
+        if state != FAST_FORWARD_ACTIVATING:
+            fail("fast_forward.until.slots_before only applies to state: activating")
+        if type(slots_before) != "int" or slots_before < 1:
+            fail(
+                "fast_forward.until.slots_before must be an integer of at least 1, got {0}".format(
+                    slots_before
+                )
+            )
 
     until_fork = None
     if "epoch" in until:
@@ -2347,16 +2369,27 @@ def resolve_fast_forward(fast_forward, network_params):
             )
         until_epoch = epochs[until_fork]
 
+    slots_per_epoch = 8 if network_params["preset"] == "minimal" else 32
+    until_name = until_fork if until_fork != None else "epoch {0}".format(until_epoch)
+    if state == FAST_FORWARD_ACTIVATING:
+        return resolve_activating(
+            fast_forward,
+            network_params,
+            schedule,
+            until_name,
+            until_epoch,
+            slots_before,
+            slots_per_epoch,
+        )
+
     target_epoch = until_epoch
     if state != "activated":
         target_epoch = max(FAST_FORWARD_MIN_CHECKPOINT_EPOCH, until_epoch)
     end_epoch = target_epoch + FAST_FORWARD_STATES[state]
-    slots_per_epoch = 8 if network_params["preset"] == "minimal" else 32
     target_slot = end_epoch * slots_per_epoch
     if target_slot == 0:
         return fast_forward_disabled(fast_forward)
 
-    until_name = until_fork if until_fork != None else "epoch {0}".format(until_epoch)
     cutoff_epoch = None
     cutoff_fork = None
     for name, epoch in schedule:
@@ -2395,6 +2428,86 @@ def resolve_fast_forward(fast_forward, network_params):
         end_epoch=end_epoch,
         cutoff_epoch=cutoff_epoch,
         cutoff_fork=cutoff_fork,
+        genesis_slot=target_slot,
+        max_slot=cutoff_epoch * slots_per_epoch - 1 if cutoff_epoch != None else None,
+        handover_slot=None,
+        slots_before=None,
+        until_name=until_name,
+        history=history,
+        checkpoint_sync_url=FAST_FORWARD_CHECKPOINT_SYNC_URL
+        if history == "checkpoint"
+        else None,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Validators take over slots_before slots ahead of the until epoch, which then activates live; genesis is placed
+# so the launch finishes before that handover.
+def resolve_activating(
+    fast_forward,
+    network_params,
+    schedule,
+    until_name,
+    until_epoch,
+    slots_before,
+    slots_per_epoch,
+):
+    if until_epoch == 0:
+        fail(
+            "fast_forward: {0} activates at genesis, so there is nothing to generate before it; schedule it later or use state: activated".format(
+                until_name
+            )
+        )
+    seconds_per_slot = network_params["seconds_per_slot"]
+    launch_slots = (
+        FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS + seconds_per_slot - 1
+    ) // seconds_per_slot
+    handover_slot = until_epoch * slots_per_epoch - slots_before - 1
+    genesis_slot = handover_slot - launch_slots
+    if genesis_slot < 1:
+        min_epoch = (
+            slots_before + launch_slots + 2 + slots_per_epoch - 1
+        ) // slots_per_epoch
+        fail(
+            "fast_forward: {0} at epoch {1} is too early to start {2} slots before it; schedule it at epoch {3} or later, or turn fast_forward off".format(
+                until_name, until_epoch, slots_before, min_epoch
+            )
+        )
+
+    cutoff_epoch = None
+    cutoff_fork = None
+    for name, epoch in schedule:
+        if epoch * slots_per_epoch > handover_slot:
+            if cutoff_epoch == None or epoch < cutoff_epoch:
+                cutoff_epoch = epoch
+                cutoff_fork = name
+        elif name not in FAST_FORWARD_GENERATED_FORKS:
+            fail(
+                "fast_forward: timeskip cannot generate {0} yet (scheduled at epoch {1}, before the handover at slot {2}); stop before it with until, or use a timeskip image that supports {0}".format(
+                    name, epoch, handover_slot + 1
+                )
+            )
+
+    history = fast_forward["history"]
+    if (
+        history == "checkpoint"
+        and genesis_slot // slots_per_epoch < FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH
+    ):
+        history = "full"
+    return struct(
+        enabled=True,
+        state=FAST_FORWARD_ACTIVATING,
+        target_epoch=until_epoch,
+        target_slot=handover_slot,
+        end_epoch=handover_slot // slots_per_epoch,
+        cutoff_epoch=cutoff_epoch,
+        cutoff_fork=cutoff_fork,
+        genesis_slot=genesis_slot,
+        max_slot=handover_slot,
+        handover_slot=handover_slot,
+        slots_before=slots_before,
+        until_name=until_name,
         history=history,
         checkpoint_sync_url=FAST_FORWARD_CHECKPOINT_SYNC_URL
         if history == "checkpoint"
