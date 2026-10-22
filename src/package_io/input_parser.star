@@ -2221,7 +2221,7 @@ FAST_FORWARD_ACTIVATING = "activating"
 FAST_FORWARD_ACTIVATING_SLOTS_BEFORE = 10
 
 # Time from genesis placement to the activating handover, covering generation, insertion and VC start.
-FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS = 240
+FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS = 90
 
 # Scheduled forks the generator can build through; anything else has to activate live, after the cut-off.
 FAST_FORWARD_GENERATED_FORKS = (
