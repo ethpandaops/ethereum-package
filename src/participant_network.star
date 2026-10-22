@@ -665,6 +665,15 @@ def launch_participant_network(
         plan, vc_service_configs, vc_service_info, "vc_force_restart"
     )
 
+    if ff_handover != None:
+        fast_forward.load_in_process_keys(
+            plan,
+            args_with_right_defaults.fast_forward,
+            all_cl_contexts,
+            args_with_right_defaults.participants,
+            validator_data,
+        )
+
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():

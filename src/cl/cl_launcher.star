@@ -190,6 +190,9 @@ def launch(
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
+        beacon_keystores = new_cl_node_validator_keystores
+        if args_with_right_defaults.fast_forward.enabled and not participant.use_separate_vc:
+            beacon_keystores = None
 
         el_context = all_el_contexts[index]
 
@@ -263,7 +266,7 @@ def launch(
                 cl_context_BOOTNODE,
                 el_context,
                 full_name,
-                new_cl_node_validator_keystores,
+                beacon_keystores,
                 snooper_el_engine_context,
                 persistent,
                 tolerations,
@@ -332,7 +335,7 @@ def launch(
                 boot_cl_client_ctx,
                 el_context,
                 full_name,
-                new_cl_node_validator_keystores,
+                beacon_keystores,
                 snooper_el_engine_context,
                 persistent,
                 tolerations,

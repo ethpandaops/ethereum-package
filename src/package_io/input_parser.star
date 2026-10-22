@@ -2386,12 +2386,20 @@ def resolve_fast_forward(fast_forward, network_params):
     )
 
 
-# Fast-forward needs separate VCs, plus flags that let nodes take blocks over the API without peers and start duties at once.
+# Fast-forward keeps keys out of every beacon node until handover: separate VCs, except Grandine, whose
+# in-process validators load their keys through the keymanager. Also flags that let nodes take blocks over
+# the API without peers and start duties at once.
 def apply_fast_forward_participant_defaults(participant):
     cl_type = participant["cl_type"]
-    if cl_type in (constants.CL_TYPE.grandine,) and participant["vc_type"] == "":
-        participant["vc_type"] = constants.VC_TYPE.lighthouse
-    participant["use_separate_vc"] = True
+    if (
+        cl_type == constants.CL_TYPE.grandine
+        and participant["vc_type"] == ""
+        and participant["use_separate_vc"] != True
+    ):
+        participant["use_separate_vc"] = False
+        participant["keymanager_enabled"] = True
+    else:
+        participant["use_separate_vc"] = True
     extra = {
         "el_extra_params": {constants.EL_TYPE.geth: ["--syncmode=full"]},
         "cl_extra_params": {

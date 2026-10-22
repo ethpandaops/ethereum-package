@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Publish an ff-gen chain into every beacon node, in slot order, until each one's head is the generated head.
 
-usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] [--el-confirm name,...]
+usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--until-slot SLOT] [--timeout S] [--el-confirm name,...]
                  name=http://beacon:port[@http://el:port] [...]
+
+With --until-slot, only blocks up to that slot are published and the last of them is the target head.
 
 A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
 from a peer that is already ahead, so that node only gets polled from then on. No node runs more than
@@ -192,13 +194,17 @@ def main():
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--seconds-per-slot", type=int, required=True)
     ap.add_argument("--el-confirm", default="", help="comma-separated nodes whose envelopes are confirmed by their EL head")
+    ap.add_argument("--until-slot", type=int, default=None)
     ap.add_argument("nodes", nargs="+")
     args = ap.parse_args()
 
     blocks = json.load(open(f"{args.chain}/manifest.json"))
     summary = json.load(open(f"{args.chain}/summary.json"))
-    target = summary["head_root"]
-    el_target = summary.get("el_head", {}).get("hash")
+    if args.until_slot is not None:
+        blocks = [b for b in blocks if b["slot"] <= args.until_slot]
+    target = blocks[-1]["root"]
+    head_slot = blocks[-1]["slot"]
+    el_target = blocks[-1]["el_block_hash"]
     el_confirm = set(filter(None, args.el_confirm.split(",")))
     nodes = [Node(spec, el_confirm) for spec in args.nodes]
 
@@ -217,7 +223,7 @@ def main():
             break
         time.sleep(0.1)
 
-    report = {"started": started, "blocks": len(blocks), "head_slot": summary["head_slot"], "head_root": target, "el_head": el_target, "nodes": {}}
+    report = {"started": started, "blocks": len(blocks), "head_slot": head_slot, "head_root": target, "el_head": el_target, "nodes": {}}
     for n in nodes:
         slot, root = head(n.url)
         el = el_head(n.el)
@@ -242,7 +248,7 @@ def main():
         print(f"ff-insert {n.name}: {json.dumps(report['nodes'][n.name])}", flush=True)
     report["finished"] = time.time()
     genesis = int(summary["genesis"]["genesis_time"])
-    report["gap_slots"] = int((report["finished"] - genesis) // args.seconds_per_slot) - summary["head_slot"]
+    report["gap_slots"] = int((report["finished"] - genesis) // args.seconds_per_slot) - head_slot
     with open(args.report, "w") as f:
         json.dump(report, f, indent=1)
     if report["gap_slots"] >= MAX_GAP_SLOTS:
@@ -250,7 +256,7 @@ def main():
     missing = [n.name for n in nodes if n.at_head is None]
     if missing:
         raise SystemExit(f"ff-insert: {missing} did not reach head {target} within {args.timeout}s")
-    print(f"ff-insert: all {len(nodes)} nodes at slot {summary['head_slot']} {target} after {report['finished'] - started:.1f}s, gap {report['gap_slots']} slots", flush=True)
+    print(f"ff-insert: all {len(nodes)} nodes at slot {head_slot} {target} after {report['finished'] - started:.1f}s, gap {report['gap_slots']} slots", flush=True)
 
 
 if __name__ == "__main__":

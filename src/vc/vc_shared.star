@@ -111,7 +111,8 @@ FF_INTERCHANGE_FILE = FF_HANDOVER_MOUNT + "/interchange.json"
 FF_VC_DATA_DIR = "/tmp/ff-vc-data"
 
 
-# Import the fast-forward slashing-protection watermark, then exec the VC; a failed import keeps the VC down.
+# Import the fast-forward slashing-protection watermark, wait for the handover start time, then exec the VC;
+# a failed import keeps the VC down.
 def apply_ff_handover(config_args, cmd, exec_command, import_command, ff_handover):
     if ff_handover == None:
         return
@@ -123,7 +124,9 @@ def apply_ff_handover(config_args, cmd, exec_command, import_command, ff_handove
         + FF_VC_DATA_DIR
         + "; "
         + import_command
-        + "; echo ff: slashing protection imported at $(date -u +%H:%M:%S.%N); exec "
+        + "; echo ff: slashing protection imported at $(date -u +%H:%M:%S.%N); . "
+        + FF_HANDOVER_MOUNT
+        + "/handover.env; wait=$((FF_VC_START_AT - $(date +%s))); if [ $wait -gt 0 ]; then echo ff: starting in ${wait}s, handover slot $FF_HANDOVER_SLOT; sleep $wait; fi; echo ff: starting at $(date -u +%H:%M:%S.%N); exec "
         + exec_command
         + " "
         + " ".join(cmd)
