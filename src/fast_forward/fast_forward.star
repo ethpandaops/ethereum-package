@@ -225,6 +225,8 @@ def launch(
         ],
         wait="10m",
     )
+    # reth keeps gigabytes in its container layer and is not needed once the chain exists.
+    plan.remove_service(name=RETH_SERVICE_NAME)
 
     drip(plan, fast_forward, network_params, scripts, nodes, el_confirm)
 
