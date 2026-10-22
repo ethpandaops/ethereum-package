@@ -1751,16 +1751,13 @@ checkpoint_sync_url: ""
 fast_forward:
   # Defaults to false
   enabled: false
-  # How far to generate before handing over:
-  # - a state: activated, justified or finalized (at the last scheduled fork)
-  # - a fork name, finalized: gloas
-  # - a map: {fork: <name>, state: <state>} or {epoch: <n>, state: <state>}
-  # Forks scheduled after the generated history activate live.
-  # Defaults to finalized at the last scheduled fork
+  # Where the generated history ends, e.g.
+  #   until: {fork: gloas}                   # state defaults to finalized
+  #   until: {epoch: 10, state: justified}   # states: activated, justified, finalized
+  # Forks after that activate live. Defaults to the last scheduled fork, finalized
   until: null
-  # checkpoint: beacon nodes checkpoint-sync from the generated chain's last finalized checkpoint,
-  # execution clients are fed payloads up to it, and only the blocks after it are published.
-  # full: every beacon node imports every generated block.
+  # checkpoint: nodes checkpoint-sync from the generated finalized checkpoint
+  # full: nodes import every generated block
   # Defaults to checkpoint
   history: checkpoint
   # The timeskip image

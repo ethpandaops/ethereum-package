@@ -8,5 +8,5 @@ network_params:
   gloas_fork_epoch: 0
 fast_forward:
   enabled: true
-  until: finalized
+  until: {state: finalized}
 wait_for_finalization: true
