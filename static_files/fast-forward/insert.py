@@ -57,10 +57,10 @@ def finality(url):
     return {"justified": int(data["current_justified"]["epoch"]), "finalized": int(data["finalized"]["epoch"])}
 
 
-def el_head(url):
+def el_head(url, tag="latest"):
     if not url:
         return None
-    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBlockByNumber", "params": ["latest", False]}).encode()
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "eth_getBlockByNumber", "params": [tag, False]}).encode()
     st, raw = http("POST", url, body=body, headers={"Content-Type": "application/json"}, timeout=10)
     if st != 200:
         return None
@@ -133,7 +133,12 @@ def block_imported(node, slot, root):
 
 def envelope_imported(node, b):
     if node.el_confirm:
+        # The head may already be past this payload when later blocks arrive by gossip.
         h = el_head(node.el)
+        if h is None or h["number"] < b["el_block_number"]:
+            return False
+        if h["number"] > b["el_block_number"]:
+            h = el_head(node.el, hex(b["el_block_number"]))
         return h is not None and h["hash"] == b["el_block_hash"]
     st, _ = http("GET", f"{node.url}/eth/v1/beacon/execution_payload_envelopes/{b['root']}", headers={"Accept": "application/json"}, timeout=10)
     return st == 200
