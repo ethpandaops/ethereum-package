@@ -1751,12 +1751,12 @@ checkpoint_sync_url: ""
 fast_forward:
   # Defaults to false
   enabled: false
-  # Where the generated history ends, e.g.
-  #   until: {fork: gloas, state: activating}                    # you start 10 slots before gloas; the transition runs live
-  #   until: {fork: gloas, state: activating, slots_before: 20}  # 20 slots before instead
-  #   until: {fork: gloas, state: activated}                     # gloas already active
-  #   until: {fork: gloas, state: finalized}                     # a gloas checkpoint already finalized
-  #   until: {epoch: 10, state: justified}                       # epoch works instead of fork for every state
+  # Where the generated history ends: a fork (or an epoch) and a state, e.g.
+  #   until:
+  #     fork: gloas            # or epoch: 10
+  #     state: activating      # activating, activated, justified or finalized
+  #     slots_before: 20       # activating only, defaults to 10
+  # activating: you start slots_before slots ahead of gloas and the transition runs live.
   # Forks after that activate live. Defaults to the last scheduled fork, finalized
   until: null
   # checkpoint: nodes checkpoint-sync from the generated finalized checkpoint
