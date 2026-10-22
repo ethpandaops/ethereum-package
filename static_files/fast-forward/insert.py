@@ -4,7 +4,7 @@
 usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] [--el-confirm name,...]
                  name=http://beacon:port[@http://el:port] [...]
 
-A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
+A block counts as imported once the node's head slot reaches it or the node serves its root. A 503 means the node is syncing
 from a peer that is already ahead, so that node only gets polled from then on. No node runs more than
 WINDOW blocks ahead of the slowest one still being published to, so none sees a peer far enough ahead
 to fall back to range sync (Prysm then answers 503, Lighthouse stays in head-chain sync).
@@ -120,9 +120,14 @@ def wait_until(check, timeout):
     return False
 
 
-def block_imported(node, slot):
+# A node may import a block without making it head: right after checkpoint sync, the anchor's children
+# carry an older justified checkpoint than the anchor and stay out of fork choice's viable heads.
+def block_imported(node, slot, root):
     s, _ = head(node.url)
-    return s is not None and s >= slot
+    if s is not None and s >= slot:
+        return True
+    st, _ = http("GET", f"{node.url}/eth/v1/beacon/blocks/{root}/root", headers={"Accept": "application/json"}, timeout=10)
+    return st == 200
 
 
 def envelope_imported(node, b):
@@ -166,7 +171,7 @@ def publish_blocks(node, chain, blocks, pace):
                 block = f.read()
             body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
             headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
-            if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
+            if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot, b["root"]), slot):
                 if node.stopped_at is None:
                     node.unconfirmed.append(slot)
                 return
