@@ -7,8 +7,15 @@ HANDOVER_ARTIFACT = "ff-handover"
 NIMBUS_HANDOVER_ARTIFACT = "ff-handover-nimbus"
 DEFAULT_NIMBUS_IMAGE = "ethpandaops/nimbus-eth2:unstable"
 
+CHECKPOINT_SERVICE_NAME = "ff-checkpoint"
+CHECKPOINT_PORT = 5052
+TAIL_ARTIFACT = "ff-chain-tail"
+INSERT_REPORT_ARTIFACT = "ff-insert-report"
+
 CHAIN_DIR = "/ff/chain"
 HANDOVER_DIR = "/ff/handover"
+TAIL_DIR = "/ff/tail"
+REPORT_DIR = "/ff/report"
 SCRIPTS_DIR = "/ff-scripts"
 
 
@@ -25,7 +32,7 @@ def generate_command(fast_forward, network_params, final_genesis_timestamp):
         + 'if [ "$wall" -ge {0} ]; then echo "fast_forward: launch overran, wall slot $wall is already past the start of epoch {1}, where {2} should activate live" >&2; exit 1; fi; '.format(
             cutoff_slot, fast_forward.cutoff_epoch, fast_forward.cutoff_fork
         )
-        + "ff-gen --until-slot=$wall"
+        + "ff-gen --max-slot={0}".format(cutoff_slot - 1)
     )
 
 
@@ -63,26 +70,15 @@ def new_handover(participants):
     )
 
 
-# Generates the chain to the wall slot on a private reth, publishes it to every beacon node, and stores the VC watermark.
-def launch(
-    plan,
-    fast_forward,
-    handover,
-    network_params,
-    el_cl_data,
-    jwt_file,
-    all_el_contexts,
-    all_cl_contexts,
-    participants,
-    validator_count,
-    final_genesis_timestamp,
-):
+def check_participants(participants):
     for participant in participants:
         if participant.use_separate_vc != True:
             fail("fast_forward needs a separate validator client for every participant")
 
+
+def describe(plan, fast_forward):
     plan.print(
-        "fast_forward: generating until {0} at epoch {1}; history runs to the start of epoch {2}{3}".format(
+        "fast_forward: generating until {0} at epoch {1}; history runs to the start of epoch {2}{3}; beacon nodes get it {4}".format(
             fast_forward.state,
             fast_forward.target_epoch,
             fast_forward.end_epoch,
@@ -91,10 +87,15 @@ def launch(
             else ", {0} activates live at epoch {1}".format(
                 fast_forward.cutoff_fork, fast_forward.cutoff_epoch
             ),
+            "from its last finalized checkpoint (history: checkpoint)"
+            if fast_forward.history == "checkpoint"
+            else "block by block from genesis (history: full)",
         )
     )
 
-    reth = plan.add_service(
+
+def add_reth(plan, fast_forward, el_cl_data, jwt_file):
+    return plan.add_service(
         name=RETH_SERVICE_NAME,
         config=ServiceConfig(
             image=fast_forward.el_image,
@@ -110,6 +111,9 @@ def launch(
                 "--disable-discovery",
                 "--max-outbound-peers=0",
                 "--max-inbound-peers=0",
+                # MDBX's default 4 GB growth step is fully allocated in the container layer.
+                "--db.growth-step=64MB",
+                "--db.max-size=64GB",
             ],
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data.files_artifact_uuid,
@@ -126,9 +130,41 @@ def launch(
         ),
     )
 
-    scripts = plan.upload_files(
-        src=static_files.FAST_FORWARD_INSERT_SCRIPT_FILEPATH, name="ff-scripts"
+
+def upload_scripts(plan):
+    return plan.upload_files(
+        src=static_files.FAST_FORWARD_SCRIPTS_DIRPATH, name="ff-scripts"
     )
+
+
+def ff_gen_command(
+    fast_forward,
+    network_params,
+    final_genesis_timestamp,
+    reth,
+    validator_count,
+):
+    return (
+        "("
+        + generate_command(fast_forward, network_params, final_genesis_timestamp)
+        + " --testnet-dir="
+        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + " --validator-count={0}".format(validator_count)
+        + " --engine-url=http://{0}:{1}".format(reth.ip_address, ENGINE_PORT)
+        + " --jwt-secret="
+        + constants.JWT_MOUNT_PATH_ON_CONTAINER
+        + " --output-dir="
+        + CHAIN_DIR
+        + " --no-json)"
+    )
+
+
+# Generation takes about 10 ms per slot natively; leave room for a slower, shared Docker VM.
+def generation_wait(fast_forward):
+    return "{0}s".format(600 + fast_forward.target_slot // 10)
+
+
+def insert_command(network_params, all_el_contexts, all_cl_contexts, report_dir, timeout):
     nodes = " ".join(
         [
             "{0}={1}@{2}".format(
@@ -145,40 +181,86 @@ def launch(
             if ctx.client_name == constants.CL_TYPE.prysm
         ]
     )
-    run = " && ".join(
+    return "python3 {0}/insert.py --chain {1} --report {2}/insert.json --seconds-per-slot {3} --timeout {4} --el-confirm={5} {6}".format(
+        SCRIPTS_DIR,
+        CHAIN_DIR,
+        report_dir,
+        network_params.seconds_per_slot,
+        timeout,
+        el_confirm,
+        nodes,
+    )
+
+
+# history: checkpoint, before any beacon node starts. Generates the chain, feeds every EL its payloads
+# up to the last finalized checkpoint while ff-gen runs, keeps the anchor plus the blocks after it,
+# and serves the anchor as a beacon API for the beacon nodes' checkpoint sync.
+def generate_checkpoint(
+    plan,
+    fast_forward,
+    network_params,
+    el_cl_data,
+    jwt_file,
+    all_el_contexts,
+    participants,
+    validator_count,
+    final_genesis_timestamp,
+):
+    check_participants(participants)
+    describe(plan, fast_forward)
+    reth = add_reth(plan, fast_forward, el_cl_data, jwt_file)
+    scripts = upload_scripts(plan)
+    slots_per_epoch = 8 if network_params.preset == "minimal" else 32
+    engines = " ".join(
         [
-            "mkdir -p " + HANDOVER_DIR,
+            "{0}=http://{1}:{2}".format(
+                el.service_name, el.ip_addr, el.engine_rpc_port_num
+            )
+            for el in all_el_contexts
+        ]
+    )
+    run = "\n".join(
+        [
+            "set -e",
+            "mkdir -p {0} {1}".format(HANDOVER_DIR, TAIL_DIR),
             "echo gen_start=$(date +%s.%N) > " + HANDOVER_DIR + "/timing.txt",
-            "("
-            + generate_command(fast_forward, network_params, final_genesis_timestamp)
-            + " --testnet-dir="
-            + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-            + " --validator-count={0}".format(validator_count)
-            + " --engine-url=http://{0}:{1}".format(reth.ip_address, ENGINE_PORT)
-            + " --jwt-secret="
-            + constants.JWT_MOUNT_PATH_ON_CONTAINER
-            + " --output-dir="
-            + CHAIN_DIR
-            + " --no-json)",
-            assert_target_command(fast_forward, CHAIN_DIR + "/summary.json"),
+            "python3 {0}/checkpoint.py feed --chain {1} --jwt {2} --slots-per-epoch {3} --report {4}/feed.json {5} > {4}/feed.log 2>&1 &".format(
+                SCRIPTS_DIR,
+                CHAIN_DIR,
+                constants.JWT_MOUNT_PATH_ON_CONTAINER,
+                slots_per_epoch,
+                HANDOVER_DIR,
+                engines,
+            ),
+            "feeder=$!",
+            "mkdir -p " + CHAIN_DIR,
+            ff_gen_command(
+                fast_forward,
+                network_params,
+                final_genesis_timestamp,
+                reth,
+                validator_count,
+            )
+            + " || { kill $feeder; exit 1; }",
+            assert_target_command(fast_forward, CHAIN_DIR + "/summary.json")
+            + " || { kill $feeder; exit 1; }",
             "echo gen_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
+            "wait $feeder || { cat " + HANDOVER_DIR + "/feed.log; exit 1; }",
+            "cat {0}/feed.log".format(HANDOVER_DIR),
+            "echo feed_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
+            "python3 {0}/checkpoint.py tail --chain {1} --out {2}".format(
+                SCRIPTS_DIR, CHAIN_DIR, TAIL_DIR
+            ),
             "cp {0}/interchange.json {0}/summary.json {1}/".format(
                 CHAIN_DIR, HANDOVER_DIR
             ),
-            "python3 {0}/insert.py --chain {1} --report {2}/insert.json --seconds-per-slot {3} --el-confirm={4} {5}".format(
-                SCRIPTS_DIR,
-                CHAIN_DIR,
-                HANDOVER_DIR,
-                network_params.seconds_per_slot,
-                el_confirm,
-                nodes,
-            ),
-            "echo insert_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
+            # The run's container stays until the enclave goes; drop the full history it no longer needs.
+            "rm -rf " + CHAIN_DIR,
         ]
     )
     plan.run_sh(
-        name="ff-generate-and-insert",
-        description="Generating the fast-forward chain and publishing it into every beacon node",
+        name="ff-generate-and-feed",
+        description="Generating the fast-forward chain and feeding every EL up to its last finalized checkpoint",
         image=fast_forward.image,
         env_vars={
             "FF_GEN_MNEMONIC": network_params.preregistered_validator_keys_mnemonic
@@ -189,9 +271,140 @@ def launch(
             SCRIPTS_DIR: scripts,
         },
         run=run,
-        store=[StoreSpec(src=HANDOVER_DIR, name=HANDOVER_ARTIFACT)],
-        wait="10m",
+        store=[
+            StoreSpec(src=HANDOVER_DIR, name=HANDOVER_ARTIFACT),
+            StoreSpec(src=TAIL_DIR, name=TAIL_ARTIFACT),
+        ],
+        wait=generation_wait(fast_forward),
     )
+    plan.remove_service(name=RETH_SERVICE_NAME)
+
+    plan.add_service(
+        name=CHECKPOINT_SERVICE_NAME,
+        config=ServiceConfig(
+            image=fast_forward.image,
+            cmd=[
+                "python3",
+                SCRIPTS_DIR + "/checkpoint.py",
+                "serve",
+                "--dir",
+                TAIL_DIR,
+                "--network-config",
+                constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+                "--port",
+                str(CHECKPOINT_PORT),
+            ],
+            files={
+                constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data.files_artifact_uuid,
+                TAIL_DIR: TAIL_ARTIFACT,
+                SCRIPTS_DIR: scripts,
+            },
+            ports={
+                "http": PortSpec(
+                    number=CHECKPOINT_PORT,
+                    transport_protocol="TCP",
+                    application_protocol="http",
+                    wait="30s",
+                ),
+            },
+        ),
+    )
+
+
+# Publishes the generated chain into every beacon node (history: full generates it here first;
+# history: checkpoint only publishes the blocks after the anchor), then readies the VC handover.
+def launch(
+    plan,
+    fast_forward,
+    handover,
+    network_params,
+    el_cl_data,
+    jwt_file,
+    all_el_contexts,
+    all_cl_contexts,
+    participants,
+    validator_count,
+    final_genesis_timestamp,
+):
+    if fast_forward.history == "checkpoint":
+        plan.run_sh(
+            name="ff-insert-tail",
+            description="Publishing the blocks after the checkpoint anchor into every beacon node",
+            image=fast_forward.image,
+            files={
+                CHAIN_DIR: TAIL_ARTIFACT,
+                SCRIPTS_DIR: "ff-scripts",
+            },
+            run=" && ".join(
+                [
+                    "mkdir -p " + REPORT_DIR,
+                    "echo insert_start=$(date +%s.%N) > " + REPORT_DIR + "/timing.txt",
+                    insert_command(
+                        network_params,
+                        all_el_contexts,
+                        all_cl_contexts,
+                        REPORT_DIR,
+                        600,
+                    ),
+                    "echo insert_end=$(date +%s.%N) >> " + REPORT_DIR + "/timing.txt",
+                ]
+            ),
+            store=[StoreSpec(src=REPORT_DIR, name=INSERT_REPORT_ARTIFACT)],
+            wait="15m",
+        )
+    else:
+        check_participants(participants)
+        describe(plan, fast_forward)
+        reth = add_reth(plan, fast_forward, el_cl_data, jwt_file)
+        scripts = upload_scripts(plan)
+        # Every node imports every block; give slow importers room so the report shows the real cost.
+        insert_timeout = max(300, fast_forward.target_slot)
+        run = " && ".join(
+            [
+                "mkdir -p " + HANDOVER_DIR,
+                "echo gen_start=$(date +%s.%N) > " + HANDOVER_DIR + "/timing.txt",
+                ff_gen_command(
+                    fast_forward,
+                    network_params,
+                    final_genesis_timestamp,
+                    reth,
+                    validator_count,
+                ),
+                assert_target_command(fast_forward, CHAIN_DIR + "/summary.json"),
+                "echo gen_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
+                "cp {0}/interchange.json {0}/summary.json {1}/".format(
+                    CHAIN_DIR, HANDOVER_DIR
+                ),
+                insert_command(
+                    network_params,
+                    all_el_contexts,
+                    all_cl_contexts,
+                    HANDOVER_DIR,
+                    insert_timeout,
+                ),
+                "echo insert_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
+                "rm -rf " + CHAIN_DIR,
+            ]
+        )
+        plan.run_sh(
+            name="ff-generate-and-insert",
+            description="Generating the fast-forward chain and publishing it into every beacon node",
+            image=fast_forward.image,
+            env_vars={
+                "FF_GEN_MNEMONIC": network_params.preregistered_validator_keys_mnemonic
+            },
+            files={
+                constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data.files_artifact_uuid,
+                constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+                SCRIPTS_DIR: scripts,
+            },
+            run=run,
+            store=[StoreSpec(src=HANDOVER_DIR, name=HANDOVER_ARTIFACT)],
+            wait="{0}s".format(
+                int(generation_wait(fast_forward)[:-1]) + insert_timeout + 60
+            ),
+        )
+        plan.remove_service(name=RETH_SERVICE_NAME)
 
     # Teku starts gossip only on a sync-state change or a new peer while near the head; API import triggers neither.
     for ctx in all_cl_contexts:

@@ -2198,12 +2198,20 @@ def get_default_fast_forward_params():
     return {
         "enabled": False,
         "until": None,
+        "history": "checkpoint",
         "image": "ff-gen:local",
         "el_image": "ghcr.io/paradigmxyz/reth:latest",
     }
 
 
 FAST_FORWARD_MIN_CHECKPOINT_EPOCH = 2
+
+# How beacon nodes get the generated history: start from its last finalized checkpoint, or import every block.
+FAST_FORWARD_HISTORIES = ("checkpoint", "full")
+FAST_FORWARD_CHECKPOINT_SYNC_URL = "http://ff-checkpoint:5052"
+
+# The checkpoint path needs a finalized checkpoint after genesis, which first exists at the start of epoch 3.
+FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH = 3
 
 # Epochs of history past the target epoch before the head state shows each target state.
 FAST_FORWARD_STATES = {"activated": 0, "justified": 1, "finalized": 2}
@@ -2250,6 +2258,8 @@ def fast_forward_disabled(fast_forward):
         end_epoch=None,
         cutoff_epoch=None,
         cutoff_fork=None,
+        history=None,
+        checkpoint_sync_url=None,
         image=fast_forward["image"],
         el_image=fast_forward["el_image"],
     )
@@ -2261,6 +2271,12 @@ def resolve_fast_forward(fast_forward, network_params):
         return fast_forward_disabled(fast_forward)
     if network_params["network"] != constants.NETWORK_NAME.kurtosis:
         fail("fast_forward only works on a fresh kurtosis network")
+    if fast_forward["history"] not in FAST_FORWARD_HISTORIES:
+        fail(
+            "fast_forward.history must be one of {0}, got '{1}'".format(
+                FAST_FORWARD_HISTORIES, fast_forward["history"]
+            )
+        )
 
     schedule = []
     epochs = {}
@@ -2373,6 +2389,9 @@ def resolve_fast_forward(fast_forward, network_params):
                 )
             )
 
+    history = fast_forward["history"]
+    if history == "checkpoint" and end_epoch < FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH:
+        history = "full"
     return struct(
         enabled=True,
         state=state,
@@ -2381,6 +2400,10 @@ def resolve_fast_forward(fast_forward, network_params):
         end_epoch=end_epoch,
         cutoff_epoch=cutoff_epoch,
         cutoff_fork=cutoff_fork,
+        history=history,
+        checkpoint_sync_url=FAST_FORWARD_CHECKPOINT_SYNC_URL
+        if history == "checkpoint"
+        else None,
         image=fast_forward["image"],
         el_image=fast_forward["el_image"],
     )

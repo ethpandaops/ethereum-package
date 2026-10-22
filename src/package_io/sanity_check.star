@@ -489,6 +489,7 @@ SUBCATEGORY_PARAMS = {
     "fast_forward": [
         "enabled",
         "until",
+        "history",
         "image",
         "el_image",
     ],

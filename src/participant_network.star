@@ -267,6 +267,19 @@ def launch_participant_network(
             wait="20m",
         )
 
+    if args_with_right_defaults.fast_forward.history == "checkpoint":
+        fast_forward.generate_checkpoint(
+            plan,
+            args_with_right_defaults.fast_forward,
+            network_params,
+            el_cl_data,
+            jwt_file,
+            all_el_contexts,
+            args_with_right_defaults.participants,
+            total_number_of_validator_keys,
+            final_genesis_timestamp,
+        )
+
     # Launch all consensus layer clients
     prysm_password_relative_filepath = (
         validator_data.prysm_password_relative_filepath

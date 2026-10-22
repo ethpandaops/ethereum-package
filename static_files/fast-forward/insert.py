@@ -8,6 +8,7 @@ A block counts as imported once the node's head slot reaches it. A 503 means the
 from a peer that is already ahead, so that node only gets polled from then on. No node runs more than
 WINDOW blocks ahead of the slowest one still being published to, so none sees a peer far enough ahead
 to fall back to range sync (Prysm then answers 503, Lighthouse stays in head-chain sync).
+A manifest entry marked envelope_only (a checkpoint anchor the node already has) gets only its envelope.
 A Gloas block's payload envelope (envelopes/<slot>.ssz) is posted right after the block, with empty
 blobs under `Eth-Blob-Data-Included: true` and `broadcast_validation=consensus`, and counts as imported
 once the node serves it back. Nodes in --el-confirm wait for their EL head to reach the payload
@@ -160,14 +161,15 @@ def publish_blocks(node, chain, blocks, pace):
     for i, b in enumerate(blocks):
         pace.wait_turn(i)
         slot, version = b["slot"], b["version"]
-        with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
-            block = f.read()
-        body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
-        headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
-        if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
-            if node.stopped_at is None:
-                node.unconfirmed.append(slot)
-            return
+        if not b.get("envelope_only"):
+            with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
+                block = f.read()
+            body = block if version in BARE_BLOCK_FORKS else with_empty_blobs(block)
+            headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version}
+            if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
+                if node.stopped_at is None:
+                    node.unconfirmed.append(slot)
+                return
         if b.get("envelope_ssz_bytes") is None:
             pace.confirmed(node, i)
             continue
