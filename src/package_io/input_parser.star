@@ -2396,6 +2396,11 @@ def apply_fast_forward_participant_defaults(participant):
     ):
         participant["use_separate_vc"] = False
         participant["keymanager_enabled"] = True
+        # Keys arrive just before handover, too late for subnet subscriptions to reach peers by the first live slot.
+        if "--subscribe-all-subnets" not in participant["cl_extra_params"]:
+            participant["cl_extra_params"] = participant["cl_extra_params"] + [
+                "--subscribe-all-subnets"
+            ]
     else:
         participant["use_separate_vc"] = True
     extra = {
