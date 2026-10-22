@@ -139,6 +139,8 @@ def launch(
                 "--disable-discovery",
                 "--max-outbound-peers=0",
                 "--max-inbound-peers=0",
+                "--db.growth-step=64MB",
+                "--db.max-size=64GB",
             ],
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data.files_artifact_uuid,
