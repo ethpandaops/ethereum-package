@@ -2289,7 +2289,7 @@ def resolve_fast_forward(fast_forward, network_params):
     until = fast_forward["until"] if fast_forward["until"] != None else {}
     if type(until) != "dict":
         fail(
-            "fast_forward.until must be a map, e.g. {{fork: gloas}} or {{epoch: 10, state: justified}}, got {0}".format(
+            "fast_forward.until must be a map, e.g. {{fork: gloas, state: finalized}} or {{epoch: 10, state: justified}}, got {0}".format(
                 until
             )
         )
@@ -2302,6 +2302,14 @@ def resolve_fast_forward(fast_forward, network_params):
             )
     if "fork" in until and "epoch" in until:
         fail("fast_forward.until: set fork or epoch, not both")
+    if until and (
+        "state" not in until or ("fork" not in until and "epoch" not in until)
+    ):
+        fail(
+            "fast_forward.until needs fork or epoch, and state, e.g. {{fork: gloas, state: finalized}}, got {0}".format(
+                until
+            )
+        )
     state = until.get("state", "finalized")
     if state not in FAST_FORWARD_STATES:
         fail(
