@@ -108,6 +108,7 @@ class Node:
         self.unconfirmed = []
         self.unconfirmed_envelopes = []
         self.publish_done = None
+        self.anchor_envelope_rejected = False
         self.at_head = None
 
 
@@ -139,15 +140,15 @@ def envelope_imported(node, b):
 
 
 # Posts until confirmed; returns False when the node should get no more posts.
-def post(node, url, body, headers, codes, confirm, slot):
-    for _ in range(RESENDS + 1):
+def post(node, url, body, headers, codes, confirm, slot, resends=RESENDS, timeout=CONFIRM_TIMEOUT):
+    for _ in range(resends + 1):
         st, _ = http("POST", url, body=body, headers=headers)
         node.posts += 1
         codes[st] = codes.get(st, 0) + 1
         if st == 503:
             node.stopped_at = slot
             return False
-        if wait_until(confirm, CONFIRM_TIMEOUT):
+        if wait_until(confirm, timeout):
             return True
     return False
 
@@ -182,6 +183,12 @@ def publish_blocks(node, chain, blocks, pace):
             body = with_empty_blobs(f.read())
         headers = {"Content-Type": "application/octet-stream", "Eth-Consensus-Version": version, "Eth-Blob-Data-Included": "true"}
         t = time.time()
+        if b.get("envelope_only"):
+            # Nodes that checkpoint-synced from the state alone have no anchor block to attach it to.
+            if not post(node, envelope_url, body, headers, node.envelope_codes, lambda: envelope_imported(node, b), slot, resends=0, timeout=3):
+                node.anchor_envelope_rejected = True
+            pace.confirmed(node, i)
+            continue
         ok = post(node, envelope_url, body, headers, node.envelope_codes, lambda: envelope_imported(node, b), slot)
         node.envelopes += 1
         node.envelope_s += time.time() - t
@@ -240,6 +247,7 @@ def main():
             "stopped_at_503": n.stopped_at,
             "unconfirmed": n.unconfirmed,
             "unconfirmed_envelopes": n.unconfirmed_envelopes,
+            "anchor_envelope_rejected": n.anchor_envelope_rejected,
             "head_slot": slot,
             "head_root": root,
             "finality": finality(n.url),
