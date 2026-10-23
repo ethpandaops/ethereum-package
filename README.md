@@ -960,7 +960,7 @@ network_params:
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
-  # Also auto-enabled when any participant image tag contains "frame".
+  # Also auto-enabled when any participant image contains "frame" or "bogota".
   # Defaults to false
   frames_enabled: false
 
