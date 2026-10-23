@@ -1555,7 +1555,10 @@ def parse_network_params(plan, input_args):
         user_network_params = input_args.get("network_params", {})
         if "genesis_gaslimit" not in user_network_params:
             result["network_params"]["genesis_gaslimit"] = 200000000
-        if "gas_limit" not in user_network_params:
+        if (
+            "gas_limit" not in user_network_params
+            and user_network_params.get("gas_limit_schedule") == []
+        ):
             result["network_params"]["gas_limit"] = 200000000
 
     if "snooper_params" in input_args:
