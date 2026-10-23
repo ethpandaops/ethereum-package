@@ -686,6 +686,19 @@ def input_parser(plan, input_args):
                 )
             )
 
+    # Temporary hack while FOCIL is kept separate from frames: a "frame" or
+    # "bogota" image implies frames_enabled, which disables the Heze fork on
+    # the CL side while the EL still activates bogota at heze_fork_epoch.
+    for participant in result["participants"]:
+        images = [
+            participant["el_image"],
+            participant["cl_image"],
+            participant["vc_image"],
+        ]
+        if any([tag in image for image in images for tag in ("frame", "bogota")]):
+            result["network_params"]["frames_enabled"] = True
+            break
+
     validate_slot_duration_heze(result["network_params"])
     schedule_heze_slot_duration_bpo(
         plan, result["network_params"], input_args.get("network_params", {})
