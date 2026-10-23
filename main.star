@@ -1015,6 +1015,14 @@ def run(plan, args={}):
 
         return output
 
+    # Defer prometheus/grafana so order in additional_services cannot break
+    # Grafana's prometheus URL dependency, and so services like zkboost can
+    # append scrape jobs before Prometheus is launched (same idea as the
+    # legacy prometheus_grafana entry).
+    launch_prometheus = False
+    launch_grafana = False
+    prometheus_service_index = 0
+    grafana_service_index = 0
     launch_prometheus_grafana = False
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
@@ -1225,40 +1233,14 @@ def run(plan, args={}):
             )
             plan.print("Successfully launched nginx")
         elif additional_service == "prometheus":
-            plan.print("Launching prometheus...")
-            prometheus_private_url = prometheus.launch_prometheus(
-                plan,
-                all_el_contexts,
-                all_cl_contexts,
-                all_vc_contexts,
-                network_params,
-                all_remote_signer_contexts,
-                prometheus_additional_metrics_jobs,
-                all_ethereum_metrics_exporter_contexts,
-                all_xatu_sentry_contexts,
-                global_node_selectors,
-                args_with_right_defaults.prometheus_params,
-                args_with_right_defaults.port_publisher,
-                index,
-            )
-            plan.print("Successfully launched prometheus")
+            # Launch after the dispatch loop so later services (e.g. zkboost)
+            # can contribute scrape jobs, and so grafana can run after it
+            # regardless of list order.
+            launch_prometheus = True
+            prometheus_service_index = index
         elif additional_service == "grafana":
-            plan.print("Launching grafana...")
-            grafana.launch_grafana(
-                plan,
-                grafana_datasource_config_template,
-                grafana_dashboards_config_template,
-                prometheus_private_url,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.grafana_params,
-                args_with_right_defaults.port_publisher,
-                index,
-                tempo_query_url,
-                otel_clickhouse_host,
-                otel_clickhouse_port,
-            )
-            plan.print("Successfully launched grafana")
+            launch_grafana = True
+            grafana_service_index = index
         elif additional_service == "tempo":
             plan.print("Launching tempo...")
             tempo.launch_tempo(
@@ -1411,6 +1393,18 @@ def run(plan, args={}):
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
+        launch_prometheus = True
+        launch_grafana = True
+        prometheus_service_index = prometheus_grafana_index
+        grafana_service_index = prometheus_grafana_index
+
+    if launch_grafana and not launch_prometheus:
+        fail(
+            "grafana requires prometheus in additional_services "
+            + "(list order does not matter; both are launched after other services)"
+        )
+
+    if launch_prometheus:
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
@@ -1425,8 +1419,11 @@ def run(plan, args={}):
             global_node_selectors,
             args_with_right_defaults.prometheus_params,
             args_with_right_defaults.port_publisher,
-            prometheus_grafana_index,
+            prometheus_service_index,
         )
+        plan.print("Successfully launched prometheus")
+
+    if launch_grafana:
         plan.print("Launching grafana...")
         grafana.launch_grafana(
             plan,
@@ -1437,7 +1434,7 @@ def run(plan, args={}):
             global_tolerations,
             args_with_right_defaults.grafana_params,
             args_with_right_defaults.port_publisher,
-            prometheus_grafana_index,
+            grafana_service_index,
             tempo_query_url,
             otel_clickhouse_host,
             otel_clickhouse_port,
