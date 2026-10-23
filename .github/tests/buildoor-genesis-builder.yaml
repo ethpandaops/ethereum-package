@@ -1,0 +1,29 @@
+# A buildoor instance driving a builder that is registered at genesis
+# (network_params.builder_count) rather than onboarded via lifecycle deposit.
+# The first builder_count buildoor instances take the genesis builders'
+# mnemonic indices (0..builder_count-1), so buildoor finds its key in
+# state.builders at startup and skips the deposit path. Requires gloas at genesis.
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2
+network_params:
+  preset: minimal
+  gloas_fork_epoch: 0
+  builder_count: 1
+buildoor_params:
+  builder_api: false
+  epbs_builder: true
+  lifecycle: true
+  instances:
+    - participant: 1
+      count: 1
+additional_services:
+  - buildoor
+  - dora
+  - spamoor
+spamoor_params:
+  spammers:
+    - scenario: eoatx
+      config:
+        throughput: 2

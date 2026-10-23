@@ -778,13 +778,9 @@ network_params:
   # Defaults to 7500 basis points (75% of slot duration)
   view_freeze_cutoff_bps: 7500
 
-  # Inclusion list submission due timing
-  # Defaults to 6667 basis points (~67% of slot duration)
-  inclusion_list_submission_due_bps: 6667
-
-  # Proposer inclusion list cutoff timing
-  # Defaults to 9167 basis points (~92% of slot duration)
-  proposer_inclusion_list_cutoff_bps: 9167
+  # Inclusion list due timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  inclusion_list_due_bps: 7500
 
   # Maximum request blocks for Deneb fork
   # Defaults to 128
@@ -951,10 +947,25 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
+  # Must be a positive multiple of 1000
+  # Ignored while frames_enabled is true, since the CL Heze fork is disabled
+  # When it differs from slot_duration_ms and heze_fork_epoch is not at genesis,
+  # a BPO is scheduled at heze_fork_epoch with the target blobs, max blobs and
+  # base fee update fraction of the preceding blob schedule entry scaled to keep
+  # blob throughput and blob base fee responsiveness per second
+  # (e.g. 14/21/11684671 at 12000 -> 12/18/12018519 at 10000).
+  # BPOs scheduled after heze_fork_epoch move up one slot. If that BPO slot has
+  # user-provided blob values but no epoch, those values are used instead.
+  # Skipped when a bpo_*_epoch is already set to heze_fork_epoch or all five
+  # BPOs are in use.
+  # Defaults to 12000 for mainnet and 6000 for minimal preset
+  slot_duration_ms_heze: 12000
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
-  # Also auto-enabled when any participant image tag contains "frame".
+  # Also auto-enabled when any participant image contains "frame" or "bogota".
   # Defaults to false
   frames_enabled: false
 
@@ -1022,7 +1033,9 @@ network_params:
   # recommended maximum gas limit
   # Requires Gloas: every epoch must be >= gloas_fork_epoch, since the
   # CL only drives the gas limit post-Gloas
-  # Defaults to [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Defaults to a single 200000000 entry at gloas_fork_epoch when Gloas is
+  # scheduled, otherwise [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Set it explicitly (including []) to override
   # Example:
   # gas_limit_schedule:
   #   - epoch: 256
@@ -1081,7 +1094,11 @@ network_params:
   min_epochs_for_data_column_sidecars_requests: 4096
 
   # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
-  # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
+  # (written to state.builders). Requires gloas_fork_epoch to be 0 (GLOAS at genesis).
+  # Buildoor instances (buildoor_params.instances / mev_type: buildoor) are handed
+  # these builders first, in launch order, so they skip the lifecycle deposit; note
+  # that per spec (is_active_builder) a genesis builder can only bid once epoch 1 is
+  # finalized (deposit_epoch 0 < finalized_checkpoint.epoch), i.e. from ~epoch 3.
   # Default to 0
   builder_count: 0
 
@@ -1090,7 +1107,9 @@ network_params:
   builder_balance: 100
 
   # Mnemonic used to derive builder BLS keys. Genesis-registered builders use
-  # indices 0..builder_count-1; buildoor instances use the following indices.
+  # indices 0..builder_count-1; buildoor instances are assigned indices in launch
+  # order, so the first builder_count of them run the genesis builders and any
+  # further ones derive the next free index and onboard via lifecycle deposit.
   # Deliberately distinct from preregistered_validator_keys_mnemonic so builder
   # keys can never collide with validator keys.
   builder_keys_mnemonic: "baby envelope toddler valid pottery buddy cash spare such hedgehog ring ramp item seminar rely select advance knife cruel cereal left father model tissue"
@@ -1272,38 +1291,36 @@ bootnodoor_params:
 
 # Configuration place for zkboost - https://github.com/eth-act/zkboost
 # The dashboard is automatically enabled when grafana is in additional_services.
+# Participant cl_extra_params:
+#   --execution-endpoint=http://<instance>:3000
+#     Sends the Engine API of the participant through that zkboost instance.
+#     Each instance needs exactly one such participant, which also sets --proof-engine.
+#   --proof-engine
+#     Enables the proof engine with the built-in verifier config of Lighthouse.
+#   --proof-engine=<path>
+#     Uses the verifier config at <path>. Add the file with extra_files and mount it with cl_extra_mounts.
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
   image: "ghcr.io/eth-act/zkboost/zkboost:latest"
   # List of zkboost instances, each running a separate zkboost container.
-  # Each instance watches one EL participant for new blocks.
   #   name (required): Kurtosis service name, must be unique across instances
-  #   el_participant_index (required): index of the EL participant to connect to (must not be el_type=None)
-  # Defaults to a single instance named "zkboost" connected to the first EL participant.
+  #   zkvms: zkVM backend configurations of this instance (default: zkvms below)
+  # Defaults to a single instance named "zkboost".
   instances:
     - name: zkboost
-      el_participant_index: 0
   # List of zkVM backend configurations.
-  # If empty or not set, a mock reth-zisk zkvm is auto-configured with
-  # random timing scaled to slot duration. Each entry must have a unique proof_type.
+  # Each entry must have a unique proof_type. If empty, zkboost only proxies the Engine API.
   #
   # Common fields for all entries:
   #   kind (required): the zkVM backend type
-  #     "mock"     - in-process mock backend for testing, no real proving
-  #     "ere"      - launches a GPU ere-server and connects to it
-  #     "external" - connects to an already-deployed prover via HTTP
+  #     "ere"      - launches a GPU ere-server, or connects to endpoint if set
+  #     "cluster"  - connects to an already-deployed ZisK or OpenVM proving cluster
+  #     "mock"     - proves nothing, and submits a mock proof with the public values of the payload
+  #                  and random proof bytes, which a CL without a mock proof verifier rejects
   #   proof_type (required): identifies the EL client + zkVM combination
   #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
-  #
-  # Mock-specific fields (only for kind: mock):
-  #   mock_proving_time: controls simulated proving duration
-  #     { kind: constant, ms: <ms> }                   - fixed duration (default: 2/3 of slot_duration_ms)
-  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random (defaults: min=1/3, max=4/3 of slot)
-  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block gas (default: 150 ms/Mgas)
-  #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
-  #   mock_failure: whether to simulate proving failures (default: false)
   #
   # ere-specific fields (only for kind: ere):
   #   PREREQUISITE: Running an ere-server with GPU support requires the
@@ -1314,16 +1331,12 @@ zkboost_params:
   #     "default-runtime": "nvidia"
   #   and restart Docker.
   #
-  #   image (required): docker image for the ere-server
-  #   program_url: URL to download the EVM program binary (or use program_path for a path
-  #     already present in the image)
-  #   port: port the ere-server listens on (default 3000)
   #   image: docker image for the ere-server (default: resolved from zkboost's
   #     pinned ere version in its Cargo.toml)
   #   elf_url: HTTPS URL of the guest ELF to prove. ere-server fetches it
   #     itself at startup. (default: resolved from zkboost's pinned ere-guests
   #     version).
-  #   gpu: GPU configuration (default: no GPU)
+  #   gpu (required unless endpoint is set): GPU configuration
   #     count: number of GPUs to allocate (default 0)
   #         NOTE: if more than one ere service uses gpu.count, Docker will assign
   #         the same GPU(s) to all of them. Use gpu.device_ids instead when running
@@ -1331,8 +1344,8 @@ zkboost_params:
   #     device_ids: list of specific GPU device IDs to pin to this service (default [])
   #         Use this to assign distinct GPUs across multiple ere services
   #         (e.g. ["0"] for the first service and ["1"] for the second).
-  #     shm_size: shared memory size in MB (default 0)
-  #     ulimits: ulimit overrides as a map (default {})
+  #     shm_size: shared memory size in MB (default 0, or 32768 for ZisK)
+  #     ulimits: ulimit overrides as a map (default {}, or {memlock: -1} for ZisK)
   #     driver: GPU driver to use (default "nvidia")
   #         Accepts a string shorthand or a per-backend dict:
   #         - string: used directly as the Docker DeviceRequest driver; Kubernetes resource
@@ -1342,36 +1355,37 @@ zkboost_params:
   #         - dict: explicit per-backend override
   #           e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
   #   env: extra environment variables as a map (default {})
+  #     Entries override the defaults RUST_LOG=info and, for ZisK, ERE_ZISK_SETUP_ON_INIT=1
+  #     and a RUST_LOG with the ZisK modules at warn.
+  #   endpoint: HTTP URL of a running ere-server. If set, nothing is launched.
   #
-  # external-specific fields (only for kind: external):
-  #   endpoint (required): full HTTP URL of the already-deployed prover
+  # mock-specific fields (only for kind: mock):
+  #   mock_proving_time: simulated proving time (default: { kind: constant, ms: <1/2 of slot duration> })
+  #     { kind: constant, ms: <ms> }, { kind: random, min_ms: <ms>, max_ms: <ms> },
+  #     or { kind: linear, ms_per_mgas: <ms> }
+  #   mock_proof_size: size of the proof data in bytes (default 262144, min 128)
+  #   mock_failure: always fails the proof if true (default false)
+  #
+  # cluster-specific fields (only for kind: cluster):
+  #   endpoint (required): endpoint of the running proving cluster
+  #   elf_url: HTTPS URL of the guest ELF (default: resolved from zkboost's pinned ere-guests version)
   #
   # example:
-  # - kind: mock
-  #   proof_type: ethrex-zisk
-  #   mock_proving_time: { kind: constant, ms: 5000 }
-  #   mock_proof_size: 1024
-  # - kind: mock
-  #   proof_type: reth-zisk
-  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
-  # - kind: mock
-  #   proof_type: reth-sp1
-  #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
   # - kind: ere
   #   proof_type: reth-zisk
-  #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
-  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
-  # - kind: external
-  #   proof_type: reth-zisk
+  # - kind: ere
+  #   proof_type: ethrex-zisk
   #   endpoint: "http://my-prover:3000"
-  zkvms:
-    - kind: mock
-      proof_type: reth-zisk
-      mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
-      mock_proof_size: 1024
+  # - kind: cluster
+  #   proof_type: reth-openvm
+  #   endpoint: "http://openvm-cluster:3000"
+  # - kind: mock
+  #   proof_type: reth-sp1
+  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+  zkvms: []
   # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
   env:
     RUST_LOG: "info,zkboost=debug"
@@ -1657,7 +1671,9 @@ buildoor_params:
   # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
   # itself after genesis, so genesis builder registration is not required and gloas
-  # may activate at any epoch.
+  # may activate at any epoch. With network_params.builder_count > 0 the first
+  # builder_count instances (in launch order) instead run the genesis-registered
+  # builders and need no deposit.
   # Each entry may set an optional `image` to override buildoor_params.image for
   # just that instance (A/B testing).
   # Defaults to [] (no per-participant buildoors).
@@ -1852,7 +1868,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.1
+  image: ethpandaops/ethereum-genesis-generator:6.2.7
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

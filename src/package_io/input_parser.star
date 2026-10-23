@@ -101,6 +101,123 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
+def validate_slot_duration_heze(network_params):
+    slot_duration_ms_heze = network_params["slot_duration_ms_heze"]
+
+    if (
+        type(slot_duration_ms_heze) != "int"
+        or slot_duration_ms_heze <= 0
+        or slot_duration_ms_heze % 1000 != 0
+    ):
+        fail(
+            "slot_duration_ms_heze must be a positive multiple of 1000, got {0}".format(
+                slot_duration_ms_heze
+            )
+        )
+
+
+def schedule_heze_slot_duration_bpo(plan, network_params, user_network_params):
+    heze_epoch = network_params["heze_fork_epoch"]
+    old_ms = network_params["slot_duration_ms"]
+    new_ms = network_params["slot_duration_ms_heze"]
+    if (
+        heze_epoch == constants.FAR_FUTURE_EPOCH
+        or heze_epoch == 0
+        or new_ms == old_ms
+        or network_params["frames_enabled"]
+    ):
+        return
+
+    fields = ["epoch", "target_blobs", "max_blobs", "base_fee_update_fraction"]
+    bpos = []
+    for i in range(1, 6):
+        bpo = {
+            field: network_params["bpo_{0}_{1}".format(i, field)] for field in fields
+        }
+        if bpo["epoch"] == heze_epoch:
+            return
+        if bpo["epoch"] != constants.FAR_FUTURE_EPOCH:
+            bpos.append(bpo)
+
+    if len(bpos) == 5:
+        plan.print(
+            "WARNING: slot_duration_ms_heze ({0}) differs from slot_duration_ms ({1}) but all BPOs are in use, so no BPO is scheduled at heze_fork_epoch ({2}) to keep blob throughput per second".format(
+                new_ms, old_ms, heze_epoch
+            )
+        )
+        return
+
+    prev = {
+        "target_blobs": network_params["target_blobs_per_block_electra"],
+        "max_blobs": network_params["max_blobs_per_block_electra"],
+        "base_fee_update_fraction": network_params["base_fee_update_fraction_electra"],
+    }
+    index = 0
+    for bpo in bpos:
+        if bpo["epoch"] < heze_epoch:
+            prev = bpo
+            index += 1
+
+    slot = index + 1
+    user_fields = []
+    if slot > len(bpos):
+        user_fields = [
+            field
+            for field in fields[1:]
+            if "bpo_{0}_{1}".format(slot, field) in user_network_params
+        ]
+
+    if user_fields:
+        heze_bpo = {
+            field: network_params["bpo_{0}_{1}".format(slot, field)] for field in fields
+        }
+        heze_bpo["epoch"] = heze_epoch
+        message = "with the user-provided {0}".format(", ".join(user_fields))
+    else:
+        prev_target = prev["target_blobs"]
+        prev_max = prev["max_blobs"]
+        prev_fraction = prev["base_fee_update_fraction"]
+        if prev_fraction == 0:
+            prev_fraction = int(prev_max * 131072 / 0.23556607131276688 + 0.5)
+        target = (2 * prev_target * new_ms + old_ms) // (2 * old_ms)
+        if target < 1:
+            target = 1
+        heze_bpo = {
+            "epoch": heze_epoch,
+            "target_blobs": target,
+            "max_blobs": (2 * prev_max * target + prev_target) // (2 * prev_target),
+            "base_fee_update_fraction": (
+                2 * prev_fraction * target * old_ms + prev_target * new_ms
+            )
+            // (2 * prev_target * new_ms),
+        }
+        message = "for {0}ms -> {1}ms slots: target {2} -> {3}, max {4} -> {5}, base fee update fraction {6} -> {7}".format(
+            old_ms,
+            new_ms,
+            prev_target,
+            heze_bpo["target_blobs"],
+            prev_max,
+            heze_bpo["max_blobs"],
+            prev_fraction,
+            heze_bpo["base_fee_update_fraction"],
+        )
+
+    bpos.insert(index, heze_bpo)
+    for i, bpo in enumerate(bpos):
+        for field in fields:
+            network_params["bpo_{0}_{1}".format(i + 1, field)] = bpo[field]
+
+    plan.print(
+        "Scheduled BPO {0} at heze_fork_epoch {1} {2}".format(slot, heze_epoch, message)
+    )
+    if slot < len(bpos):
+        plan.print(
+            "Shifted BPOs scheduled after heze_fork_epoch to BPO {0}-{1}".format(
+                slot + 1, len(bpos)
+            )
+        )
+
+
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -539,6 +656,17 @@ def input_parser(plan, input_args):
             )
         )
 
+    if (
+        "gas_limit_schedule" not in input_args.get("network_params", {})
+        and result["network_params"]["gloas_fork_epoch"] != constants.FAR_FUTURE_EPOCH
+    ):
+        result["network_params"]["gas_limit_schedule"] = [
+            {
+                "epoch": result["network_params"]["gloas_fork_epoch"],
+                "gas_limit": 200000000,
+            }
+        ]
+
     for entry in result["network_params"]["gas_limit_schedule"]:
         if type(entry) != "dict" or sorted(entry.keys()) != ["epoch", "gas_limit"]:
             fail(
@@ -559,6 +687,11 @@ def input_parser(plan, input_args):
                     result["network_params"]["gloas_fork_epoch"],
                 )
             )
+
+    validate_slot_duration_heze(result["network_params"])
+    schedule_heze_slot_duration_bpo(
+        plan, result["network_params"], input_args.get("network_params", {})
+    )
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
@@ -595,46 +728,8 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        has_instance_zkvms = False
-        for instance in result["zkboost_params"]["instances"]:
-            if len(instance.get("zkvms", [])) > 0:
-                has_instance_zkvms = True
-
-        # Inject default mock zkvm if none configured globally or per instance.
-        if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
-            default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
-            result["zkboost_params"]["zkvms"] = [
-                {
-                    "kind": "mock",
-                    "proof_type": "reth-zisk",
-                    "mock_proving_time": {
-                        "kind": "random",
-                        "min_ms": default_ms // 2,
-                        "max_ms": default_ms * 2,
-                    },
-                    "mock_proof_size": 128 << 10,
-                },
-            ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
             result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
-
-        has_real_el = False
-        for participant in result["participants"]:
-            if participant["el_type"] != constants.EL_TYPE.none:
-                has_real_el = True
-        if not has_real_el:
-            fail(
-                "zkboost requires at least one participant with a real EL client (geth, reth, nethermind, etc.) to connect to, but all participants have el_type=None."
-            )
-
-        for idx, instance in enumerate(result["zkboost_params"]["instances"]):
-            el_idx = instance.get("el_participant_index", 0)
-            if el_idx >= len(result["participants"]):
-                fail(
-                    "zkboost_params.instances[{0}]: el_participant_index {1} is out of range, only {2} participants exist".format(
-                        idx, el_idx, len(result["participants"])
-                    )
-                )
 
         # Validate zkvm configurations
         valid_proof_types = [
@@ -645,7 +740,6 @@ def input_parser(plan, input_args):
             "reth-sp1",
             "reth-zisk",
         ]
-        configured_proof_types = []
         effective_zkvms = []
         effective_ere_zkvms_by_proof_type = {}
         for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
@@ -666,6 +760,7 @@ def input_parser(plan, input_args):
                 effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
                 if (
                     zkvm.get("kind") == "ere"
+                    and "endpoint" not in zkvm
                     and proof_type not in effective_ere_zkvms_by_proof_type
                 ):
                     effective_ere_zkvms_by_proof_type[proof_type] = zkvm
@@ -677,9 +772,9 @@ def input_parser(plan, input_args):
                 inst_idx, zkvm_idx
             )
 
-            if kind not in ["mock", "ere", "external", "verifier"]:
+            if kind not in ["ere", "cluster", "mock"]:
                 fail(
-                    "{0}: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
+                    "{0}: unsupported kind '{1}', please use 'ere', 'cluster', or 'mock'".format(
                         zkvm_path, kind
                     )
                 )
@@ -690,9 +785,6 @@ def input_parser(plan, input_args):
                         zkvm_path, proof_type, ", ".join(valid_proof_types)
                     )
                 )
-
-            if proof_type not in configured_proof_types:
-                configured_proof_types.append(proof_type)
 
             # Default proof_timeout_secs to 3/4 of slot duration (minimum 1 second)
             default_proof_timeout = max(
@@ -708,63 +800,24 @@ def input_parser(plan, input_args):
                     )
                 )
 
-            if kind == "external":
+            # Default mock proving time to 1/2 of slot duration, below the default proof timeout
+            if kind == "mock" and "mock_proving_time" not in zkvm:
+                zkvm["mock_proving_time"] = {
+                    "kind": "constant",
+                    "ms": result["network_params"]["slot_duration_ms"] // 2,
+                }
+
+            if kind == "cluster":
                 if zkvm.get("endpoint", "") == "":
-                    fail("{0}: external zkvm requires 'endpoint'".format(zkvm_path))
-
-            if kind == "mock":
-                # Normalize mock_proving_time - handle omitted, null, and partial cases
-                mock_proving_time = zkvm.get("mock_proving_time")
-                if mock_proving_time == None:
-                    mock_proving_time = {}
-                pt_kind = mock_proving_time.get("kind", "constant")
-                if pt_kind not in ["constant", "random", "linear"]:
+                    fail("{0}: cluster zkvm requires 'endpoint'".format(zkvm_path))
+                if proof_type.split("-")[-1] not in ["zisk", "openvm"]:
                     fail(
-                        "{0}: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
-                            zkvm_path, pt_kind
+                        "{0}: cluster zkvm supports only zisk and openvm proof types".format(
+                            zkvm_path
                         )
                     )
-                # Fill in kind-appropriate defaults so partial or omitted
-                # mock_proving_time doesn't silently become 0ms.
-                # Duration defaults scale with slot duration (2/3 of slot).
-                default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
-                mock_proving_time["kind"] = pt_kind
-                if pt_kind == "constant":
-                    mock_proving_time["ms"] = mock_proving_time.get("ms", default_ms)
-                elif pt_kind == "random":
-                    mock_proving_time["min_ms"] = mock_proving_time.get(
-                        "min_ms", default_ms // 2
-                    )
-                    mock_proving_time["max_ms"] = mock_proving_time.get(
-                        "max_ms", default_ms * 2
-                    )
-                    if mock_proving_time["min_ms"] > mock_proving_time["max_ms"]:
-                        fail(
-                            "{0}: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
-                                zkvm_path,
-                                mock_proving_time["min_ms"],
-                                mock_proving_time["max_ms"],
-                            )
-                        )
-                elif pt_kind == "linear":
-                    # ms_per_mgas is a rate (ms per mega-gas), not a duration
-                    mock_proving_time["ms_per_mgas"] = mock_proving_time.get(
-                        "ms_per_mgas", 150
-                    )
-                zkvm["mock_proving_time"] = mock_proving_time
-
-                # Set mock_proof_size and mock_failure defaults
-                zkvm["mock_proof_size"] = zkvm.get("mock_proof_size", 128 << 10)
-                if zkvm["mock_proof_size"] < 32:
-                    fail(
-                        "{0}: mock_proof_size must be >= 32, got {1}".format(
-                            zkvm_path, zkvm["mock_proof_size"]
-                        )
-                    )
-                zkvm["mock_failure"] = zkvm.get("mock_failure", False)
 
         _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
-        _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -969,12 +1022,7 @@ def input_parser(plan, input_args):
                 "payload_attestation_due_bps"
             ],
             view_freeze_cutoff_bps=result["network_params"]["view_freeze_cutoff_bps"],
-            inclusion_list_submission_due_bps=result["network_params"][
-                "inclusion_list_submission_due_bps"
-            ],
-            proposer_inclusion_list_cutoff_bps=result["network_params"][
-                "proposer_inclusion_list_cutoff_bps"
-            ],
+            inclusion_list_due_bps=result["network_params"]["inclusion_list_due_bps"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
@@ -1038,6 +1086,7 @@ def input_parser(plan, input_args):
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
             gas_limit_schedule=result["network_params"]["gas_limit_schedule"],
+            slot_duration_ms_heze=result["network_params"]["slot_duration_ms_heze"],
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
@@ -1361,8 +1410,7 @@ def _validate_ere_gpu_config(zkvms):
                     proof_type
                 )
                 + "ere-server requires GPU for proving. "
-                + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
-                + "For verification-only use cases, use 'kind: verifier' instead."
+                + "Either add gpu.device_ids or gpu.count, or set endpoint to connect to a running ere-server."
             )
 
         # Check: GPU device_id overlap
@@ -1390,58 +1438,6 @@ def _validate_ere_gpu_config(zkvms):
             + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
             + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
         )
-
-
-def _validate_requested_proof_types(participants, configured_proof_types):
-    """Validate that proof types requested by participants have zkvms configured.
-
-    Parses --proof-types flags from cl_extra_params and vc_extra_params to find
-    which proof types participants need, then checks each is in configured_proof_types.
-    """
-    for idx, participant in enumerate(participants):
-        cl_extra_params = participant.get("cl_extra_params", [])
-        vc_extra_params = participant.get("vc_extra_params", [])
-        all_params = list(cl_extra_params) + list(vc_extra_params)
-
-        for param in all_params:
-            if not param.startswith("--proof-types="):
-                continue
-            ids_str = param.split("=", 1)[1]
-            for id_str in ids_str.split(","):
-                id_str = id_str.strip()
-                if not id_str:
-                    continue
-                proof_type_id = int(id_str)
-                if proof_type_id not in constants.PROOF_TYPE_ID_TO_NAME:
-                    fail(
-                        "participants[{0}]: unknown proof-type ID '{1}' in --proof-types flag. ".format(
-                            idx, proof_type_id
-                        )
-                        + "Valid IDs are: {0}.".format(
-                            ", ".join(
-                                [
-                                    "{0}={1}".format(k, v)
-                                    for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()
-                                ]
-                            )
-                        )
-                    )
-                proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
-                if proof_type not in configured_proof_types:
-                    fail(
-                        "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
-                            idx, proof_type, proof_type_id
-                        )
-                        + "but no zkvm is configured for it in zkboost_params.instances[*].zkvms. "
-                        + "Either add a zkvm entry for '{0}' or remove ID {1} from --proof-types. ".format(
-                            proof_type, proof_type_id
-                        )
-                        + "Configured proof_types: {0}.".format(
-                            ", ".join(configured_proof_types)
-                            if configured_proof_types
-                            else "(none)"
-                        )
-                    )
 
 
 def parse_network_params(plan, input_args):
@@ -1506,21 +1502,16 @@ def parse_network_params(plan, input_args):
                 max_key = "bpo_{}_max_blobs".format(bpo_num)
                 target_key = "bpo_{}_target_blobs".format(bpo_num)
 
-                # If only max is set (non-zero), calculate target as 2/3 of max (rounded)
-                if result["network_params"].get(max_key) and not result[
-                    "network_params"
-                ].get(target_key):
+                max_set = bool(input_args["network_params"].get(max_key))
+                target_set = bool(input_args["network_params"].get(target_key))
+                if max_set and not target_set:
                     result["network_params"][target_key] = int(
                         result["network_params"][max_key] * 2.0 / 3.0 + 0.5
                     )
-                # If only target is set (non-zero), calculate max as target * 3/2 (rounded)
-                elif result["network_params"].get(target_key) and not result[
-                    "network_params"
-                ].get(max_key):
+                elif target_set and not max_set:
                     result["network_params"][max_key] = int(
                         result["network_params"][target_key] * 3.0 / 2.0 + 0.5
                     )
-                # If both are set or both are 0, don't override
 
         elif attr == "participants":
             participants = []
@@ -1966,8 +1957,7 @@ def default_network_params():
         "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
-        "inclusion_list_submission_due_bps": 6667,
-        "proposer_inclusion_list_cutoff_bps": 9167,
+        "inclusion_list_due_bps": 7500,
         "altair_fork_epoch": 0,
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
@@ -1996,6 +1986,7 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
+        "slot_duration_ms_heze": 12000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -2055,8 +2046,7 @@ def default_minimal_network_params():
         "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
-        "inclusion_list_submission_due_bps": 6667,
-        "proposer_inclusion_list_cutoff_bps": 9167,
+        "inclusion_list_due_bps": 7500,
         "altair_fork_epoch": 0,
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
@@ -2085,6 +2075,7 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
+        "slot_duration_ms_heze": 6000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -2551,7 +2542,7 @@ def get_default_bootnodoor_params():
 def get_default_zkboost_params():
     return {
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
-        "instances": [{"name": "zkboost", "el_participant_index": 0}],
+        "instances": [{"name": "zkboost"}],
         "zkvms": [],
         "env": {},
     }

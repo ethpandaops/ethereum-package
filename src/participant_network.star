@@ -94,16 +94,13 @@ def launch_participant_network(
 
         # Temporary hack while FOCIL is kept separate from frames: if
         # network_params.frames_enabled is set or any participant runs a
-        # "frame" image, disable the Heze fork on the CL side
+        # "frame" or "bogota" image, disable the Heze fork on the CL side
         # (FRAMES_ENABLED=true) while the EL still activates bogota at
         # HEZE_FORK_EPOCH.
         frames_enabled = network_params.frames_enabled
         for participant in args_with_right_defaults.participants:
-            if (
-                "frame" in participant.el_image
-                or "frame" in participant.cl_image
-                or "frame" in participant.vc_image
-            ):
+            images = [participant.el_image, participant.cl_image, participant.vc_image]
+            if any([tag in image for image in images for tag in ("frame", "bogota")]):
                 frames_enabled = True
                 break
 

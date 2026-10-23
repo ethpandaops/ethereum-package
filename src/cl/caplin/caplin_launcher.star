@@ -9,6 +9,7 @@ constants = import_module("../../package_io/constants.star")
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/caplin/caplin-beacon-data"
 
 BEACON_P2P_PORT_NUM = 4001
+BEACON_QUIC_PORT_NUM = 4002
 BEACON_HTTP_PORT_NUM = 5555
 BEACON_METRICS_PORT_NUM = 6060
 
@@ -74,16 +75,27 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3]}
+            )
+        )
 
     p2p_port = (
         public_ports_for_component[0]
         if public_ports_for_component
         else BEACON_P2P_PORT_NUM
     )
+    quic_port = (
+        public_ports_for_component[3]
+        if public_ports_for_component
+        else BEACON_QUIC_PORT_NUM
+    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: p2p_port,
         constants.UDP_DISCOVERY_PORT_ID: p2p_port,
+        constants.QUIC_DISCOVERY_PORT_ID: quic_port,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -103,6 +115,8 @@ def get_beacon_config(
         "--beacon.api.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--sentinel.tcp.port={0}".format(p2p_port),
         "--discovery.port={0}".format(p2p_port),
+        # caplin's QUIC listener defaults to 4001 and refuses to share the discovery port
+        "--sentinel.quic.port={0}".format(quic_port),
         "--discovery.addr=0.0.0.0",
         "--local-discovery",
         "--pprof",

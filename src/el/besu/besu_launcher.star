@@ -98,7 +98,7 @@ def get_config(
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
         "--rpc-http-port={0}".format(RPC_PORT_NUM),
-        "--rpc-http-api=ADMIN,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
+        "--rpc-http-api=ADMIN,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3,TESTING",
         "--rpc-http-cors-origins=*",
         "--rpc-http-max-active-connections=300",
         "--rpc-ws-enabled=true",
