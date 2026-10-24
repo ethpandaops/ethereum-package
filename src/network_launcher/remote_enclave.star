@@ -2,6 +2,9 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 el_cl_genesis_data = import_module(
     "../prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
 )
+validator_keystores = import_module(
+    "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
+)
 
 
 def parse_remote_enclave_url(network):
@@ -17,7 +20,15 @@ def parse_remote_enclave_url(network):
     return "http://{0}".format(target.rstrip("/"))
 
 
-def launch(plan, network, global_tolerations=[], global_node_selectors={}):
+def launch(
+    plan,
+    network,
+    global_tolerations=[],
+    global_node_selectors={},
+    mnemonic=None,
+    participants=[],
+    docker_cache_params=None,
+):
     base_url = parse_remote_enclave_url(network)
     plan.print(
         "[remote_enclave] Syncing genesis bundle from {0}/network-config.tar".format(
@@ -50,4 +61,11 @@ def launch(plan, network, global_tolerations=[], global_node_selectors={}):
         plan, el_cl_genesis_data_uuid.files_artifacts[0]
     )
     validator_data = None
+    total_keys = 0
+    for participant in participants:
+        total_keys += participant.validator_count
+    if mnemonic != None and total_keys > 0:
+        validator_data = validator_keystores.generate_validator_keystores(
+            plan, mnemonic, participants, docker_cache_params
+        )
     return el_cl_data, final_genesis_timestamp, network_id, validator_data
