@@ -18,6 +18,14 @@ MAX_CPU = 1000
 MIN_MEMORY = 128
 MAX_MEMORY = 2048
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
 USED_PORTS = {
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -42,6 +50,7 @@ def launch_dora(
     additional_service_index,
     docker_cache_params,
     el_cl_data_files_artifact_uuid,
+    global_log_level,
     buildoor_api_urls=[],
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
@@ -95,6 +104,10 @@ def launch_dora(
             }
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        dora_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     template_data = new_config_template_data(
         network_params.network,
         HTTP_PORT_NUMBER,
@@ -102,6 +115,7 @@ def launch_dora(
         all_el_client_info,
         mev_endpoint_info,
         buildoor_api_urls,
+        log_level,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -181,6 +195,7 @@ def new_config_template_data(
     el_client_info,
     mev_endpoint_info,
     buildoor_api_urls,
+    log_level,
 ):
     public_rpc = ""
     if len(el_client_info) > 0:
@@ -194,6 +209,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "BuildoorAPIURLs": buildoor_api_urls,
+        "LogLevel": log_level,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
         "IsDevnet": True if "devnet" in network else False,
     }

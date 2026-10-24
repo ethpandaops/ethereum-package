@@ -29,6 +29,15 @@ USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+
 def launch_nginx(
     plan,
     el_cl_genesis_data,
@@ -40,6 +49,7 @@ def launch_nginx(
     global_node_selectors,
     global_tolerations,
     docker_cache_params,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -117,6 +127,10 @@ def launch_nginx(
             )
         }
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         config_files_artifact_name,
         el_cl_genesis_data,
@@ -125,6 +139,7 @@ def launch_nginx(
         global_node_selectors,
         tolerations,
         docker_cache_params,
+        log_level,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -138,6 +153,7 @@ def get_config(
     node_selectors,
     tolerations,
     docker_cache_params,
+    log_level,
 ):
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
@@ -172,7 +188,7 @@ def get_config(
         "/network-configs/",
         ".",
         "&&",
-        'nginx -g "daemon off;"',
+        'nginx -g "daemon off; error_log /dev/stderr {0};"'.format(log_level),
     ]
 
     cmd_str = " ".join(cmd)

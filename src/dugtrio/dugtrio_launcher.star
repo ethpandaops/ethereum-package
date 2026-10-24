@@ -17,6 +17,14 @@ MAX_CPU = 1000
 MIN_MEMORY = 128
 MAX_MEMORY = 2048
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
 USED_PORTS = {
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -37,6 +45,7 @@ def launch_dugtrio(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -52,8 +61,12 @@ def launch_dugtrio(
             )
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+
     template_data = new_config_template_data(
-        network_params.network, HTTP_PORT_NUMBER, all_cl_client_info
+        network_params.network, HTTP_PORT_NUMBER, all_cl_client_info, log_level
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -128,11 +141,12 @@ def get_config(
     )
 
 
-def new_config_template_data(network, listen_port_num, cl_client_info):
+def new_config_template_data(network, listen_port_num, cl_client_info, log_level):
     return {
         "Network": network,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
+        "LogLevel": log_level,
     }
 
 

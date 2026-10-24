@@ -2,6 +2,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 xatu_sentry_context = import_module("../xatu_sentry/xatu_sentry_context.star")
 input_parser = import_module("../package_io/input_parser.star")
+constants = import_module("../package_io/constants.star")
 
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
@@ -16,6 +17,15 @@ MIN_MEMORY = 16
 MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch(
     plan,
     xatu_sentry_service_name,
@@ -25,9 +35,14 @@ def launch(
     pair_name,
     node_selectors,
     global_tolerations,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
+
+    log_level = input_parser.get_client_log_level_or_default(
+        xatu_sentry_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
 
     template_data = new_config_template_data(
         str(METRICS_PORT_NUMBER),
@@ -38,6 +53,7 @@ def launch(
         xatu_sentry_params.beacon_subscriptions,
         xatu_sentry_params.xatu_server_headers,
         xatu_sentry_params.xatu_server_tls,
+        log_level,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -103,6 +119,7 @@ def new_config_template_data(
     beacon_subscriptions,
     xatu_server_headers,
     xatu_server_tls,
+    log_level,
 ):
     return {
         "MetricsPort": metrics_port,
@@ -113,4 +130,5 @@ def new_config_template_data(
         "BeaconSubscriptions": beacon_subscriptions,
         "XatuServerHeaders": xatu_server_headers,
         "XatuServerTLS": xatu_server_tls,
+        "LogLevel": log_level,
     }

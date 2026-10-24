@@ -509,6 +509,7 @@ def run(plan, args={}):
             args_with_right_defaults.mev_params,
             enumerate(args_with_right_defaults.participants),
             global_node_selectors,
+            args_with_right_defaults.global_log_level,
         )
 
     plan.print(
@@ -704,6 +705,7 @@ def run(plan, args={}):
             mev_buildoor_key_index,
             ranges,
             constants.BUILDOOR_SERVICE_NAME,
+            global_log_level=args_with_right_defaults.global_log_level,
         )
         mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
@@ -741,6 +743,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 builder_cl_context.beacon_service_name,
+                args_with_right_defaults.global_log_level,
             )
             mev_endpoints.append(flashbots_endpoint)
             mev_endpoint_names.append("flashbots")
@@ -761,6 +764,7 @@ def run(plan, args={}):
                 global_tolerations,
                 el_cl_data_files_artifact_uuid,
                 mev_params.helix_relay_image,  # Use the helix-specific image
+                global_log_level=args_with_right_defaults.global_log_level,
             )
             mev_endpoints.append(helix_endpoint)
             mev_endpoint_names.append("helix")
@@ -782,6 +786,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 builder_cl_context.beacon_service_name,
+                args_with_right_defaults.global_log_level,
             )
             mev_endpoints.append(endpoint)
             mev_endpoint_names.append(args_with_right_defaults.mev_type)
@@ -796,6 +801,7 @@ def run(plan, args={}):
                 num_participants,
                 global_node_selectors,
                 global_tolerations,
+                args_with_right_defaults.global_log_level,
             )
             mev_endpoints.append(endpoint)
             mev_endpoint_names.append(args_with_right_defaults.mev_type)
@@ -814,6 +820,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 el_cl_data_files_artifact_uuid,
+                global_log_level=args_with_right_defaults.global_log_level,
             )
             mev_endpoints.append(endpoint)
             mev_endpoint_names.append(args_with_right_defaults.mev_type)
@@ -894,6 +901,7 @@ def run(plan, args={}):
                 ranges,
                 buildoor_service_name,
                 image=buildoor_instance.image,
+                global_log_level=args_with_right_defaults.global_log_level,
             )
             buildoor_api_urls.append(buildoor_endpoints["api_url"])
 
@@ -945,6 +953,7 @@ def run(plan, args={}):
                         index,
                         global_node_selectors,
                         global_tolerations,
+                        args_with_right_defaults.global_log_level,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
                     plan.print("Launching mev-rs mev boost")
@@ -970,6 +979,7 @@ def run(plan, args={}):
                         index,
                         global_node_selectors,
                         global_tolerations,
+                        args_with_right_defaults.global_log_level,
                     )
                 elif (
                     args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
@@ -998,6 +1008,7 @@ def run(plan, args={}):
                         global_node_selectors,
                         global_tolerations,
                         final_genesis_timestamp,
+                        args_with_right_defaults.global_log_level,
                     )
                 else:
                     fail("Invalid MEV type")
@@ -1073,6 +1084,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.blockscout_params,
                 network_params,
+                args_with_right_defaults.global_log_level,
                 shadowfork_block_height,
             )
             plan.print("Successfully launched blockscout")
@@ -1095,6 +1107,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.global_log_level,
                 buildoor_api_urls,
             )
             plan.print("Successfully launched dora")
@@ -1117,6 +1130,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched checkpointz")
         elif additional_service == "dugtrio":
@@ -1135,6 +1149,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched dugtrio")
         elif additional_service == "erpc":
@@ -1151,6 +1166,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched erpc")
         elif additional_service == "blobscan":
@@ -1167,6 +1183,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "forky":
@@ -1187,6 +1204,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched forky")
         elif additional_service == "tracoor":
@@ -1207,6 +1225,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched tracoor")
         elif additional_service == "nginx" or additional_service == "apache":
@@ -1222,6 +1241,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched nginx")
         elif additional_service == "prometheus":
@@ -1257,6 +1277,7 @@ def run(plan, args={}):
                 tempo_query_url,
                 otel_clickhouse_host,
                 otel_clickhouse_port,
+                global_log_level=args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -1269,6 +1290,7 @@ def run(plan, args={}):
                 args_with_right_defaults.tempo_params,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched tempo")
         elif additional_service == "prometheus_grafana":
@@ -1293,6 +1315,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "mempool_bridge":
@@ -1333,6 +1356,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 osaka_time,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched spamoor")
         elif additional_service == "disruptoor":
@@ -1345,6 +1369,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched disruptoor")
         elif additional_service == "slashoor":
@@ -1362,6 +1387,7 @@ def run(plan, args={}):
                 global_tolerations,
                 network_params,
                 args_with_right_defaults.additional_services,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched slashoor")
         elif additional_service == "zkboost":
@@ -1441,6 +1467,7 @@ def run(plan, args={}):
             tempo_query_url,
             otel_clickhouse_host,
             otel_clickhouse_port,
+            global_log_level=args_with_right_defaults.global_log_level,
         )
         plan.print("Successfully launched grafana")
 

@@ -39,6 +39,15 @@ REDIS_MIN_MEMORY = 16
 REDIS_MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_mev_relay(
     plan,
     mev_params,
@@ -53,6 +62,7 @@ def launch_mev_relay(
     global_node_selectors,
     global_tolerations,
     builder_cl_service_name,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     public_ports = shared_utils.get_mev_public_port(
@@ -111,6 +121,9 @@ def launch_mev_relay(
     )
     plan.print("Builder CL is synced, starting MEV relay services")
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
     image = mev_params.mev_relay_image
 
     env_vars = {
@@ -123,7 +136,7 @@ def launch_mev_relay(
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(network_params.seconds_per_slot),
         "SLOTS_PER_EPOCH": str(32) if network_params.preset == "mainnet" else str(8),
-        "LOG_LEVEL": "debug",
+        "LOG_LEVEL": log_level,
         "DB_TABLE_PREFIX": "custom",
         "ENABLE_BUILDER_CANCELLATIONS": "1",
     }
