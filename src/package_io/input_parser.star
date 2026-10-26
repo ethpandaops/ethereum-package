@@ -2679,6 +2679,10 @@ def apply_external_builder_flags(participant, mev_url, gas_limit):
         participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
     if participant["vc_type"] == "vero":
         participant["vc_extra_params"].append("--use-external-builder")
+    if participant["cl_type"] == "ethlambda":
+        participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+    if participant["vc_type"] == "ethlambda":
+        participant["vc_extra_params"].append("--builder-proposals")
 
 
 # buildoor builds a payload from the CL's payload_attributes SSE stream, so the
