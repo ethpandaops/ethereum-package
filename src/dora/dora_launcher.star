@@ -43,6 +43,7 @@ def launch_dora(
     docker_cache_params,
     el_cl_data_files_artifact_uuid,
     buildoor_api_urls=[],
+    allow_mock_proofs=False,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -102,6 +103,7 @@ def launch_dora(
         all_el_client_info,
         mev_endpoint_info,
         buildoor_api_urls,
+        allow_mock_proofs,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -181,6 +183,7 @@ def new_config_template_data(
     el_client_info,
     mev_endpoint_info,
     buildoor_api_urls,
+    allow_mock_proofs,
 ):
     public_rpc = ""
     if len(el_client_info) > 0:
@@ -196,6 +199,7 @@ def new_config_template_data(
         "BuildoorAPIURLs": buildoor_api_urls,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
         "IsDevnet": True if "devnet" in network else False,
+        "AllowMockProofs": allow_mock_proofs,
     }
 
 

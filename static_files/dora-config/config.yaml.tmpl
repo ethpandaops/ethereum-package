@@ -104,6 +104,10 @@ indexer:
   # maximum number of parallel beacon state requests (might cause high memory usage)
   maxParallelValidatorSetRequests: 2
 
+  # EIP-8025 execution proofs: accept zkboost mock proofs (set when zkboost runs mock zkVMs)
+  executionProofs:
+    allowMockProofs: {{ .AllowMockProofs }}
+
 mevIndexer:
   # list of mev relays to crawl mev blocks from
   relays: {{ if not .MEVRelayInfo }}[]{{ end }}
