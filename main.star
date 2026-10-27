@@ -1096,6 +1096,10 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
                 buildoor_api_urls,
+                allow_mock_proofs=(
+                    "zkboost" in args_with_right_defaults.additional_services
+                    and zkboost.has_mock_zkvms(args_with_right_defaults.zkboost_params)
+                ),
             )
             plan.print("Successfully launched dora")
         elif additional_service == "checkpointz":
