@@ -827,20 +827,6 @@ def input_parser(plan, input_args):
             "First participant cannot have el_type=None without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
         )
 
-    # ethlambda does not expose its ENR over the beacon API, so on networks
-    # whose bootnode is the first participant nobody could bootstrap from it.
-    if (
-        "bootnodoor" not in result["additional_services"]
-        and result["participants"][0]["cl_type"] == constants.CL_TYPE.ethlambda
-        and (
-            result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
-        )
-    ):
-        fail(
-            "First participant cannot have cl_type=ethlambda without bootnodoor enabled. The first participant acts as the bootnode for the network, and ethlambda does not report its ENR. Either enable bootnodoor in additional_services or move the ethlambda participant after another CL client."
-        )
-
     if (
         "mempool_bridge" in result["additional_services"]
         and result["network_params"]["network"] not in constants.PUBLIC_NETWORKS
