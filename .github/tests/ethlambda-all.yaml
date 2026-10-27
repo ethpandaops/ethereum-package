@@ -1,13 +1,15 @@
 participants:
   - el_type: geth
-    cl_type: lighthouse
-  # The ethlambda validator client on another client's beacon node
-  - el_type: geth
-    cl_type: lighthouse
-    vc_type: ethlambda
-  # ethlambda beacon node with its own validator client. It cannot be the first
-  # participant, since that one is the network's bootnode.
-  - el_type: geth
     cl_type: ethlambda
-additional_services:
-  - dora
+  - el_type: nethermind
+    cl_type: ethlambda
+  - el_type: erigon
+    cl_type: ethlambda
+  - el_type: besu
+    cl_type: ethlambda
+  - el_type: reth
+    cl_type: ethlambda
+  - el_type: ethrex
+    cl_type: ethlambda
+  - el_type: nimbus
+    cl_type: ethlambda
