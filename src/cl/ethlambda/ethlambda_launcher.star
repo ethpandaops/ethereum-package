@@ -6,8 +6,9 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-# ethlambda always runs its validators in a separate client, the ethlambda
-# validator (src/vc/ethlambda.star), which reaches it over the validator API.
+# ethlambda's beacon node runs no validators itself, so they always run in a
+# separate validator client (by default ethlambda's own, src/vc/ethlambda.star),
+# which reaches it over the validator API.
 
 ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
@@ -276,13 +277,18 @@ def get_cl_context(
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
     # The ENR is what later CLs bootstrap from; without it an ethlambda node
-    # cannot be the network's bootnode. The multiaddr is left empty because
-    # ethlambda lists its quic address first, which not every client dials.
+    # cannot be the network's bootnode. ethlambda lists its QUIC address first
+    # and its TCP one last, and not every client dials QUIC, so take the last.
     (
         beacon_node_enr,
-        _,
+        beacon_multiaddr,
         beacon_peer_id,
-    ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
+    ) = cl_shared.get_beacon_node_identity(
+        plan,
+        service_name,
+        participant,
+        multiaddr_index=-1,
+    )
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, BEACON_METRICS_PATH, beacon_metrics_url
@@ -296,7 +302,7 @@ def get_cl_context(
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,
         beacon_service_name=service_name,
-        multiaddr="",
+        multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
