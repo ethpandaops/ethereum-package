@@ -374,8 +374,7 @@ participants:
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine and ethlambda
-    # ethlambda (mainnet preset only) cannot be the first participant unless bootnodoor is enabled,
-    # and its block production supports neither blob transactions nor sync committee aggregates yet
+    # ( ethlambda only supports the mainnet preset )
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -481,7 +480,7 @@ participants:
     # The type of validator client that should be used
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and ethlambda
     # ( The prysm validator only works with a prysm CL client )
-    # ( The ethlambda validator needs the mainnet preset, and performs no sync committee duties )
+    # ( The ethlambda validator only supports the mainnet preset )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
 

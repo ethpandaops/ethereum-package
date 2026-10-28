@@ -8,7 +8,6 @@ constants = import_module("../../package_io/constants.star")
 
 # ethlambda always runs its validators in a separate client, the ethlambda
 # validator (src/vc/ethlambda.star), which reaches it over the validator API.
-# That API builds no blob-carrying payloads and no sync aggregates yet.
 
 ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
