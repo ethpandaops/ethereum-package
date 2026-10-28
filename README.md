@@ -954,6 +954,7 @@ network_params:
   # user-provided blob values but no epoch, those values are used instead.
   # Skipped when a bpo_*_epoch is already set to heze_fork_epoch or all five
   # BPOs are in use.
+  # The gas limit is scaled the same way through gas_limit_schedule.
   # Defaults to 12000 for mainnet and 6000 for minimal preset
   slot_duration_ms_heze: 12000
 
@@ -1031,6 +1032,12 @@ network_params:
   # Defaults to a single 200000000 entry at gloas_fork_epoch when Gloas is
   # scheduled, otherwise [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
   # Set it explicitly (including []) to override
+  # When slot_duration_ms_heze differs from slot_duration_ms and heze_fork_epoch
+  # is not at genesis, an entry is added at heze_fork_epoch with the preceding
+  # gas limit scaled to keep gas per second constant
+  # (e.g. 200000000 at 12000 -> 166666667 at 10000). Entries after
+  # heze_fork_epoch are kept as-is. Skipped when an entry is already set at
+  # heze_fork_epoch.
   # Example:
   # gas_limit_schedule:
   #   - epoch: 256

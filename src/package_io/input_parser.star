@@ -216,6 +216,46 @@ def schedule_heze_slot_duration_bpo(plan, network_params, user_network_params):
         )
 
 
+def schedule_heze_slot_duration_gas_limit(plan, network_params):
+    heze_epoch = network_params["heze_fork_epoch"]
+    old_ms = network_params["slot_duration_ms"]
+    new_ms = network_params["slot_duration_ms_heze"]
+    if (
+        heze_epoch == constants.FAR_FUTURE_EPOCH
+        or heze_epoch == 0
+        or new_ms == old_ms
+        or network_params["frames_enabled"]
+        or network_params["gloas_fork_epoch"] == constants.FAR_FUTURE_EPOCH
+    ):
+        return
+
+    schedule = network_params["gas_limit_schedule"]
+    prev_gas_limit = network_params["gas_limit"] or network_params["genesis_gaslimit"]
+    prev_epoch = -1
+    index = 0
+    for i, entry in enumerate(schedule):
+        if entry["epoch"] == heze_epoch:
+            return
+        if entry["epoch"] < heze_epoch:
+            if entry["epoch"] >= prev_epoch:
+                prev_epoch = entry["epoch"]
+                prev_gas_limit = entry["gas_limit"]
+            index = i + 1
+
+    gas_limit = (2 * prev_gas_limit * new_ms + old_ms) // (2 * old_ms)
+    network_params["gas_limit_schedule"] = (
+        schedule[:index]
+        + [{"epoch": heze_epoch, "gas_limit": gas_limit}]
+        + schedule[index:]
+    )
+
+    plan.print(
+        "Scheduled gas limit {0} -> {1} at heze_fork_epoch {2} for {3}ms -> {4}ms slots".format(
+            prev_gas_limit, gas_limit, heze_epoch, old_ms, new_ms
+        )
+    )
+
+
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -690,6 +730,7 @@ def input_parser(plan, input_args):
     schedule_heze_slot_duration_bpo(
         plan, result["network_params"], input_args.get("network_params", {})
     )
+    schedule_heze_slot_duration_gas_limit(plan, result["network_params"])
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
@@ -1514,7 +1555,10 @@ def parse_network_params(plan, input_args):
         user_network_params = input_args.get("network_params", {})
         if "genesis_gaslimit" not in user_network_params:
             result["network_params"]["genesis_gaslimit"] = 200000000
-        if "gas_limit" not in user_network_params:
+        if (
+            "gas_limit" not in user_network_params
+            and user_network_params.get("gas_limit_schedule") == []
+        ):
             result["network_params"]["gas_limit"] = 200000000
 
     if "snooper_params" in input_args:
