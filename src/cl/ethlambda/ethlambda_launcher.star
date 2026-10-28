@@ -276,21 +276,14 @@ def get_cl_context(
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
-    # ethlambda's /eth/v1/node/identity reports only the peer id: its enr and
-    # p2p_addresses are empty, so the shared identity extraction (which indexes
-    # into p2p_addresses) cannot be used. An empty ENR is also why an ethlambda
-    # node cannot be the network's bootnode.
-    beacon_peer_id = ""
-    if not participant.skip_start:
-        response = plan.request(
-            recipe=GetHttpRequestRecipe(
-                endpoint="/eth/v1/node/identity",
-                port_id=constants.HTTP_PORT_ID,
-                extract={"peer_id": ".data.peer_id"},
-            ),
-            service_name=service_name,
-        )
-        beacon_peer_id = response["extract.peer_id"]
+    # The ENR is what later CLs bootstrap from; without it an ethlambda node
+    # cannot be the network's bootnode. The multiaddr is left empty because
+    # ethlambda lists its quic address first, which not every client dials.
+    (
+        beacon_node_enr,
+        _,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, BEACON_METRICS_PATH, beacon_metrics_url
@@ -298,7 +291,7 @@ def get_cl_context(
     nodes_metrics_info = [beacon_node_metrics_info]
     return cl_context.new_cl_context(
         client_name="ethlambda",
-        enr="",
+        enr=beacon_node_enr,
         ip_addr=service.name,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
