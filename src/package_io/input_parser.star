@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:latest",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -48,6 +49,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -1533,6 +1535,17 @@ def parse_network_params(plan, input_args):
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
 
+        if constants.CL_TYPE.ethlambda in (cl_type, vc_type):
+            # The ethlambda binary is built with mainnet SSZ bounds and
+            # 32-slot epochs. An empty vc_type defaults to cl_type below, which
+            # this check already covers.
+            if result["network_params"]["preset"] != "mainnet":
+                fail(
+                    "ethlambda only supports the mainnet preset, got {0}".format(
+                        result["network_params"]["preset"]
+                    )
+                )
+
         if (
             cl_type in (constants.CL_TYPE.nimbus)
             and (result["network_params"]["seconds_per_slot"] < 12)
@@ -2652,6 +2665,10 @@ def apply_external_builder_flags(participant, mev_url, gas_limit):
         participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
     if participant["vc_type"] == "vero":
         participant["vc_extra_params"].append("--use-external-builder")
+    if participant["cl_type"] == "ethlambda":
+        participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+    if participant["vc_type"] == "ethlambda":
+        participant["vc_extra_params"].append("--builder-proposals")
 
 
 # buildoor builds a payload from the CL's payload_attributes SSE stream, so the

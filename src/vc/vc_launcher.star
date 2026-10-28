@@ -10,6 +10,7 @@ nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
+ethlambda = import_module("./ethlambda.star")
 vc_shared = import_module("./vc_shared.star")
 
 
@@ -63,6 +64,9 @@ def get_vc_config(
         constants.VC_TYPE.vero: {
             "get_config": vero.get_config,
         },
+        constants.VC_TYPE.ethlambda: {
+            "get_config": ethlambda.get_config,
+        },
     }
 
     tolerations = shared_utils.get_tolerations(
@@ -102,6 +106,9 @@ def get_vc_config(
             fail("vero VC requires `use_remote_signer` to be true")
         if keymanager_enabled:
             fail("vero VC doesn't support the Keymanager API")
+    elif vc_type == constants.VC_TYPE.ethlambda:
+        if remote_signer_context != None:
+            fail("`use_remote_signer` flag not supported for ethlambda VC")
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:
