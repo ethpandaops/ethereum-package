@@ -402,6 +402,17 @@ def _launch_ere_server(
     return "http://{0}:{1}".format(service_name, ERE_SERVER_PORT)
 
 
+def has_mock_zkvms(zkboost_params):
+    """Whether any zkboost instance runs a `kind: mock` zkVM, i.e. mock proofs
+    are produced.
+    """
+    for instance in zkboost_params.instances:
+        for zkvm in instance.get("zkvms", zkboost_params.zkvms):
+            if zkvm.get("kind") == "mock":
+                return True
+    return False
+
+
 def _zkvm_has_gpu(zkvm):
     gpu = zkvm.get("gpu", {})
     return len(gpu.get("device_ids", [])) > 0 or gpu.get("count", 0) > 0
