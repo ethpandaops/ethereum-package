@@ -10,6 +10,7 @@ VALIDATOR_CLIENT_USED_PORTS = {
         VALIDATOR_CLIENT_METRICS_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     ),
 }
 
@@ -18,6 +19,7 @@ VALIDATOR_KEYMANAGER_USED_PORTS = {
         VALIDATOR_HTTP_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     )
 }
 
@@ -101,3 +103,32 @@ def get_labels(client, participant, image, cl_context, vc_index):
         | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
         supernode=participant.supernode,
     )
+
+
+FF_HANDOVER_MOUNT = "/ff"
+FF_NIMBUS_MOUNT = "/ff-nimbus"
+FF_INTERCHANGE_FILE = FF_HANDOVER_MOUNT + "/interchange.json"
+FF_VC_DATA_DIR = "/tmp/ff-vc-data"
+
+
+# Import the fast-forward watermark, sleep until the handover start time, then exec the VC; a failed import keeps it down.
+def apply_ff_handover(config_args, cmd, exec_command, import_command, ff_handover):
+    if ff_handover == None:
+        return
+    if config_args.get("entrypoint") != None:
+        fail("fast_forward cannot wrap a validator client that sets its own entrypoint")
+    config_args["files"][FF_HANDOVER_MOUNT] = ff_handover.handover_artifact
+    script = (
+        "set -e; mkdir -p "
+        + FF_VC_DATA_DIR
+        + "; "
+        + import_command
+        + "; echo ff: slashing protection imported at $(date -u +%H:%M:%S.%N); . "
+        + FF_HANDOVER_MOUNT
+        + "/handover.env; wait=$((FF_VC_START_AT - $(date +%s))); if [ $wait -gt 0 ]; then echo ff: starting in ${wait}s, handover slot $FF_HANDOVER_SLOT; sleep $wait; fi; echo ff: starting at $(date -u +%H:%M:%S.%N); exec "
+        + exec_command
+        + " "
+        + " ".join(cmd)
+    )
+    config_args["entrypoint"] = ["sh", "-c"]
+    config_args["cmd"] = [script]

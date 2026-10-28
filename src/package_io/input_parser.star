@@ -96,6 +96,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
+    "fast_forward",
 )
 
 
@@ -1356,6 +1357,7 @@ def input_parser(plan, input_args):
                 for instance in result["buildoor_params"]["instances"]
             ],
         ),
+        fast_forward=result["fast_forward"],
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
             config_version=result["trueblocks_params"]["config_version"],
@@ -1521,6 +1523,13 @@ def parse_network_params(plan, input_args):
         for sub_attr in input_args["snooper_params"]:
             result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
 
+    fast_forward_params = get_default_fast_forward_params()
+    for key, value in input_args.get("fast_forward", {}).items():
+        fast_forward_params[key] = value
+    result["fast_forward"] = resolve_fast_forward(
+        fast_forward_params, result["network_params"]
+    )
+
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -1529,6 +1538,8 @@ def parse_network_params(plan, input_args):
         if el_type == None or el_type in ("None", "null", "Null"):
             participant["el_type"] = constants.EL_TYPE.none
             el_type = constants.EL_TYPE.none
+        if result["fast_forward"].enabled:
+            apply_fast_forward_participant_defaults(participant)
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
@@ -1783,6 +1794,9 @@ def parse_network_params(plan, input_args):
     if (
         result["network_params"]["network"] != constants.NETWORK_NAME.kurtosis
         and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
+        and not result["network_params"]["network"].startswith(
+            constants.NETWORK_NAME.remote_enclave
+        )
     ):
         for participant in result["participants"]:
             participant["validator_count"] = 0
@@ -2178,6 +2192,365 @@ def get_default_dora_params():
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
     }
+
+
+def get_default_fast_forward_params():
+    return {
+        "enabled": False,
+        "until": None,
+        "history": "checkpoint",
+        "image": "ghcr.io/ethpandaops/timeskip:latest",
+        "el_image": "ghcr.io/paradigmxyz/reth:latest",
+    }
+
+
+FAST_FORWARD_MIN_CHECKPOINT_EPOCH = 2
+
+# How beacon nodes get the generated history: start from its last finalized checkpoint, or import every block.
+FAST_FORWARD_HISTORIES = ("checkpoint", "full")
+FAST_FORWARD_CHECKPOINT_SYNC_URL = "http://ff-checkpoint:5052"
+
+# The checkpoint path needs a finalized checkpoint after genesis, which first exists at the start of epoch 3.
+FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH = 3
+
+# Epochs of history past the target epoch before the head state shows each target state.
+FAST_FORWARD_STATES = {"activated": 0, "justified": 1, "finalized": 2}
+
+# state: activating hands over this many slots before the until epoch, so it activates live.
+FAST_FORWARD_ACTIVATING = "activating"
+FAST_FORWARD_ACTIVATING_SLOTS_BEFORE = 10
+
+# Time from genesis placement to the activating handover, covering generation, insertion and VC start.
+FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS = 90
+
+# Scheduled forks the generator can build through; anything else has to activate live, after the cut-off.
+FAST_FORWARD_GENERATED_FORKS = (
+    "altair",
+    "bellatrix",
+    "capella",
+    "deneb",
+    "electra",
+    "fulu",
+    "gloas",
+    "bpo_1",
+    "bpo_2",
+    "bpo_3",
+    "bpo_4",
+    "bpo_5",
+)
+
+FAST_FORWARD_SCHEDULE_KEYS = (
+    ("altair", "altair_fork_epoch"),
+    ("bellatrix", "bellatrix_fork_epoch"),
+    ("capella", "capella_fork_epoch"),
+    ("deneb", "deneb_fork_epoch"),
+    ("electra", "electra_fork_epoch"),
+    ("fulu", "fulu_fork_epoch"),
+    ("gloas", "gloas_fork_epoch"),
+    ("heze", "heze_fork_epoch"),
+    ("bpo_1", "bpo_1_epoch"),
+    ("bpo_2", "bpo_2_epoch"),
+    ("bpo_3", "bpo_3_epoch"),
+    ("bpo_4", "bpo_4_epoch"),
+    ("bpo_5", "bpo_5_epoch"),
+)
+
+
+def fast_forward_disabled(fast_forward):
+    return struct(
+        enabled=False,
+        state=None,
+        target_epoch=None,
+        target_slot=None,
+        end_epoch=None,
+        cutoff_epoch=None,
+        cutoff_fork=None,
+        genesis_slot=None,
+        max_slot=None,
+        handover_slot=None,
+        slots_before=None,
+        until_name=None,
+        history=None,
+        checkpoint_sync_url=None,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Resolve `until` into the target state and the generated-history end; later scheduled forks activate live.
+def resolve_fast_forward(fast_forward, network_params):
+    if not fast_forward["enabled"]:
+        return fast_forward_disabled(fast_forward)
+    if network_params["network"] != constants.NETWORK_NAME.kurtosis:
+        fail("fast_forward only works on a fresh kurtosis network")
+    if fast_forward["history"] not in FAST_FORWARD_HISTORIES:
+        fail(
+            "fast_forward.history must be one of {0}, got '{1}'".format(
+                FAST_FORWARD_HISTORIES, fast_forward["history"]
+            )
+        )
+
+    schedule = []
+    epochs = {}
+    for name, key in FAST_FORWARD_SCHEDULE_KEYS:
+        epoch = network_params.get(key, constants.FAR_FUTURE_EPOCH)
+        epochs[name] = epoch
+        if epoch != constants.FAR_FUTURE_EPOCH:
+            schedule.append((name, epoch))
+
+    until = fast_forward["until"] if fast_forward["until"] != None else {}
+    if type(until) != "dict":
+        fail(
+            "fast_forward.until must be a map, e.g. {{fork: gloas, state: finalized}} or {{epoch: 10, state: justified}}, got {0}".format(
+                until
+            )
+        )
+    for key in until:
+        if key not in ("fork", "epoch", "state", "slots_before"):
+            fail(
+                "fast_forward.until: unknown key '{0}', expected fork, epoch, state or slots_before".format(
+                    key
+                )
+            )
+    if "fork" in until and "epoch" in until:
+        fail("fast_forward.until: set fork or epoch, not both")
+    if until and (
+        "state" not in until or ("fork" not in until and "epoch" not in until)
+    ):
+        fail(
+            "fast_forward.until needs fork or epoch, and state, e.g. {{fork: gloas, state: finalized}}, got {0}".format(
+                until
+            )
+        )
+    state = until.get("state", "finalized")
+    if state not in FAST_FORWARD_STATES and state != FAST_FORWARD_ACTIVATING:
+        fail(
+            "fast_forward.until.state must be one of {0}, got '{1}'".format(
+                [FAST_FORWARD_ACTIVATING] + list(FAST_FORWARD_STATES.keys()), state
+            )
+        )
+    slots_before = until.get("slots_before", FAST_FORWARD_ACTIVATING_SLOTS_BEFORE)
+    if "slots_before" in until:
+        if state != FAST_FORWARD_ACTIVATING:
+            fail("fast_forward.until.slots_before only applies to state: activating")
+        if type(slots_before) != "int" or slots_before < 1:
+            fail(
+                "fast_forward.until.slots_before must be an integer of at least 1, got {0}".format(
+                    slots_before
+                )
+            )
+
+    until_fork = None
+    if "epoch" in until:
+        if type(until["epoch"]) != "int" or until["epoch"] < 0:
+            fail(
+                "fast_forward.until.epoch must be a non-negative integer, got {0}".format(
+                    until["epoch"]
+                )
+            )
+        until_epoch = until["epoch"]
+    else:
+        until_fork = until.get("fork")
+        if until_fork == None:
+            for name, epoch in schedule:
+                if until_fork == None or epoch >= epochs[until_fork]:
+                    until_fork = name
+        if until_fork not in epochs:
+            fail(
+                "fast_forward.until.fork: unknown fork '{0}', expected one of {1}".format(
+                    until_fork, [name for name, _ in FAST_FORWARD_SCHEDULE_KEYS]
+                )
+            )
+        if epochs[until_fork] == constants.FAR_FUTURE_EPOCH:
+            fail(
+                "fast_forward.until.fork: {0} is not scheduled in network_params".format(
+                    until_fork
+                )
+            )
+        until_epoch = epochs[until_fork]
+
+    slots_per_epoch = 8 if network_params["preset"] == "minimal" else 32
+    until_name = until_fork if until_fork != None else "epoch {0}".format(until_epoch)
+    if state == FAST_FORWARD_ACTIVATING:
+        return resolve_activating(
+            fast_forward,
+            network_params,
+            schedule,
+            until_name,
+            until_epoch,
+            slots_before,
+            slots_per_epoch,
+        )
+
+    target_epoch = until_epoch
+    if state != "activated":
+        target_epoch = max(FAST_FORWARD_MIN_CHECKPOINT_EPOCH, until_epoch)
+    end_epoch = target_epoch + FAST_FORWARD_STATES[state]
+    target_slot = end_epoch * slots_per_epoch
+    if target_slot == 0:
+        return fast_forward_disabled(fast_forward)
+
+    cutoff_epoch = None
+    cutoff_fork = None
+    for name, epoch in schedule:
+        if epoch > end_epoch:
+            if cutoff_epoch == None or epoch < cutoff_epoch:
+                cutoff_epoch = epoch
+                cutoff_fork = name
+            continue
+        if epoch > until_epoch:
+            fail(
+                "fast_forward: {0} activates at epoch {1}, before a chain generated until {2} is {3} at epoch {4} (generated history runs to the start of epoch {5}); use until.fork: {0}, or schedule {0} at epoch >= {6}".format(
+                    name,
+                    epoch,
+                    until_name,
+                    state,
+                    target_epoch,
+                    end_epoch,
+                    end_epoch + 1,
+                )
+            )
+        if name not in FAST_FORWARD_GENERATED_FORKS:
+            fail(
+                "fast_forward: timeskip cannot generate {0} yet (scheduled at epoch {1}, inside the generated history up to the start of epoch {2}); stop before it with until, or use a timeskip image that supports {0}".format(
+                    name, epoch, end_epoch
+                )
+            )
+
+    history = fast_forward["history"]
+    if history == "checkpoint" and end_epoch < FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH:
+        history = "full"
+    return struct(
+        enabled=True,
+        state=state,
+        target_epoch=target_epoch,
+        target_slot=target_slot,
+        end_epoch=end_epoch,
+        cutoff_epoch=cutoff_epoch,
+        cutoff_fork=cutoff_fork,
+        genesis_slot=target_slot,
+        max_slot=cutoff_epoch * slots_per_epoch - 1 if cutoff_epoch != None else None,
+        handover_slot=None,
+        slots_before=None,
+        until_name=until_name,
+        history=history,
+        checkpoint_sync_url=FAST_FORWARD_CHECKPOINT_SYNC_URL
+        if history == "checkpoint"
+        else None,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Validators take over slots_before slots ahead of the until epoch, which then activates live; genesis is placed
+# so the launch finishes before that handover.
+def resolve_activating(
+    fast_forward,
+    network_params,
+    schedule,
+    until_name,
+    until_epoch,
+    slots_before,
+    slots_per_epoch,
+):
+    if until_epoch == 0:
+        fail(
+            "fast_forward: {0} activates at genesis, so there is nothing to generate before it; schedule it later or use state: activated".format(
+                until_name
+            )
+        )
+    seconds_per_slot = network_params["seconds_per_slot"]
+    launch_slots = (
+        FAST_FORWARD_ACTIVATING_LAUNCH_SECONDS + seconds_per_slot - 1
+    ) // seconds_per_slot
+    handover_slot = until_epoch * slots_per_epoch - slots_before - 1
+    genesis_slot = handover_slot - launch_slots
+    if genesis_slot < 1:
+        min_epoch = (
+            slots_before + launch_slots + 2 + slots_per_epoch - 1
+        ) // slots_per_epoch
+        fail(
+            "fast_forward: {0} at epoch {1} is too early to start {2} slots before it; schedule it at epoch {3} or later, or turn fast_forward off".format(
+                until_name, until_epoch, slots_before, min_epoch
+            )
+        )
+
+    cutoff_epoch = None
+    cutoff_fork = None
+    for name, epoch in schedule:
+        if epoch * slots_per_epoch > handover_slot:
+            if cutoff_epoch == None or epoch < cutoff_epoch:
+                cutoff_epoch = epoch
+                cutoff_fork = name
+        elif name not in FAST_FORWARD_GENERATED_FORKS:
+            fail(
+                "fast_forward: timeskip cannot generate {0} yet (scheduled at epoch {1}, before the handover at slot {2}); stop before it with until, or use a timeskip image that supports {0}".format(
+                    name, epoch, handover_slot + 1
+                )
+            )
+
+    history = fast_forward["history"]
+    if (
+        history == "checkpoint"
+        and genesis_slot // slots_per_epoch < FAST_FORWARD_MIN_CHECKPOINT_END_EPOCH
+    ):
+        history = "full"
+    return struct(
+        enabled=True,
+        state=FAST_FORWARD_ACTIVATING,
+        target_epoch=until_epoch,
+        target_slot=handover_slot,
+        end_epoch=handover_slot // slots_per_epoch,
+        cutoff_epoch=cutoff_epoch,
+        cutoff_fork=cutoff_fork,
+        genesis_slot=genesis_slot,
+        max_slot=handover_slot,
+        handover_slot=handover_slot,
+        slots_before=slots_before,
+        until_name=until_name,
+        history=history,
+        checkpoint_sync_url=FAST_FORWARD_CHECKPOINT_SYNC_URL
+        if history == "checkpoint"
+        else None,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Fast-forward keeps keys out of beacon nodes until handover (separate VCs; Grandine loads them via keymanager), plus API-import flags.
+def apply_fast_forward_participant_defaults(participant):
+    cl_type = participant["cl_type"]
+    if (
+        cl_type == constants.CL_TYPE.grandine
+        and participant["vc_type"] == ""
+        and participant["use_separate_vc"] != True
+    ):
+        participant["use_separate_vc"] = False
+        participant["keymanager_enabled"] = True
+        # Keys arrive just before handover, too late for subnet subscriptions to reach peers by the first live slot.
+        if "--subscribe-all-subnets" not in participant["cl_extra_params"]:
+            participant["cl_extra_params"] = participant["cl_extra_params"] + [
+                "--subscribe-all-subnets"
+            ]
+    else:
+        participant["use_separate_vc"] = True
+    extra = {
+        "el_extra_params": {constants.EL_TYPE.geth: ["--syncmode=full"]},
+        "cl_extra_params": {
+            constants.CL_TYPE.teku: ["--Xstartup-target-peer-count=0"],
+            constants.CL_TYPE.lodestar: ["--network.allowPublishToZeroPeers"],
+        },
+    }
+    for key, by_type in extra.items():
+        client = participant["el_type"] if key == "el_extra_params" else cl_type
+        for flag in by_type.get(client, []):
+            if flag not in participant[key]:
+                participant[key] = participant[key] + [flag]
+    vc_type = participant["vc_type"] if participant["vc_type"] != "" else cl_type
+    if vc_type == constants.VC_TYPE.nimbus:
+        flag = "--doppelganger-detection=false"
+        if flag not in participant["vc_extra_params"]:
+            participant["vc_extra_params"] = participant["vc_extra_params"] + [flag]
 
 
 def get_default_trueblocks_params():
