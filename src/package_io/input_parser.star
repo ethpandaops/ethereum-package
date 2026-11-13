@@ -99,123 +99,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
-def validate_slot_duration_heze(network_params):
-    slot_duration_ms_heze = network_params["slot_duration_ms_heze"]
-
-    if (
-        type(slot_duration_ms_heze) != "int"
-        or slot_duration_ms_heze <= 0
-        or slot_duration_ms_heze % 1000 != 0
-    ):
-        fail(
-            "slot_duration_ms_heze must be a positive multiple of 1000, got {0}".format(
-                slot_duration_ms_heze
-            )
-        )
-
-
-def schedule_heze_slot_duration_bpo(plan, network_params, user_network_params):
-    heze_epoch = network_params["heze_fork_epoch"]
-    old_ms = network_params["slot_duration_ms"]
-    new_ms = network_params["slot_duration_ms_heze"]
-    if (
-        heze_epoch == constants.FAR_FUTURE_EPOCH
-        or heze_epoch == 0
-        or new_ms == old_ms
-        or network_params["frames_enabled"]
-    ):
-        return
-
-    fields = ["epoch", "target_blobs", "max_blobs", "base_fee_update_fraction"]
-    bpos = []
-    for i in range(1, 6):
-        bpo = {
-            field: network_params["bpo_{0}_{1}".format(i, field)] for field in fields
-        }
-        if bpo["epoch"] == heze_epoch:
-            return
-        if bpo["epoch"] != constants.FAR_FUTURE_EPOCH:
-            bpos.append(bpo)
-
-    if len(bpos) == 5:
-        plan.print(
-            "WARNING: slot_duration_ms_heze ({0}) differs from slot_duration_ms ({1}) but all BPOs are in use, so no BPO is scheduled at heze_fork_epoch ({2}) to keep blob throughput per second".format(
-                new_ms, old_ms, heze_epoch
-            )
-        )
-        return
-
-    prev = {
-        "target_blobs": network_params["target_blobs_per_block_electra"],
-        "max_blobs": network_params["max_blobs_per_block_electra"],
-        "base_fee_update_fraction": network_params["base_fee_update_fraction_electra"],
-    }
-    index = 0
-    for bpo in bpos:
-        if bpo["epoch"] < heze_epoch:
-            prev = bpo
-            index += 1
-
-    slot = index + 1
-    user_fields = []
-    if slot > len(bpos):
-        user_fields = [
-            field
-            for field in fields[1:]
-            if "bpo_{0}_{1}".format(slot, field) in user_network_params
-        ]
-
-    if user_fields:
-        heze_bpo = {
-            field: network_params["bpo_{0}_{1}".format(slot, field)] for field in fields
-        }
-        heze_bpo["epoch"] = heze_epoch
-        message = "with the user-provided {0}".format(", ".join(user_fields))
-    else:
-        prev_target = prev["target_blobs"]
-        prev_max = prev["max_blobs"]
-        prev_fraction = prev["base_fee_update_fraction"]
-        if prev_fraction == 0:
-            prev_fraction = int(prev_max * 131072 / 0.23556607131276688 + 0.5)
-        target = (2 * prev_target * new_ms + old_ms) // (2 * old_ms)
-        if target < 1:
-            target = 1
-        heze_bpo = {
-            "epoch": heze_epoch,
-            "target_blobs": target,
-            "max_blobs": (2 * prev_max * target + prev_target) // (2 * prev_target),
-            "base_fee_update_fraction": (
-                2 * prev_fraction * target * old_ms + prev_target * new_ms
-            )
-            // (2 * prev_target * new_ms),
-        }
-        message = "for {0}ms -> {1}ms slots: target {2} -> {3}, max {4} -> {5}, base fee update fraction {6} -> {7}".format(
-            old_ms,
-            new_ms,
-            prev_target,
-            heze_bpo["target_blobs"],
-            prev_max,
-            heze_bpo["max_blobs"],
-            prev_fraction,
-            heze_bpo["base_fee_update_fraction"],
-        )
-
-    bpos.insert(index, heze_bpo)
-    for i, bpo in enumerate(bpos):
-        for field in fields:
-            network_params["bpo_{0}_{1}".format(i + 1, field)] = bpo[field]
-
-    plan.print(
-        "Scheduled BPO {0} at heze_fork_epoch {1} {2}".format(slot, heze_epoch, message)
-    )
-    if slot < len(bpos):
-        plan.print(
-            "Shifted BPOs scheduled after heze_fork_epoch to BPO {0}-{1}".format(
-                slot + 1, len(bpos)
-            )
-        )
-
-
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -686,11 +569,6 @@ def input_parser(plan, input_args):
                 )
             )
 
-    validate_slot_duration_heze(result["network_params"])
-    schedule_heze_slot_duration_bpo(
-        plan, result["network_params"], input_args.get("network_params", {})
-    )
-
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
         has_node_with_128_plus_validators = False
@@ -1070,7 +948,6 @@ def input_parser(plan, input_args):
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
             gas_limit_schedule=result["network_params"]["gas_limit_schedule"],
-            slot_duration_ms_heze=result["network_params"]["slot_duration_ms_heze"],
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
@@ -1959,7 +1836,6 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_ms_heze": 12000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -2048,7 +1924,6 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_ms_heze": 6000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
