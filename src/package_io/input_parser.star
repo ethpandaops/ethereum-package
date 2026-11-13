@@ -368,13 +368,28 @@ def input_parser(plan, input_args):
         for group, group_params in result["port_publisher"].items()
         if type(group_params) == "dict" and group_params.get("enabled")
     ]
-    if len(enabled_port_publisher_groups) > 0:
-        exposed_ports = "P2P ports (TCP/UDP/QUIC discovery and torrent)"
-        if "nginx" in result["additional_services"]:
-            exposed_ports += " and the nginx network-config port"
+    exposed_ports = []
+    if (
+        len(
+            [
+                group
+                for group in enabled_port_publisher_groups
+                if group in ("el", "cl", "other")
+            ]
+        )
+        > 0
+    ):
+        exposed_ports.append("P2P ports (TCP/UDP/QUIC discovery and torrent)")
+    if (
+        len(enabled_port_publisher_groups) > 0
+        and "nginx" in result["additional_services"]
+    ):
+        exposed_ports.append("the nginx network-config port")
+    if len(exposed_ports) > 0:
         plan.print(
-            "WARNING: port_publisher is enabled for {0}. {1} are published on all host interfaces (0.0.0.0) at fixed port numbers and are reachable from the network, including the internet if this host has a public IP. All other ports are published on 127.0.0.1 only.".format(
-                ", ".join(enabled_port_publisher_groups), exposed_ports
+            "WARNING: port_publisher is enabled for {0}. Published on all host interfaces (0.0.0.0) at fixed port numbers, and reachable from the network, including the internet if this host has a public IP: {1}. All other ports are published on 127.0.0.1 only.".format(
+                ", ".join(enabled_port_publisher_groups),
+                " and ".join(exposed_ports),
             )
         )
 
