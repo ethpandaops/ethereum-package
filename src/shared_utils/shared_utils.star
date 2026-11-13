@@ -7,7 +7,7 @@ WS_APPLICATION_PROTOCOL = "ws"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
 NOT_PROVIDED_HOST_IP = ""
-P2P_HOST_IP = "0.0.0.0"
+PUBLIC_HOST_IP = "0.0.0.0"
 
 MAX_PORTS_PER_CL_NODE = 7
 MAX_PORTS_PER_EL_NODE = 7
@@ -329,7 +329,7 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
             ports.update(
                 {
                     port_id: new_port_spec(
-                        port, TCP_PROTOCOL, wait=wait, host_ip=P2P_HOST_IP
+                        port, TCP_PROTOCOL, wait=wait, host_ip=PUBLIC_HOST_IP
                     )
                 }
             )
@@ -351,7 +351,7 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
             ports.update(
                 {
                     port_id: new_port_spec(
-                        port, UDP_PROTOCOL, wait=wait, host_ip=P2P_HOST_IP
+                        port, UDP_PROTOCOL, wait=wait, host_ip=PUBLIC_HOST_IP
                     )
                 }
             )

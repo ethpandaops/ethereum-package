@@ -113,7 +113,9 @@ def launch_nginx(
     if nginx_port != None:
         public_ports = {
             HTTP_PORT_ID: shared_utils.new_port_spec(
-                nginx_port, shared_utils.TCP_PROTOCOL
+                nginx_port,
+                shared_utils.TCP_PROTOCOL,
+                host_ip=shared_utils.PUBLIC_HOST_IP,
             )
         }
 
