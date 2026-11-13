@@ -363,6 +363,36 @@ def input_parser(plan, input_args):
                 else:
                     result["trueblocks_params"][sub_attr] = sub_value
 
+    enabled_port_publisher_groups = [
+        group
+        for group, group_params in result["port_publisher"].items()
+        if type(group_params) == "dict" and group_params.get("enabled")
+    ]
+    exposed_ports = []
+    if (
+        len(
+            [
+                group
+                for group in enabled_port_publisher_groups
+                if group in ("el", "cl", "other")
+            ]
+        )
+        > 0
+    ):
+        exposed_ports.append("P2P ports (TCP/UDP/QUIC discovery and torrent)")
+    if (
+        len(enabled_port_publisher_groups) > 0
+        and "nginx" in result["additional_services"]
+    ):
+        exposed_ports.append("the nginx network-config port")
+    if len(exposed_ports) > 0:
+        plan.print(
+            "WARNING: port_publisher is enabled for {0}. Published on all host interfaces (0.0.0.0) at fixed port numbers, and reachable from the network, including the internet if this host has a public IP: {1}. All other ports are published on 127.0.0.1 only.".format(
+                ", ".join(enabled_port_publisher_groups),
+                " and ".join(exposed_ports),
+            )
+        )
+
     if result.get("snooper_enabled"):
         plan.print(
             "DEPRECATION WARNING: 'snooper_enabled' is deprecated, use 'snooper_params.enabled' instead"
@@ -935,9 +965,11 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
-                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"]
-                if participant["checkpoint_sync_enabled"] != None
-                else result["checkpoint_sync_enabled"],
+                checkpoint_sync_enabled=(
+                    participant["checkpoint_sync_enabled"]
+                    if participant["checkpoint_sync_enabled"] != None
+                    else result["checkpoint_sync_enabled"]
+                ),
                 skip_start=participant["skip_start"],
             )
             for participant in result["participants"]
