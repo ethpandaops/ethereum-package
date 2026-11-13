@@ -384,6 +384,18 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
     return ports
 
 
+def is_port_publisher_enabled(port_publisher):
+    return (
+        port_publisher.el_enabled
+        or port_publisher.cl_enabled
+        or port_publisher.vc_enabled
+        or port_publisher.remote_signer_enabled
+        or port_publisher.additional_services_enabled
+        or port_publisher.mev_enabled
+        or port_publisher.other_enabled
+    )
+
+
 def get_additional_service_standard_public_port(
     port_publisher, port_id, additional_service_index, port_index
 ):

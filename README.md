@@ -220,7 +220,7 @@ In effect, A's nginx plays the same role for B that the GitHub-hosted `network-c
 
 #### Limits / gotchas
 
-- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published nginx port and EL/CL public ports. The package publishes A's nginx port and its EL/CL P2P ports on all host interfaces for this; every other port is published on `127.0.0.1` only. Same-host works through the host's own address; cross-host works as long as the NAT IP set on A is routable from B.
+- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published nginx port and EL/CL public ports. With `port_publisher` enabled, the package publishes A's nginx port and its EL/CL P2P ports on all host interfaces for this; every other port is published on `127.0.0.1` only, and without `port_publisher` so is nginx. Same-host works through the host's own address; cross-host works as long as the NAT IP set on A is routable from B.
 - A's nginx snapshot is taken at A's startup. If A restarts and gets new node identities, B must be torn down and redeployed against the new bundle.
 - Geth snap-sync brittleness applies as noted above; CL sync is unaffected.
 

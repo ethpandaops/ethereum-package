@@ -110,12 +110,18 @@ def launch_nginx(
         template_and_data_by_rel_dest_filepath, "nginx-bootstrap-info"
     )
 
-    if nginx_port != None:
+    public_port_number = nginx_port
+    if public_port_number == None and HTTP_PORT_ID in public_ports:
+        public_port_number = public_ports[HTTP_PORT_ID].number
+    if public_port_number != None:
+        host_ip = shared_utils.NOT_PROVIDED_HOST_IP
+        if shared_utils.is_port_publisher_enabled(port_publisher):
+            host_ip = shared_utils.PUBLIC_HOST_IP
         public_ports = {
             HTTP_PORT_ID: shared_utils.new_port_spec(
-                nginx_port,
+                public_port_number,
                 shared_utils.TCP_PROTOCOL,
-                host_ip=shared_utils.PUBLIC_HOST_IP,
+                host_ip=host_ip,
             )
         }
 
