@@ -258,9 +258,9 @@ def input_parser(plan, input_args):
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        result["network_params"]["deposit_contract_address"] = (
+            constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        )
 
     for attr in input_args:
         value = input_args[attr]
@@ -362,6 +362,18 @@ def input_parser(plan, input_args):
                         result["trueblocks_params"]["scrape"][k] = v
                 else:
                     result["trueblocks_params"][sub_attr] = sub_value
+
+    enabled_port_publisher_groups = [
+        group
+        for group, group_params in result["port_publisher"].items()
+        if type(group_params) == "dict" and group_params.get("enabled")
+    ]
+    if len(enabled_port_publisher_groups) > 0:
+        plan.print(
+            "WARNING: port_publisher is enabled for {0}. P2P ports (TCP/UDP/QUIC discovery and torrent) are published on all host interfaces (0.0.0.0) at fixed port numbers and are reachable from the network, including the internet if this host has a public IP. All other ports are published on 127.0.0.1 only.".format(
+                ", ".join(enabled_port_publisher_groups)
+            )
+        )
 
     if result.get("snooper_enabled"):
         plan.print(
@@ -935,9 +947,11 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
-                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"]
-                if participant["checkpoint_sync_enabled"] != None
-                else result["checkpoint_sync_enabled"],
+                checkpoint_sync_enabled=(
+                    participant["checkpoint_sync_enabled"]
+                    if participant["checkpoint_sync_enabled"] != None
+                    else result["checkpoint_sync_enabled"]
+                ),
                 skip_start=participant["skip_start"],
             )
             for participant in result["participants"]
