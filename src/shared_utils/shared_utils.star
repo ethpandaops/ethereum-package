@@ -6,6 +6,8 @@ HTTP_APPLICATION_PROTOCOL = "http"
 WS_APPLICATION_PROTOCOL = "ws"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
+NOT_PROVIDED_HOST_IP = ""
+P2P_HOST_IP = "0.0.0.0"
 
 MAX_PORTS_PER_CL_NODE = 7
 MAX_PORTS_PER_EL_NODE = 7
@@ -61,20 +63,18 @@ def new_port_spec(
     transport_protocol,
     application_protocol=NOT_PROVIDED_APPLICATION_PROTOCOL,
     wait=NOT_PROVIDED_WAIT,
+    host_ip=NOT_PROVIDED_HOST_IP,
 ):
-    if wait == NOT_PROVIDED_WAIT:
-        return PortSpec(
-            number=number,
-            transport_protocol=transport_protocol,
-            application_protocol=application_protocol,
-        )
-
-    return PortSpec(
-        number=number,
-        transport_protocol=transport_protocol,
-        application_protocol=application_protocol,
-        wait=wait,
-    )
+    kwargs = {
+        "number": number,
+        "transport_protocol": transport_protocol,
+        "application_protocol": application_protocol,
+    }
+    if wait != NOT_PROVIDED_WAIT:
+        kwargs["wait"] = wait
+    if host_ip != NOT_PROVIDED_HOST_IP:
+        kwargs["host_ip"] = host_ip
+    return PortSpec(**kwargs)
 
 
 def zfill_custom(value, width):
@@ -325,8 +325,15 @@ def __get_port_range(port_start, max_ports_per_component, participant_index):
 def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
     ports = {}
     for port_id, port in port_assignments.items():
-        if port_id in [
-            constants.TCP_DISCOVERY_PORT_ID,
+        if port_id == constants.TCP_DISCOVERY_PORT_ID:
+            ports.update(
+                {
+                    port_id: new_port_spec(
+                        port, TCP_PROTOCOL, wait=wait, host_ip=P2P_HOST_IP
+                    )
+                }
+            )
+        elif port_id in [
             constants.RPC_PORT_ID,
             constants.ENGINE_RPC_PORT_ID,
             constants.ENGINE_WS_PORT_ID,
@@ -341,7 +348,13 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
             constants.QUIC_DISCOVERY_PORT_ID,
             constants.TORRENT_PORT_ID,
         ]:
-            ports.update({port_id: new_port_spec(port, UDP_PROTOCOL, wait=wait)})
+            ports.update(
+                {
+                    port_id: new_port_spec(
+                        port, UDP_PROTOCOL, wait=wait, host_ip=P2P_HOST_IP
+                    )
+                }
+            )
         elif port_id == constants.DEBUG_PORT_ID:
             ports.update(
                 {
