@@ -106,6 +106,8 @@ def get_vc_config(
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:
         return None
+    elif vc_type == constants.VC_TYPE.crysm:
+        return None
 
     if vc_type not in vc_launchers:
         fail(

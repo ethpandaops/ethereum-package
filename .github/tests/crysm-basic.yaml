@@ -1,0 +1,13 @@
+participants:
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    cl_type: crysm
+    validator_count: 128
+
+network_params:
+  gloas_fork_epoch: 0
+  bpo_1_epoch: 0
+  bpo_2_epoch: 0
+
+additional_services:
+  - dora
