@@ -1216,7 +1216,7 @@ tx_fuzz_params:
 # Configuration place for rakoon transaction fuzzer - https://github.com/protocol-security/fuzztools
 rakoon_params:
   # Rakoon docker image to use
-  image: "ethpandaops/fuzztools:v1"
+  image: "ethpandaops/fuzztools:main"
   # Transaction type to fuzz (eip7702, eip1559, eip2930, legacy)
   # Note: blob transactions are not supported by design
   tx_type: "eip7702"
@@ -1245,8 +1245,8 @@ prometheus_params:
   min_mem: 128
   max_mem: 2048
   # Prometheus docker image to use
-  # Defaults to the latest image
-  image: "prom/prometheus:latest"
+  # Defaults to prom/prometheus:v3.2.1
+  image: "prom/prometheus:v3.2.1"
 
 # Configuration place for grafana
 grafana_params:
@@ -1401,8 +1401,8 @@ tempo_params:
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Defaults to the latest image
-  image: "ethpandaops/assertoor:latest"
+  # Defaults to ethpandaops/assertoor:master
+  image: "ethpandaops/assertoor:master"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -1585,7 +1585,8 @@ mev_params:
   # The image to use for mev-boost
   mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
-  mev_boost_args: []
+  # Defaults to ["mev-boost", "--relay-check"] (see get_default_mev_params)
+  mev_boost_args: ["mev-boost", "--relay-check"]
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
   # Extra environment variables to send to the API
@@ -1745,14 +1746,15 @@ checkpoint_sync_url: ""
 # Configuration place for spamoor as transaction spammer
 spamoor_params:
   # The image to use for spamoor
-  image: ethpandaops/spamoor:latest
+  # Defaults to ethpandaops/spamoor:master
+  image: ethpandaops/spamoor:master
   # Resource management for spamoor
   # CPU is milicores
   # RAM is in MB
-  min_cpu: 10
-  max_cpu: 1000
-  min_mem: 20
-  max_mem: 300
+  min_cpu: 100
+  max_cpu: 2000
+  min_mem: 100
+  max_mem: 800
   # A list of spammers to launch on startup
   # example:
   # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
