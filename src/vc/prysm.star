@@ -78,6 +78,7 @@ def get_config(
         or cl_context.client_name != constants.CL_TYPE.prysm
         or participant.blobber_enabled
         or beacon_http_urls != [cl_context.beacon_http_url]
+        or network_params.heze_fork_epoch < constants.FAR_FUTURE_EPOCH
     )
 
     if use_beacon_api:
