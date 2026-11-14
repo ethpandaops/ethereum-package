@@ -178,7 +178,6 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkVersion": constants.FULU_FORK_VERSION,
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "HezeForkVersion": constants.HEZE_FORK_VERSION,
-        "SlotDurationMsHeze": network_params.slot_duration_ms_heze,
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
