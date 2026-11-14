@@ -60,6 +60,7 @@ disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
 trueblocks = import_module("./src/trueblocks/trueblocks_launcher.star")
+fast_forward = import_module("./src/fast_forward/fast_forward.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -1003,6 +1004,17 @@ def run(plan, args={}):
                     fail("Invalid MEV type")
                 all_mevboost_contexts.append(mev_boost_context)
 
+    if (
+        args_with_right_defaults.wait_for_finalization
+        and args_with_right_defaults.fast_forward.enabled
+    ):
+        fast_forward.wait_for_target(
+            plan,
+            args_with_right_defaults.fast_forward,
+            all_cl_contexts,
+            HTTP_PORT_ID_FOR_FACT,
+        )
+
     if len(args_with_right_defaults.additional_services) == 0:
         output = struct(
             all_participants=all_participants,
@@ -1448,7 +1460,10 @@ def run(plan, args={}):
         )
         plan.print("Successfully launched grafana")
 
-    if args_with_right_defaults.wait_for_finalization:
+    if (
+        args_with_right_defaults.wait_for_finalization
+        and not args_with_right_defaults.fast_forward.enabled
+    ):
         plan.print("Waiting for the first finalized epoch")
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name

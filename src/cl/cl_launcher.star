@@ -134,6 +134,10 @@ def launch(
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
+        or (
+            network_params.network.startswith(constants.NETWORK_NAME.remote_enclave)
+            and validator_data != None
+        )
         else None
     )
     network_name = shared_utils.get_network_name(network_params.network)
@@ -186,6 +190,12 @@ def launch(
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
+        beacon_keystores = new_cl_node_validator_keystores
+        if (
+            args_with_right_defaults.fast_forward.enabled
+            and not participant.use_separate_vc
+        ):
+            beacon_keystores = None
 
         el_context = all_el_contexts[index]
 
@@ -214,7 +224,13 @@ def launch(
             )
         checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
         checkpoint_sync_enabled = participant.checkpoint_sync_enabled
-        if checkpoint_sync_enabled:
+        if args_with_right_defaults.fast_forward.checkpoint_sync_url != None:
+            # Only the CL starts from the generated checkpoint; its EL is fed up to it and keeps full sync.
+            checkpoint_sync_enabled = True
+            checkpoint_sync_url = (
+                args_with_right_defaults.fast_forward.checkpoint_sync_url
+            )
+        elif checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if network_params.network == constants.NETWORK_NAME.kurtosis:
                     if "checkpointz" in args_with_right_defaults.additional_services:
@@ -259,7 +275,7 @@ def launch(
                 cl_context_BOOTNODE,
                 el_context,
                 full_name,
-                new_cl_node_validator_keystores,
+                beacon_keystores,
                 snooper_el_engine_context,
                 persistent,
                 tolerations,
@@ -328,7 +344,7 @@ def launch(
                 boot_cl_client_ctx,
                 el_context,
                 full_name,
-                new_cl_node_validator_keystores,
+                beacon_keystores,
                 snooper_el_engine_context,
                 persistent,
                 tolerations,

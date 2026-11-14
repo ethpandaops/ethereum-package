@@ -40,6 +40,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    ff_handover=None,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -167,6 +168,21 @@ def get_config(
         vc_binary_artifact,
         "/app/cmd/validator/validator",
         "/app/cmd/validator/validator",
+    )
+
+    if ff_handover != None:
+        cmd.append("--datadir=" + vc_shared.FF_VC_DATA_DIR)
+    vc_shared.apply_ff_handover(
+        config_args,
+        cmd,
+        "/app/cmd/validator/validator",
+        "touch "
+        + vc_shared.FF_VC_DATA_DIR
+        + "/validator.db && /app/cmd/validator/validator slashing-protection-history import --accept-terms-of-use --datadir="
+        + vc_shared.FF_VC_DATA_DIR
+        + " --slashing-protection-json-file="
+        + vc_shared.FF_INTERCHANGE_FILE,
+        ff_handover,
     )
 
     vc_shared.apply_resource_limits(config_args, participant)

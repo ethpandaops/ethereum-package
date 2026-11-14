@@ -1742,6 +1742,32 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
+# Start a fresh kurtosis network with its early history already generated, so it is finalized
+# within about a minute instead of after about 26 minutes. Genesis is placed in the past, timeskip
+# (https://github.com/ethpandaops/timeskip) generates every slot since then against a private reth,
+# the chain goes into every client, and the validator clients take over at a slot boundary with
+# slashing protection for the generated history. Every participant runs a separate validator client,
+# except Grandine, whose keys are loaded through its keymanager at handover.
+fast_forward:
+  # Defaults to false
+  enabled: false
+  # Where the generated history ends: a fork (or an epoch) and a state, e.g.
+  #   until:
+  #     fork: gloas            # or epoch: 10
+  #     state: activating      # activating, activated, justified or finalized
+  #     slots_before: 20       # activating only, defaults to 10
+  # activating: you start slots_before slots ahead of gloas and the transition runs live.
+  # Forks after that activate live. Defaults to the last scheduled fork, finalized
+  until: null
+  # checkpoint: nodes checkpoint-sync from the generated finalized checkpoint
+  # full: nodes import every generated block
+  # Defaults to checkpoint
+  history: checkpoint
+  # The timeskip image
+  image: ghcr.io/ethpandaops/timeskip:latest
+  # The execution client that builds the payloads during generation
+  el_image: ghcr.io/paradigmxyz/reth:latest
+
 # Configuration place for spamoor as transaction spammer
 spamoor_params:
   # The image to use for spamoor
