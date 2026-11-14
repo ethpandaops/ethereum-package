@@ -31,8 +31,9 @@ def get_execution_engine_endpoint(participant, el_context, snooper_el_engine_con
 
 # Returns the Directory for the beacon node's persistent data volume.
 # volume_size_key is the client key used to look up the default volume size in
-# constants.VOLUME_SIZE. Note: caplin and consensoor intentionally pass the
-# lighthouse key, as they have no entry of their own in constants.VOLUME_SIZE.
+# constants.VOLUME_SIZE. Note: caplin, consensoor and ethlambda intentionally
+# pass the lighthouse key, as they have no entry of their own in
+# constants.VOLUME_SIZE.
 def get_beacon_data_directory(
     beacon_service_name, participant, network_params, volume_size_key
 ):
@@ -105,6 +106,18 @@ def get_beacon_node_identity(
 def append_bootnode_arg(
     plan, cmd, flag, launcher, network_params, bootnode_contexts, bootnode_enr_override
 ):
+    bootnode_arg = get_bootnode_arg(
+        plan, launcher, network_params, bootnode_contexts, bootnode_enr_override
+    )
+    if bootnode_arg != None:
+        cmd.append(flag + bootnode_arg)
+
+
+# Returns the comma-joined bootnode ENRs resolved as described in
+# append_bootnode_arg, or None when the client should use its built-in list.
+def get_bootnode_arg(
+    plan, launcher, network_params, bootnode_contexts, bootnode_enr_override
+):
     bootnode_arg = bootnode_enr_override
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
@@ -121,9 +134,7 @@ def append_bootnode_arg(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
 
-    # Add bootnode argument if set
-    if bootnode_arg != None:
-        cmd.append(flag + bootnode_arg)
+    return bootnode_arg
 
 
 def get_blobber_config(

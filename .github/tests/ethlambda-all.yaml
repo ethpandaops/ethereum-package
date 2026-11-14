@@ -1,0 +1,15 @@
+participants:
+  - el_type: geth
+    cl_type: ethlambda
+  - el_type: nethermind
+    cl_type: ethlambda
+  - el_type: erigon
+    cl_type: ethlambda
+  - el_type: besu
+    cl_type: ethlambda
+  - el_type: reth
+    cl_type: ethlambda
+  - el_type: ethrex
+    cl_type: ethlambda
+  - el_type: nimbus
+    cl_type: ethlambda
