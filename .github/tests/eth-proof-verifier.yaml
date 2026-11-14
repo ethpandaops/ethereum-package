@@ -1,0 +1,9 @@
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    el_type: geth
+    cl_extra_params:
+      - --proof-engine-endpoint=http://eth-proof-verifier:8025
+
+additional_services:
+  - eth_proof_verifier

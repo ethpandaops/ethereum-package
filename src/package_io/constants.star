@@ -128,6 +128,7 @@ DEFAULT_BUILDOOR_IMAGE = "ethpandaops/buildoor:main"
 DEFAULT_TRUEBLOCKS_IMAGE = "ethpandaops/trueblocks:v5.9.3"
 DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_ZKBOOST_IMAGE = "ghcr.io/eth-act/zkboost/zkboost:latest"
+DEFAULT_ETH_PROOF_VERIFIER_IMAGE = "ghcr.io/dapplion/eth_proof_verifier:latest"
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"

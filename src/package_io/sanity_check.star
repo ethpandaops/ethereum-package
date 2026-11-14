@@ -470,6 +470,11 @@ SUBCATEGORY_PARAMS = {
         "zkvms",
         "env",
     ],
+    "eth_proof_verifier_params": [
+        "image",
+        "extra_args",
+        "env",
+    ],
     "buildoor_params": [
         "image",
         "extra_args",
@@ -514,6 +519,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "spamoor",
     "disruptoor",
     "zkboost",
+    "eth_proof_verifier",
     "trueblocks",
     "otel",
     "buildoor",

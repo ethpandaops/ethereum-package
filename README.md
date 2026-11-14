@@ -1126,6 +1126,7 @@ additional_services:
   - dugtrio
   - erpc
   - zkboost
+  - eth_proof_verifier
   - forkmon
   - forky
   - grafana
@@ -1289,11 +1290,14 @@ bootnodoor_params:
 # Participant cl_extra_params:
 #   --execution-endpoint=http://<instance>:3000
 #     Sends the Engine API of the participant through that zkboost instance.
-#     Each instance needs exactly one such participant, which also sets --proof-engine.
+#     Each instance needs exactly one such participant, which also sets --proof-engine or
+#     --proof-engine-endpoint.
 #   --proof-engine
 #     Enables the proof engine with the built-in verifier config of Lighthouse.
 #   --proof-engine=<path>
 #     Uses the verifier config at <path>. Add the file with extra_files and mount it with cl_extra_mounts.
+#   --proof-engine-endpoint=http://eth-proof-verifier:8025
+#     Verifies proofs with the eth_proof_verifier service (Lighthouse unstable).
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
@@ -1384,6 +1388,19 @@ zkboost_params:
   # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
   env:
     RUST_LOG: "info,zkboost=debug"
+
+# Configuration place for eth_proof_verifier - https://github.com/dapplion/eth_proof_verifier
+# A stateless EIP-8025 proof verifier, launched as a single service named eth-proof-verifier.
+# Point a beacon node at it with cl_extra_params:
+#   --proof-engine-endpoint=http://eth-proof-verifier:8025
+eth_proof_verifier_params:
+  # eth_proof_verifier docker image to use
+  # Defaults to the latest image
+  image: "ghcr.io/dapplion/eth_proof_verifier:latest"
+  # A list of optional extra args, e.g. --proof-types <file>
+  extra_args: []
+  # A list of optional extra env_vars, e.g. RUST_LOG
+  env: {}
 
 # Configuration place for tempo tracing backend
 tempo_params:
