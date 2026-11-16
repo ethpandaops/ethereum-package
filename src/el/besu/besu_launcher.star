@@ -113,15 +113,6 @@ def get_config(
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
-        "{0}".format(
-            "--sync-mode=FULL"
-            if (
-                network_params.network in constants.NETWORK_NAME.kurtosis
-                and not participant.checkpoint_sync_enabled
-            )
-            or participant.el_storage_type == "archive"
-            else "--sync-mode=SNAP2"
-        ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
@@ -131,6 +122,17 @@ def get_config(
     # Configure storage type - besu defaults to full (BONSAI), use FOREST for archive
     if participant.el_storage_type == "archive":
         cmd.append("--data-storage-format=FOREST")
+
+    if not any([p.startswith("--sync-mode") for p in participant.el_extra_params]):
+        cmd.append(
+            "--sync-mode=FULL"
+            if (
+                network_params.network in constants.NETWORK_NAME.kurtosis
+                and not participant.checkpoint_sync_enabled
+            )
+            or participant.el_storage_type == "archive"
+            else "--sync-mode=SNAP"
+        )
 
     if network_params.gas_limit > 0:
         cmd.append("--target-gas-limit={0}".format(network_params.gas_limit))
