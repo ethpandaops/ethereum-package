@@ -120,7 +120,7 @@ def get_config(
                 and not participant.checkpoint_sync_enabled
             )
             or participant.el_storage_type == "archive"
-            else "--sync-mode=SNAP"
+            else "--sync-mode=SNAP2"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
