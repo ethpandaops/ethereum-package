@@ -1075,8 +1075,8 @@ network_params:
   bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
-  # Default to "0x00"
-  withdrawal_type: "0x00"
+  # Default to "0x02"
+  withdrawal_type: "0x02"
 
   # Withdrawal address
   # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
