@@ -114,7 +114,7 @@ DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:master"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:6.2.9"
+    "ethpandaops/ethereum-genesis-generator:pq"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -149,6 +149,7 @@ ELECTRA_FORK_VERSION = "0x60000038"
 FULU_FORK_VERSION = "0x70000038"
 GLOAS_FORK_VERSION = "0x80000038"
 HEZE_FORK_VERSION = "0x90000038"
+EIP8450_FORK_VERSION = "0xe8450038"
 
 FAR_FUTURE_EPOCH = 18446744073709551615
 

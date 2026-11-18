@@ -942,6 +942,19 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # EIP-8450 post-quantum key registry fork epoch
+  # Set to 0, with all earlier forks at 0, to start with a leanXMSS public key
+  # registered for every genesis validator and builder
+  # Defaults to 18446744073709551615
+  eip8450_fork_epoch: 18446744073709551615
+
+  # Base URL holding precomputed leanXMSS public keys for the validator
+  # mnemonics, as <mnemonic fingerprint>.bin files with 32 bytes per key index.
+  # Only the needed range is fetched; keys that are missing are derived, which
+  # takes a few CPU seconds per key
+  # Defaults to ""
+  xmss_pubkey_url: ""
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
@@ -1848,7 +1861,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.9
+  image: ethpandaops/ethereum-genesis-generator:pq
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

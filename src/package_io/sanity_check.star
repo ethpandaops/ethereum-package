@@ -251,6 +251,8 @@ SUBCATEGORY_PARAMS = {
         "fulu_fork_epoch",
         "gloas_fork_epoch",
         "heze_fork_epoch",
+        "eip8450_fork_epoch",
+        "xmss_pubkey_url",
         "frames_enabled",
         "network_sync_base_url",
         "force_snapshot_sync",
