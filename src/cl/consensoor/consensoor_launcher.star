@@ -203,12 +203,8 @@ def get_beacon_config(
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
-    extra_env_vars = dict(participant.cl_extra_env_vars)
-    if network_params.xmss_signatures:
-        extra_env_vars["CONSENSOOR_XMSS"] = "1"
-
     env_vars = shared_utils.with_otel_env_vars(
-        extra_env_vars,
+        participant.cl_extra_env_vars,
         otel_otlp_grpc_url,
         beacon_service_name,
     )

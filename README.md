@@ -942,24 +942,22 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
-  # EIP-8450 post-quantum key registry fork epoch
-  # Set to 0, with all earlier forks at 0, to start with a leanXMSS public key
-  # registered for every genesis validator and builder
+  # Post-quantum (consensus-specs `pq` feature) fork epoch
+  # Set to 0, with fulu and gloas at 0 and heze not scheduled, to start the
+  # network on the pq fork: validators are identified by leanXMSS public keys
+  # and every duty is signed with leanXMSS. The EIP-7002, EIP-7251 and EIP-8282
+  # request contracts are replaced with inert stubs in the execution genesis,
+  # so no execution request other than a deposit can be made. Only genesis
+  # activation is supported
   # Defaults to 18446744073709551615
-  eip8450_fork_epoch: 18446744073709551615
+  pq_fork_epoch: 18446744073709551615
 
-  # Base URL holding precomputed leanXMSS public keys for the validator
-  # mnemonics, as <mnemonic fingerprint>.bin files with 32 bytes per key index.
-  # Only the needed range is fetched; keys that are missing are derived, which
-  # takes a few CPU seconds per key
+  # Base URL holding precomputed leanXMSS public keys and VRF roots for the
+  # validator mnemonics, as <mnemonic fingerprint>.bin files with 64 bytes per
+  # key index. Only the needed range is fetched; keys that are missing are
+  # derived, which takes a few CPU seconds per key
   # Defaults to ""
   xmss_pubkey_url: ""
-
-  # Replace BLS with leanXMSS: genesis validators are identified by their
-  # leanXMSS public key and consensoor signs every duty with it. Needs
-  # eip8450_fork_epoch: 0 and only works with consensoor participants
-  # Defaults to false
-  xmss_signatures: false
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
