@@ -891,6 +891,7 @@ def input_parser(plan, input_args):
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
             eip8450_fork_epoch=result["network_params"]["eip8450_fork_epoch"],
             xmss_pubkey_url=result["network_params"]["xmss_pubkey_url"],
+            xmss_signatures=result["network_params"]["xmss_signatures"],
             frames_enabled=result["network_params"]["frames_enabled"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -1852,6 +1853,7 @@ def default_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip8450_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "xmss_signatures": False,
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1942,6 +1944,7 @@ def default_minimal_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip8450_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "xmss_signatures": False,
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,

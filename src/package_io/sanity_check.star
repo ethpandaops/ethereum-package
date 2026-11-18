@@ -253,6 +253,7 @@ SUBCATEGORY_PARAMS = {
         "heze_fork_epoch",
         "eip8450_fork_epoch",
         "xmss_pubkey_url",
+        "xmss_signatures",
         "frames_enabled",
         "network_sync_base_url",
         "force_snapshot_sync",

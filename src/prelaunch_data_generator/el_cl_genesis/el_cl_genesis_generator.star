@@ -170,6 +170,7 @@ def new_env_file_for_el_cl_genesis_data(
         "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
         "EIP8450ForkEpoch": "{0}".format(network_params.eip8450_fork_epoch),
         "XMSSPubkeyURL": network_params.xmss_pubkey_url,
+        "XMSSValidatorPubkeys": "true" if network_params.xmss_signatures else "false",
         "FramesEnabled": "true" if frames_enabled else "false",
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,

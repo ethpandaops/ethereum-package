@@ -955,6 +955,12 @@ network_params:
   # Defaults to ""
   xmss_pubkey_url: ""
 
+  # Replace BLS with leanXMSS: genesis validators are identified by their
+  # leanXMSS public key and consensoor signs every duty with it. Needs
+  # eip8450_fork_epoch: 0 and only works with consensoor participants
+  # Defaults to false
+  xmss_signatures: false
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
