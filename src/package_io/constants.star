@@ -113,9 +113,7 @@ DEFAULT_SLASHOOR_IMAGE = "ethpandaops/slashoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:master"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
-DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:pq"
-)
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = "ethpandaops/ethereum-genesis-generator:pq"
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
