@@ -5,13 +5,10 @@ vc_shared = import_module("./vc_shared.star")
 
 ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
-# ethlambda reads its validators from a Lighthouse-style
-# validator_definitions.yml rather than by scanning a keystore directory, so
-# one is generated at container start into this writable directory, pointing
-# at the keystores mounted from the keystore artifact. The keymanager API
-# persists imported keys and its bearer token here too.
-VALIDATORS_DIRPATH_ON_SERVICE_CONTAINER = "/data/ethlambda/validators"
-VALIDATOR_DEFINITIONS_FILENAME = "validator_definitions.yml"
+# ethlambda's VC runs on the mounted keystore directory, as Lighthouse's does:
+# finding no validator_definitions.yml there, it writes one from the keystores
+# at startup. Its slashing-protection record and the keymanager API's bearer
+# token are kept in that directory too, the token always under this name.
 API_TOKEN_FILENAME = "api-token.txt"
 
 # ethlambda filters its logs through RUST_LOG (tracing's EnvFilter).
@@ -61,13 +58,16 @@ def get_config(
         ETHLAMBDA_BINARY_PATH,
         "validator",
         "--beacon-nodes=" + ",".join(beacon_http_urls),
-        "--validators-dir=" + VALIDATORS_DIRPATH_ON_SERVICE_CONTAINER,
+        "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--http-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append("--gas-limit={0}".format(network_params.gas_limit))
 
     keymanager_api_cmd = [
         "--enable-keymanager",
@@ -88,36 +88,18 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
-    # Shell commands run before the client starts. The definitions file is
-    # only written when absent, so keys imported through the keymanager API
-    # survive a restart.
-    definitions_filepath = shared_utils.path_join(
-        VALIDATORS_DIRPATH_ON_SERVICE_CONTAINER, VALIDATOR_DEFINITIONS_FILENAME
-    )
-    definition_entry = (
-        'printf -- \'- enabled: true\\n  voting_public_key: "%s"\\n'
-        + "  voting_keystore_path: {0}/%s/voting-keystore.json\\n"
-        + "  voting_keystore_password_path: {1}/%s\\n'"
-        + ' "$pubkey" "$pubkey" "$pubkey" >> {2}'
-    ).format(validator_keys_dirpath, validator_secrets_dirpath, definitions_filepath)
-    setup_cmds = [
-        "mkdir -p " + VALIDATORS_DIRPATH_ON_SERVICE_CONTAINER,
-        (
-            "if [ ! -f {0} ]; then touch {0}; for dir in {1}/*; do "
-            + 'pubkey=$(basename "$dir"); {2}; done; fi'
-        ).format(definitions_filepath, validator_keys_dirpath, definition_entry),
-    ]
+    # Shell commands run before the client starts
+    setup_cmds = []
 
     if keymanager_enabled:
         # Serve the package-wide keymanager token instead of a generated one,
-        # matching the other validator clients.
+        # matching the other validator clients. ethlambda has no flag to read
+        # it from another path, so it is copied to where the VC looks.
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         setup_cmds.append(
             "cp {0} {1}".format(
                 constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
-                shared_utils.path_join(
-                    VALIDATORS_DIRPATH_ON_SERVICE_CONTAINER, API_TOKEN_FILENAME
-                ),
+                shared_utils.path_join(validator_keys_dirpath, API_TOKEN_FILENAME),
             )
         )
         cmd.extend(keymanager_api_cmd)
