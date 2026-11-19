@@ -959,7 +959,7 @@ network_params:
   # as those of another mnemonic or beyond the end of the file, are derived,
   # which takes about 5 CPU seconds per key
   # Defaults to "", which on a pq network resolves to static_files/xmss-keys of
-  # this package on GitHub, holding the first 1000 keys of the default mnemonic
+  # this package on GitHub, holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
