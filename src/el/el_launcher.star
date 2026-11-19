@@ -167,12 +167,11 @@ def launch(
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
-        # ethereumjs is discv4-only and the MEV builder's reth parses enode
-        # bootnodes only, so both need the enode; every other client is
+        # ethereumjs is discv4-only and needs the enode; every other client is
         # discv5-only and needs the EL ENR
         el_bootnode_override = (
             bootnodoor_enode
-            if el_type in (constants.EL_TYPE.ethereumjs, constants.EL_TYPE.reth_builder)
+            if el_type == constants.EL_TYPE.ethereumjs
             else bootnodoor_el_enr
         )
 
