@@ -107,6 +107,7 @@ BUILDOOR_SERVICE_NAME = "buildoor"
 BUILDOOR_API_PORT = 8080
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:master"
 DEFAULT_DORA_PQ_IMAGE = "ethpandaops/dora:pq"
+DEFAULT_XMSS_PUBKEY_URL = "https://raw.githubusercontent.com/ethpandaops/ethereum-package/58b1093e19ae48baa60ec6586f90c7780141c6ff/static_files/xmss-keys"
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:master"
 DEFAULT_DISRUPTOOR_IMAGE = "ethpandaops/disruptoor:latest"

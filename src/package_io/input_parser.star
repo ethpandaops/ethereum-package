@@ -507,6 +507,10 @@ def input_parser(plan, input_args):
             )
         if "image" not in input_args.get("dora_params", {}):
             result["dora_params"]["image"] = constants.DEFAULT_DORA_PQ_IMAGE
+        if result["network_params"]["xmss_pubkey_url"] == "":
+            result["network_params"][
+                "xmss_pubkey_url"
+            ] = constants.DEFAULT_XMSS_PUBKEY_URL
 
     if result["network_params"]["fulu_fork_epoch"] != 0:
         for bpo_key in [

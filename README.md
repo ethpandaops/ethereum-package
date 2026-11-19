@@ -955,9 +955,11 @@ network_params:
 
   # Base URL holding precomputed leanXMSS public keys and VRF roots for the
   # validator mnemonics, as <mnemonic fingerprint>.bin files with 64 bytes per
-  # key index. Only the needed range is fetched; keys that are missing are
-  # derived, which takes a few CPU seconds per key
-  # Defaults to ""
+  # key index. Only the needed range is fetched; keys that are missing, such
+  # as those of another mnemonic or beyond the end of the file, are derived,
+  # which takes about 5 CPU seconds per key
+  # Defaults to "", which on a pq network resolves to static_files/xmss-keys of
+  # this package on GitHub, holding the first 1000 keys of the default mnemonic
   xmss_pubkey_url: ""
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
