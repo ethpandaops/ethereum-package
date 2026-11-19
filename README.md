@@ -34,7 +34,7 @@ Optional features (enabled via flags or parameter files at runtime):
 ## Quickstart
 
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
-2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
+2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]. This package requires Kurtosis 1.23.0 or newer.
 3. Run the package with default configurations from the command line:
 
    ```bash
@@ -220,7 +220,7 @@ In effect, A's nginx plays the same role for B that the GitHub-hosted `network-c
 
 #### Limits / gotchas
 
-- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published nginx port and EL/CL public ports. Same-host works because Docker publishes ports on the host's interfaces; cross-host works as long as the NAT IP set on A is routable from B.
+- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published nginx port and EL/CL public ports. With `port_publisher` enabled, the package publishes A's nginx port and its EL/CL P2P ports on all host interfaces for this; every other port is published on `127.0.0.1` only, and without `port_publisher` so is nginx. Same-host works through the host's own address; cross-host works as long as the NAT IP set on A is routable from B.
 - A's nginx snapshot is taken at A's startup. If A restarts and gets new node identities, B must be torn down and redeployed against the new bundle.
 - Geth snap-sync brittleness applies as noted above; CL sync is unaffected.
 
@@ -945,21 +945,6 @@ network_params:
   # Heze fork epoch
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
-
-  # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
-  # Must be a positive multiple of 1000
-  # Ignored while frames_enabled is true, since the CL Heze fork is disabled
-  # When it differs from slot_duration_ms and heze_fork_epoch is not at genesis,
-  # a BPO is scheduled at heze_fork_epoch with the target blobs, max blobs and
-  # base fee update fraction of the preceding blob schedule entry scaled to keep
-  # blob throughput and blob base fee responsiveness per second
-  # (e.g. 14/21/11684671 at 12000 -> 12/18/12018519 at 10000).
-  # BPOs scheduled after heze_fork_epoch move up one slot. If that BPO slot has
-  # user-provided blob values but no epoch, those values are used instead.
-  # Skipped when a bpo_*_epoch is already set to heze_fork_epoch or all five
-  # BPOs are in use.
-  # Defaults to 12000 for mainnet and 6000 for minimal preset
-  slot_duration_ms_heze: 12000
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
@@ -1867,7 +1852,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.7
+  image: ethpandaops/ethereum-genesis-generator:6.2.9
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
