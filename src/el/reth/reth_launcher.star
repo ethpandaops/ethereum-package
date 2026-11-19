@@ -161,8 +161,15 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--builder.gaslimit={0}".format(network_params.gas_limit))
 
-    # Handle bootnode configuration with bootnodoor_el_enr override
-    bootnode_arg = el_shared.get_bootnode_arg(
+    # Handle bootnode configuration with bootnodoor_el_enr override. The MEV
+    # builder images (rbuilder, mev-rs) bundle a reth whose --bootnodes parses
+    # enode URLs only and refuses an ENR, so a builder gets enodes, and
+    # el_launcher hands it bootnodoor's enode as the override.
+    if participant.el_type == constants.EL_TYPE.reth_builder:
+        get_bootnode_arg = el_shared.get_bootnode_enode_arg
+    else:
+        get_bootnode_arg = el_shared.get_bootnode_arg
+    bootnode_arg = get_bootnode_arg(
         plan,
         launcher,
         network_params.network,
