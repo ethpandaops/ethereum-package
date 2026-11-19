@@ -14,9 +14,6 @@ ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/ethlambda/beacon-data"
 NODE_KEY_MOUNTPOINT_ON_CLIENTS = "/node-key"
-# ethlambda takes its bootnodes as a file of ENRs rather than a flag value, so
-# the resolved list is written here at container start.
-BOOTNODES_FILEPATH_ON_SERVICE_CONTAINER = "/tmp/ethlambda-bootnodes.txt"
 
 # Port nums
 # discv5 binds UDP on its own port, while libp2p binds both QUIC (UDP) and the
@@ -168,22 +165,16 @@ def get_beacon_config(
             + "/node-key-file-{0}".format(participant_index + 1)
         )
 
-    # Shell commands run before the client starts
-    setup_cmds = []
-    bootnode_arg = cl_shared.get_bootnode_arg(
+    # Add bootnode argument if set
+    cl_shared.append_bootnode_arg(
         plan,
+        cmd,
+        "--bootnodes=",
         launcher,
         network_params,
         bootnode_contexts,
         bootnode_enr_override,
     )
-    if bootnode_arg != None:
-        setup_cmds.append(
-            "echo '{0}' | tr ',' '\\n' > {1}".format(
-                bootnode_arg, BOOTNODES_FILEPATH_ON_SERVICE_CONTAINER
-            )
-        )
-        cmd.append("--bootnodes=" + BOOTNODES_FILEPATH_ON_SERVICE_CONTAINER)
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default participant.extra_params is a proto repeated string
@@ -205,6 +196,9 @@ def get_beacon_config(
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
+
+    # Shell commands run before the client starts
+    setup_cmds = []
 
     # Binary injection - mount custom binary directory if provided
     if cl_binary_artifact != None:

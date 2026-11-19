@@ -106,18 +106,6 @@ def get_beacon_node_identity(
 def append_bootnode_arg(
     plan, cmd, flag, launcher, network_params, bootnode_contexts, bootnode_enr_override
 ):
-    bootnode_arg = get_bootnode_arg(
-        plan, launcher, network_params, bootnode_contexts, bootnode_enr_override
-    )
-    if bootnode_arg != None:
-        cmd.append(flag + bootnode_arg)
-
-
-# Returns the comma-joined bootnode ENRs resolved as described in
-# append_bootnode_arg, or None when the client should use its built-in list.
-def get_bootnode_arg(
-    plan, launcher, network_params, bootnode_contexts, bootnode_enr_override
-):
     bootnode_arg = bootnode_enr_override
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
@@ -134,7 +122,9 @@ def get_bootnode_arg(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
 
-    return bootnode_arg
+    # Add bootnode argument if set
+    if bootnode_arg != None:
+        cmd.append(flag + bootnode_arg)
 
 
 def get_blobber_config(
