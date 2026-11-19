@@ -511,6 +511,14 @@ def input_parser(plan, input_args):
             result["network_params"][
                 "xmss_pubkey_url"
             ] = constants.DEFAULT_XMSS_PUBKEY_URL
+        if (
+            result["network_params"]["vrf_state_url"] == ""
+            and result["network_params"]["preregistered_validator_keys_mnemonic"]
+            == constants.DEFAULT_MNEMONIC
+        ):
+            result["network_params"][
+                "vrf_state_url"
+            ] = constants.DEFAULT_VRF_STATE_URL
 
     if result["network_params"]["fulu_fork_epoch"] != 0:
         for bpo_key in [
@@ -905,6 +913,7 @@ def input_parser(plan, input_args):
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
             pq_fork_epoch=result["network_params"]["pq_fork_epoch"],
             xmss_pubkey_url=result["network_params"]["xmss_pubkey_url"],
+            vrf_state_url=result["network_params"]["vrf_state_url"],
             frames_enabled=result["network_params"]["frames_enabled"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -1866,6 +1875,7 @@ def default_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "vrf_state_url": "",
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1956,6 +1966,7 @@ def default_minimal_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "vrf_state_url": "",
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,

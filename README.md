@@ -956,11 +956,22 @@ network_params:
   # Base URL holding precomputed leanXMSS public keys and VRF roots for the
   # validator mnemonics, as <mnemonic fingerprint>.bin files with 64 bytes per
   # key index. Only the needed range is fetched; keys that are missing, such
-  # as those of another mnemonic or beyond the end of the file, are derived,
-  # which takes about 5 CPU seconds per key
+  # as those of another mnemonic or beyond the end of the file, are derived.
+  # A VRF root covers the 2^31 leaves of its tree, about an hour of CPU time
+  # per key, so more than a handful of validators need precomputed keys
   # Defaults to "", which on a pq network resolves to static_files/xmss-keys of
   # this package on GitHub, holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
+
+  # URL of a file of precomputed VRF tree states, 1028 bytes per validator
+  # index: the VRF root, then the compact state at slot 0 (4 zero bytes and the
+  # 31 siblings of leaf 0). A validator client loads the states of its
+  # validators from it instead of hashing each tree in full, which takes
+  # minutes per validator. Passed to consensoor
+  # Defaults to "", which on a pq network with the default mnemonic resolves to
+  # the states of its first 10000 keys in static_files/xmss-keys of this
+  # package on GitHub
+  vrf_state_url: ""
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
@@ -1868,7 +1879,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:pq
+  image: ethpandaops/ethereum-genesis-generator:pq-full-vrf
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
