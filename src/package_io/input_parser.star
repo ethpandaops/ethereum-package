@@ -498,6 +498,16 @@ def input_parser(plan, input_args):
             "Mock mev is only supported if the first participant is lighthouse client, please use a different client or set mev_type to 'flashbots', 'mev-rs' or 'commit-boost' or make the first participant lighthouse"
         )
 
+    if result["network_params"]["pq_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        if result["network_params"]["pq_fork_epoch"] != 0:
+            fail(
+                "pq_fork_epoch must be 0 or unset, the pq fork only activates at genesis, got {0}".format(
+                    result["network_params"]["pq_fork_epoch"]
+                )
+            )
+        if "image" not in input_args.get("dora_params", {}):
+            result["dora_params"]["image"] = constants.DEFAULT_DORA_PQ_IMAGE
+
     if result["network_params"]["fulu_fork_epoch"] != 0:
         for bpo_key in [
             "bpo_1_epoch",

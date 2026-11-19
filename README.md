@@ -948,7 +948,8 @@ network_params:
   # and every duty is signed with leanXMSS. The EIP-7002, EIP-7251 and EIP-8282
   # request contracts are replaced with inert stubs in the execution genesis,
   # so no execution request other than a deposit can be made. Only genesis
-  # activation is supported
+  # activation is supported, any other epoch is rejected. Dora defaults to
+  # ethpandaops/dora:pq when this is set
   # Defaults to 18446744073709551615
   pq_fork_epoch: 18446744073709551615
 
@@ -1161,7 +1162,7 @@ blockscout_params:
 dora_params:
   # Dora docker image to use
   # Defaults to the latest image
-  image: "ethpandaops/dora:pq"
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
