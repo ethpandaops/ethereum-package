@@ -1161,7 +1161,7 @@ blockscout_params:
 dora_params:
   # Dora docker image to use
   # Defaults to the latest image
-  image: "ethpandaops/dora:latest"
+  image: "ethdreamer/dora:pq"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 

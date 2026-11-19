@@ -153,7 +153,7 @@ network_params:
 
 additional_services: []
 dora_params:
-  image: "ethpandaops/dora:latest"
+  image: "ethdreamer/dora:pq"
 tx_fuzz_params:
   tx_fuzz_extra_args: []
 spamoor_params:
