@@ -38,7 +38,6 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
-    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -50,7 +49,6 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
-    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -62,7 +60,6 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
-    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -1525,8 +1522,8 @@ def parse_network_params(plan, input_args):
             fail("`use_remote_signer` requires `use_separate_vc`")
 
         if vc_type == "":
-            # Caplin doesn't include a built-in VC, default to lighthouse
-            if cl_type == constants.CL_TYPE.caplin:
+            # Caplin and silver don't include a built-in VC, default to lighthouse
+            if cl_type in (constants.CL_TYPE.caplin, constants.CL_TYPE.silver):
                 vc_type = "lighthouse"
             else:
                 vc_type = cl_type

@@ -15,6 +15,8 @@ BEACON_HTTP_PORT_NUM = 5051
 
 CONFIG_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/silver-config"
 CONFIG_FILENAME = "silver.toml"
+# silver reads its secp256k1 key, hex, from this file in its data dir.
+NODE_KEY_FILENAME = "node.key"
 
 # silver serves `/metrics` from the beacon API's own binds, so there is no
 # second port to publish.
@@ -63,6 +65,9 @@ def get_beacon_config(
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
+    if network_params.preset != "mainnet":
+        fail("silver supports only the mainnet preset")
+
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, RUST_LOG_LEVELS
     )
@@ -117,20 +122,23 @@ def get_beacon_config(
     else:
         # Silver opens its ports after genesis.
         used_ports = shared_utils.get_port_specs(
-            used_port_assignments, wait="{0}s".format(network_params.genesis_delay + 120)
+            used_port_assignments,
+            wait="{0}s".format(network_params.genesis_delay + 120),
         )
 
     config_artifact = render_config(
         plan,
         beacon_service_name,
         participant,
-        participant_index,
         discovery_port,
         discovery_port_quic,
         EXECUTION_ENGINE_ENDPOINT,
         el_context,
         bootnode_contexts,
         bootnode_enr_override,
+        network_params,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
     )
 
     files = {
@@ -140,16 +148,24 @@ def get_beacon_config(
     if el_context != None:
         files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
+    node_key_path = None
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
+        node_key_path = shared_utils.path_join(
+            constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS,
+            "node-key-file-{0}".format(participant_index + 1),
+        )
+
     if persistent:
-        # silver has no volume-size entry of its own in constants.VOLUME_SIZE,
-        # so it reuses the lighthouse key.
         files[
             BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER
         ] = cl_shared.get_beacon_data_directory(
             beacon_service_name,
             participant,
             network_params,
-            constants.CL_TYPE.lighthouse,
+            constants.CL_TYPE.silver,
         )
 
     processed_mounts = shared_utils.process_extra_mounts(
@@ -183,10 +199,18 @@ def get_beacon_config(
         "image": participant.cl_image,
         # Flux queues and profiling exceed Docker's 64 MiB shared-memory default.
         "gpu": GpuConfig(count=0, shm_size=2048),
+        # silver's storage needs io_uring, which Docker's default seccomp
+        # profile blocks. Runs with silver need `kurtosis run --privileged`.
+        "privileged": True,
         "ports": used_ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.cl_enabled,
         "entrypoint": ["sh", "-c"],
-        "cmd": [start_command(cmd, config_path, external_ip, cl_binary_artifact)],
+        "cmd": [
+            start_command(
+                cmd, config_path, external_ip, node_key_path, cl_binary_artifact
+            )
+        ],
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -203,6 +227,8 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
+    if len(participant.cl_devices) > 0:
+        config_args["devices"] = participant.cl_devices
     if not participant.skip_start:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
@@ -216,16 +242,32 @@ def render_config(
     plan,
     beacon_service_name,
     participant,
-    participant_index,
     discovery_port,
     discovery_port_quic,
     execution_engine_endpoint,
     el_context,
     bootnode_contexts,
     bootnode_enr_override,
+    network_params,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
 ):
+    if network_params.network in constants.PUBLIC_NETWORKS:
+        network = network_params.network
+    else:
+        network = constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+    bootstrap_enrs = bootstrap_enrs_override(
+        network_params, bootnode_contexts, bootnode_enr_override
+    )
     template_data = {
-        "SecretKey": participant_secret_key(participant_index),
+        "Network": network,
+        "ServiceName": beacon_service_name,
+        # Lighthouse likewise skips the check only when syncing from genesis.
+        "DisableWsCheck": "false" if checkpoint_sync_enabled else "true",
+        "CheckpointSyncUrl": checkpoint_sync_url if checkpoint_sync_enabled else "",
+        "FeeRecipient": constants.VALIDATING_REWARDS_ACCOUNT
+        if el_context != None
+        else "",
         "DiscoveryPort": discovery_port,
         "QuicPort": discovery_port_quic,
         "HttpPort": BEACON_HTTP_PORT_NUM,
@@ -240,8 +282,8 @@ def render_config(
         # No EL means nothing can answer newPayload, so the engine tile has to
         # rule every payload VALID by itself.
         "UnsafeNoEl": "true" if el_context == None else "false",
-        "NetworkDir": constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
-        "BootstrapEnrs": bootstrap_enrs(bootnode_contexts, bootnode_enr_override),
+        "OverrideBootstrapEnrs": bootstrap_enrs != None,
+        "BootstrapEnrs": bootstrap_enrs or [],
     }
 
     template = read_file(static_files.SILVER_CONFIG_TEMPLATE_FILEPATH)
@@ -256,10 +298,16 @@ def render_config(
 
 
 # silver dials ENRs only — it speaks QUIC, and a multiaddr carries no QUIC
-# port or custody-group count for it to read.
-def bootstrap_enrs(bootnode_contexts, bootnode_enr_override):
+# port or custody-group count for it to read. None leaves silver its own list:
+# the bundled one on a public network, `bootstrap_nodes.yaml` on a devnet.
+def bootstrap_enrs_override(network_params, bootnode_contexts, bootnode_enr_override):
     if bootnode_enr_override != None:
         return [bootnode_enr_override]
+    if (
+        network_params.network != constants.NETWORK_NAME.kurtosis
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
+    ):
+        return None
     if bootnode_contexts == None:
         return []
     return [
@@ -271,7 +319,7 @@ def bootstrap_enrs(bootnode_contexts, bootnode_enr_override):
 # config carries a placeholder and the container substitutes it on the way in.
 # silver publishes no QUIC address in its ENR without it, and then no peer can
 # dial it back.
-def start_command(cmd, config_path, external_ip, cl_binary_artifact):
+def start_command(cmd, config_path, external_ip, node_key_path, cl_binary_artifact):
     prelude = [
         'sed "s/EXTERNAL_IP/'
         + external_ip
@@ -280,21 +328,21 @@ def start_command(cmd, config_path, external_ip, cl_binary_artifact):
         + " > /tmp/"
         + CONFIG_FILENAME,
     ]
+    if node_key_path != None:
+        prelude.append("mkdir -p " + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER)
+        prelude.append(
+            "cp {0} {1}".format(
+                node_key_path,
+                shared_utils.path_join(
+                    BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER, NODE_KEY_FILENAME
+                ),
+            )
+        )
     if cl_binary_artifact != None:
         prelude.append(
             "cp /opt/bin/{0} /usr/local/bin/silver".format(cl_binary_artifact.filename)
         )
     return " && ".join(prelude + ["exec " + " ".join(cmd)])
-
-
-# One stable 32-byte key per participant, so silver keeps its peer id across
-# restarts and no two participants share an identity. The repeated byte runs
-# 0x01..0xfe: zero is not a valid secp256k1 key, and 0xff repeated exceeds the
-# curve order.
-def participant_secret_key(participant_index):
-    # Starlark's `%` takes no width modifier, so pad the nibble by hand.
-    byte = "%x" % (participant_index % 254 + 1)
-    return ("0" + byte if len(byte) < 2 else byte) * 32
 
 
 def get_cl_context(
@@ -336,7 +384,9 @@ def get_cl_context(
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid="",
+        validator_keystore_files_artifact_uuid=(
+            node_keystore_files.files_artifact_uuid if node_keystore_files else ""
+        ),
         supernode=participant.supernode,
     )
 

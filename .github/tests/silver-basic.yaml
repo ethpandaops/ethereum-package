@@ -1,10 +1,6 @@
-# silver serves no validator duties, so it takes no share of the validator
-# set: with a non-zero validator_count its validators would be assigned and
-# then never attest, and a two-participant devnet would not finalize.
 participants:
   - el_type: geth
     cl_type: silver
-    validator_count: 0
   - el_type: geth
     cl_type: lighthouse
 network_params:
