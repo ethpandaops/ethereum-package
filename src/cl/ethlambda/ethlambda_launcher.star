@@ -6,28 +6,20 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-# ethlambda's beacon node runs no validators itself, so they always run in a
-# separate validator client (by default ethlambda's own, src/vc/ethlambda.star),
-# which reaches it over the validator API.
-
 ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/ethlambda/beacon-data"
 NODE_KEY_MOUNTPOINT_ON_CLIENTS = "/node-key"
 
 # Port nums
-# discv5 binds UDP on its own port, while libp2p binds both QUIC (UDP) and the
-# noise+yamux fallback (TCP) on a second one.
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_LIBP2P_PORT_NUM = 9001
 BEACON_HTTP_PORT_NUM = 5052
 BEACON_METRICS_PORT_NUM = 5054
 BEACON_METRICS_PATH = "/metrics"
 
-# Custodying every group is what makes a node a supernode
 NUMBER_OF_CUSTODY_GROUPS = 128
 
-# ethlambda filters its logs through RUST_LOG (tracing's EnvFilter).
 LOG_LEVEL_ENV_VAR = "RUST_LOG"
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -79,8 +71,6 @@ def get_beacon_config(
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
         )
-        # The libp2p TCP and QUIC listeners share one number, so they share the
-        # QUIC slot; discv5 takes the discovery slot on its own.
         public_ports = shared_utils.get_port_specs(
             {
                 constants.TCP_DISCOVERY_PORT_ID: public_ports_for_component[4],
@@ -118,8 +108,6 @@ def get_beacon_config(
     cmd = [
         ETHLAMBDA_BINARY_PATH,
         "beacon",
-        # The built-in networks are exactly constants.PUBLIC_NETWORKS; anything
-        # else is read from the mounted network config directory.
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -131,7 +119,6 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--gossipsub-port={0}".format(libp2p_port),
         "--discovery.port={0}".format(discovery_port),
-        # The ENR otherwise advertises the 0.0.0.0 bind address
         "--discovery.advertise-ip={0}".format(
             "${K8S_POD_IP}"
             if backend == "kubernetes"
@@ -197,7 +184,6 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    # Shell commands run before the client starts
     setup_cmds = []
 
     # Binary injection - mount custom binary directory if provided
@@ -270,9 +256,6 @@ def get_cl_context(
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
-    # The ENR is what later CLs bootstrap from; without it an ethlambda node
-    # cannot be the network's bootnode. ethlambda lists its QUIC address first
-    # and its TCP one last, and not every client dials QUIC, so take the last.
     (
         beacon_node_enr,
         beacon_multiaddr,

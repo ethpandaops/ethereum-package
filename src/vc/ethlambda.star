@@ -5,13 +5,8 @@ vc_shared = import_module("./vc_shared.star")
 
 ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
-# ethlambda's VC runs on the mounted keystore directory, as Lighthouse's does:
-# finding no validator_definitions.yml there, it writes one from the keystores
-# at startup. Its slashing-protection record and the keymanager API's bearer
-# token are kept in that directory too, the token always under this name.
 API_TOKEN_FILENAME = "api-token.txt"
 
-# ethlambda filters its logs through RUST_LOG (tracing's EnvFilter).
 LOG_LEVEL_ENV_VAR = "RUST_LOG"
 
 
@@ -88,13 +83,9 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
-    # Shell commands run before the client starts
     setup_cmds = []
 
     if keymanager_enabled:
-        # Serve the package-wide keymanager token instead of a generated one,
-        # matching the other validator clients. ethlambda has no flag to read
-        # it from another path, so it is copied to where the VC looks.
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         setup_cmds.append(
             "cp {0} {1}".format(
