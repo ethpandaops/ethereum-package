@@ -27,7 +27,7 @@ DEFAULT_CL_IMAGES = {
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
     "silver": "ethpandaops/silver:main",
-    "ethlambda": "ghcr.io/lambdaclass/ethlambda:latest",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -50,7 +50,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
-    "ethlambda": "ghcr.io/lambdaclass/ethlambda:latest",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {

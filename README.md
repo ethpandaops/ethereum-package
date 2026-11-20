@@ -388,7 +388,7 @@ participants:
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     # - silver: ethpandaops/silver:main
-    # - ethlambda: ghcr.io/lambdaclass/ethlambda:latest
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     cl_image: ""
 
     # Path to a local CL binary to inject into the container (Docker only)
@@ -495,7 +495,7 @@ participants:
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
-    # - ethlambda: ghcr.io/lambdaclass/ethlambda:latest
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     vc_image: ""
 
     # Path to a local VC binary to inject into the container (Docker only)
