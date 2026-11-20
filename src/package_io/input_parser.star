@@ -26,7 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
-    "silver": "ghcr.io/gattaca-com/silver:latest",
+    "silver": "ethpandaops/silver:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
