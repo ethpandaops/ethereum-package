@@ -1,8 +1,3 @@
-# Rendered by src/cl/silver/silver_launcher.star.
-#
-# Silver derives fork and genesis values from the network metadata and anchor state.
-# The start command substitutes the external IP placeholder, because a
-# rendered artifact predates the service that gets the address.
 network = "{{ .Network }}"
 disable_weak_subjectivity_check = {{ .DisableWsCheck }}
 external_ip_v4 = "EXTERNAL_IP"
@@ -11,7 +6,6 @@ quic_port = {{ .QuicPort }}
 data_column_custody_group_count = {{ .CustodyGroupCount }}
 data_storage_dir = "{{ .DataDir }}"
 beacon_api_bind = ["0.0.0.0:{{ .HttpPort }}"]
-# Other services reach the API by this name; silver refuses unlisted Hosts.
 beacon_api_allowed_hosts = ["{{ .ServiceName }}"]
 {{- if .FeeRecipient }}
 suggested_fee_recipient = "{{ .FeeRecipient }}"

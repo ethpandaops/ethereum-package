@@ -462,7 +462,6 @@ def run(plan, args={}):
                     + "/node-key-file-{0}.json".format(index + 1)
                 )
             elif participant.cl_type == constants.CL_TYPE.silver:
-                # Teku's files are the same keys, hex encoded as silver reads them.
                 raw_node_key = (
                     static_files.PEERDAS_NODE_KEY_FILEPATH
                     + constants.CL_TYPE.teku

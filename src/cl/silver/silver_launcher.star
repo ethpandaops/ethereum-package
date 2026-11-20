@@ -3,7 +3,6 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_context = import_module("../../cl/cl_context.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 cl_shared = import_module("../cl_shared.star")
-node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 static_files = import_module("../../static_files/static_files.star")
 
@@ -15,21 +14,11 @@ BEACON_HTTP_PORT_NUM = 5051
 
 CONFIG_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/silver-config"
 CONFIG_FILENAME = "silver.toml"
-# silver reads its secp256k1 key, hex, from this file in its data dir.
 NODE_KEY_FILENAME = "node.key"
 
-# silver serves `/metrics` from the beacon API's own binds, so there is no
-# second port to publish.
-METRICS_PATH = "/metrics"
-
-# Full custody: 128 groups is every group there is
-# (`NUMBER_OF_CUSTODY_GROUPS`), and silver floors any lower value at
-# `SAMPLES_PER_SLOT` (8) when it builds its ENR.
 SUPERNODE_CUSTODY_GROUP_COUNT = 128
 DEFAULT_CUSTODY_GROUP_COUNT = 8
 
-# silver takes no `--log-level`: `RUST_LOG` carries both the level and the
-# per-module filters, and the tracing subscriber reads it directly.
 RUST_LOG_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
     constants.GLOBAL_LOG_LEVEL.warn: "warn",
@@ -72,7 +61,6 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, RUST_LOG_LEVELS
     )
 
-    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
         participant, el_context, snooper_el_engine_context
     )
@@ -85,9 +73,6 @@ def get_beacon_config(
             port_publisher,
             participant_index,
         )
-        # Not `cl_shared.get_general_cl_public_port_specs`: it publishes a
-        # `metrics` port, and Kurtosis rejects a public port with no private
-        # port of the same id behind it.
         public_ports = shared_utils.get_port_specs(
             {
                 constants.UDP_DISCOVERY_PORT_ID: public_ports_for_component[0],
@@ -107,20 +92,15 @@ def get_beacon_config(
         else BEACON_QUIC_PORT_NUM
     )
 
-    # No `tcp-discovery` and no `metrics`: silver reaches peers over discv5 and
-    # QUIC, both UDP, and serves `/metrics` from the beacon API's own port. A
-    # declared TCP port Kurtosis then waits to see opened would never open.
     used_port_assignments = {
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
         constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
     }
 
-    # Disable port checks if skip_start is enabled
     if participant.skip_start:
         used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
     else:
-        # Silver opens its ports after genesis.
         used_ports = shared_utils.get_port_specs(
             used_port_assignments,
             wait="{0}s".format(network_params.genesis_delay + 120),
@@ -174,7 +154,6 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    # Binary injection - mount custom binary directory if provided
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
@@ -197,10 +176,7 @@ def get_beacon_config(
 
     config_args = {
         "image": participant.cl_image,
-        # Flux queues and profiling exceed Docker's 64 MiB shared-memory default.
         "gpu": GpuConfig(count=0, shm_size=2048),
-        # silver's storage needs io_uring, which Docker's default seccomp
-        # profile blocks. Runs with silver need `kurtosis run --privileged`.
         "privileged": True,
         "ports": used_ports,
         "public_ports": public_ports,
@@ -262,7 +238,6 @@ def render_config(
     template_data = {
         "Network": network,
         "ServiceName": beacon_service_name,
-        # Lighthouse likewise skips the check only when syncing from genesis.
         "DisableWsCheck": "false" if checkpoint_sync_enabled else "true",
         "CheckpointSyncUrl": checkpoint_sync_url if checkpoint_sync_enabled else "",
         "FeeRecipient": constants.VALIDATING_REWARDS_ACCOUNT
@@ -279,8 +254,6 @@ def render_config(
         if el_context != None
         else "http://127.0.0.1:8551",
         "JwtSecret": constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        # No EL means nothing can answer newPayload, so the engine tile has to
-        # rule every payload VALID by itself.
         "UnsafeNoEl": "true" if el_context == None else "false",
         "OverrideBootstrapEnrs": bootstrap_enrs != None,
         "BootstrapEnrs": bootstrap_enrs or [],
@@ -297,9 +270,6 @@ def render_config(
     )
 
 
-# silver dials ENRs only — it speaks QUIC, and a multiaddr carries no QUIC
-# port or custody-group count for it to read. None leaves silver its own list:
-# the bundled one on a public network, `bootstrap_nodes.yaml` on a devnet.
 def bootstrap_enrs_override(network_params, bootnode_contexts, bootnode_enr_override):
     if bootnode_enr_override != None:
         return [bootnode_enr_override]
@@ -315,10 +285,6 @@ def bootstrap_enrs_override(network_params, bootnode_contexts, bootnode_enr_over
     ]
 
 
-# A rendered artifact predates the service that gets the address, so the
-# config carries a placeholder and the container substitutes it on the way in.
-# silver publishes no QUIC address in its ENR without it, and then no peer can
-# dial it back.
 def start_command(cmd, config_path, external_ip, node_key_path, cl_binary_artifact):
     prelude = [
         'sed "s/EXTERNAL_IP/'
@@ -363,14 +329,6 @@ def get_cl_context(
         beacon_peer_id,
     ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
 
-    # silver publishes `/metrics` on the beacon API's port, so prometheus
-    # scrapes the one port this service listens on.
-    beacon_metrics_url = "{0}:{1}".format(service.ip_address, beacon_http_port.number)
-    nodes_metrics_info = [
-        node_metrics.new_node_metrics_info(
-            service_name, METRICS_PATH, beacon_metrics_url
-        ),
-    ]
     return cl_context.new_cl_context(
         client_name="silver",
         enr=beacon_node_enr,
@@ -378,7 +336,7 @@ def get_cl_context(
         ip_address=service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=nodes_metrics_info,
+        cl_nodes_metrics_info=[],
         beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
