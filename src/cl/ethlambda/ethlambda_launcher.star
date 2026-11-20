@@ -174,7 +174,7 @@ def get_beacon_config(
             beacon_service_name,
             participant,
             network_params,
-            constants.CL_TYPE.lighthouse,
+            constants.CL_TYPE.ethlambda,
         )
 
     # Add extra mounts - automatically handle file uploads

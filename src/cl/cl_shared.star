@@ -31,9 +31,8 @@ def get_execution_engine_endpoint(participant, el_context, snooper_el_engine_con
 
 # Returns the Directory for the beacon node's persistent data volume.
 # volume_size_key is the client key used to look up the default volume size in
-# constants.VOLUME_SIZE. Note: caplin, consensoor and ethlambda intentionally
-# pass the lighthouse key, as they have no entry of their own in
-# constants.VOLUME_SIZE.
+# constants.VOLUME_SIZE. Note: caplin and consensoor intentionally pass the
+# lighthouse key, as they have no entry of their own in constants.VOLUME_SIZE.
 def get_beacon_data_directory(
     beacon_service_name, participant, network_params, volume_size_key
 ):
