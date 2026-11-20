@@ -980,9 +980,9 @@ network_params:
   # instead of building the trees, which takes seconds per validator, with a
   # range request for bytes i * 14696 to (i + 1) * 14696 - 1 of validator i.
   # Passed to consensoor, lighthouse, lodestar and nimbus as --xmss-cache-url
-  # (--xmssCacheUrl for lodestar) when set. The caches of the first 1024 keys
+  # (--xmssCacheUrl for lodestar) when set. The caches of the 10000 keys
   # of the default mnemonic are at
-  # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/e0eeab/b9dec4e1daa17dfe.xmss
+  # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss
   # Defaults to ""
   xmss_cache_url: ""
 
