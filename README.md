@@ -376,7 +376,6 @@ participants:
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
     # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
     # and needs `kurtosis run --privileged` for io_uring
-    # ethlambda supports only the mainnet preset
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -483,7 +482,6 @@ participants:
     # The type of validator client that should be used
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and ethlambda
     # ( The prysm validator only works with a prysm CL client )
-    # ( The ethlambda validator only supports the mainnet preset )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
 

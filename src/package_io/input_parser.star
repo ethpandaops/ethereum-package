@@ -39,6 +39,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -62,6 +63,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -1444,17 +1446,6 @@ def parse_network_params(plan, input_args):
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
-
-        if constants.CL_TYPE.ethlambda in (cl_type, vc_type):
-            # The ethlambda binary is built with mainnet SSZ bounds and
-            # 32-slot epochs. An empty vc_type defaults to cl_type below, which
-            # this check already covers.
-            if result["network_params"]["preset"] != "mainnet":
-                fail(
-                    "ethlambda only supports the mainnet preset, got {0}".format(
-                        result["network_params"]["preset"]
-                    )
-                )
 
         if (
             cl_type in (constants.CL_TYPE.nimbus)
