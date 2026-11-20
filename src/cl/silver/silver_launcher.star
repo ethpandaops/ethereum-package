@@ -3,6 +3,7 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_context = import_module("../../cl/cl_context.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 cl_shared = import_module("../cl_shared.star")
+node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 static_files = import_module("../../static_files/static_files.star")
 
@@ -11,10 +12,12 @@ BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/silver"
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_QUIC_PORT_NUM = 9001
 BEACON_HTTP_PORT_NUM = 5051
+BEACON_METRICS_PORT_NUM = 5054
 
 CONFIG_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/silver-config"
 CONFIG_FILENAME = "silver.toml"
 NODE_KEY_FILENAME = "node.key"
+METRICS_PATH = "/metrics"
 
 SUPERNODE_CUSTODY_GROUP_COUNT = 128
 DEFAULT_CUSTODY_GROUP_COUNT = 8
@@ -77,6 +80,7 @@ def get_beacon_config(
             {
                 constants.UDP_DISCOVERY_PORT_ID: public_ports_for_component[0],
                 constants.HTTP_PORT_ID: public_ports_for_component[1],
+                constants.METRICS_PORT_ID: public_ports_for_component[2],
                 constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3],
             }
         )
@@ -96,6 +100,7 @@ def get_beacon_config(
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
         constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
 
     if participant.skip_start:
@@ -177,7 +182,6 @@ def get_beacon_config(
     config_args = {
         "image": participant.cl_image,
         "gpu": GpuConfig(count=0, shm_size=2048),
-        "privileged": True,
         "ports": used_ports,
         "public_ports": public_ports,
         "publish_udp": port_publisher.cl_enabled,
@@ -246,6 +250,7 @@ def render_config(
         "DiscoveryPort": discovery_port,
         "QuicPort": discovery_port_quic,
         "HttpPort": BEACON_HTTP_PORT_NUM,
+        "MetricsPort": BEACON_METRICS_PORT_NUM,
         "CustodyGroupCount": SUPERNODE_CUSTODY_GROUP_COUNT
         if participant.supernode
         else DEFAULT_CUSTODY_GROUP_COUNT,
@@ -329,6 +334,14 @@ def get_cl_context(
         beacon_peer_id,
     ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
 
+    beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
+    beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
+    nodes_metrics_info = [
+        node_metrics.new_node_metrics_info(
+            service_name, METRICS_PATH, beacon_metrics_url
+        ),
+    ]
+
     return cl_context.new_cl_context(
         client_name="silver",
         enr=beacon_node_enr,
@@ -336,7 +349,7 @@ def get_cl_context(
         ip_address=service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=[],
+        cl_nodes_metrics_info=nodes_metrics_info,
         beacon_service_name=service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
