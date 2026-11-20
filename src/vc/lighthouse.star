@@ -87,6 +87,12 @@ def get_config(
         cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(service_name))
 
+    if (
+        network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+        and network_params.vrf_state_url != ""
+    ):
+        cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
+
     if len(participant.vc_extra_params):
         cmd.extend([param for param in participant.vc_extra_params])
 
