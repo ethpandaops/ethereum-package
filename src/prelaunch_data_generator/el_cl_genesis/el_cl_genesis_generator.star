@@ -141,6 +141,8 @@ def new_env_file_for_el_cl_genesis_data(
     for k, v in extra_env.items():
         extra_env_safe[k] = json.encode(v)
 
+    pq_enabled = network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+
     return {
         "UnixTimestamp": genesis_unix_timestamp,
         "NetworkId": constants.NETWORK_ID[network_params.network.split("-")[0]]
@@ -168,6 +170,8 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
         "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
         "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
+        "PQForkEpoch": "{0}".format(network_params.pq_fork_epoch),
+        "XMSSPubkeyURL": network_params.xmss_pubkey_url,
         "FramesEnabled": "true" if frames_enabled else "false",
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
@@ -178,11 +182,16 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkVersion": constants.FULU_FORK_VERSION,
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "HezeForkVersion": constants.HEZE_FORK_VERSION,
+        "PQForkVersion": constants.PQ_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "MinBuilderWithdrawabilityDelay": network_params.min_builder_withdrawability_delay,
-        "DeployEip8282Contracts": network_params.deploy_eip8282_contracts,
+        "DeployEip7002Contracts": "stub" if pq_enabled else "true",
+        "DeployEip7251Contracts": "stub" if pq_enabled else "true",
+        "DeployEip8282Contracts": "stub"
+        if pq_enabled
+        else network_params.deploy_eip8282_contracts,
         "ShardCommitteePeriod": network_params.shard_committee_period,
         "AttestationDueBpsGloas": network_params.attestation_due_bps_gloas,
         "AggregateDueBpsGloas": network_params.aggregate_due_bps_gloas,

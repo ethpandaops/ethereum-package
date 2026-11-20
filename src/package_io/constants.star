@@ -107,6 +107,9 @@ BUILDOOR_MEV_TYPE = "buildoor"
 BUILDOOR_SERVICE_NAME = "buildoor"
 BUILDOOR_API_PORT = 8080
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:master"
+DEFAULT_DORA_PQ_IMAGE = "ethpandaops/dora:pq"
+DEFAULT_XMSS_PUBKEY_URL = "https://raw.githubusercontent.com/ethpandaops/ethereum-package/d4c9a8ace9dd80ca4f9938885345f8f40a646fd0/static_files/xmss-keys"
+DEFAULT_VRF_STATE_URL = "https://raw.githubusercontent.com/ethpandaops/ethereum-package/d4c9a8ace9dd80ca4f9938885345f8f40a646fd0/static_files/xmss-keys/b9dec4e1daa17dfe.vrf"
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:master"
 DEFAULT_DISRUPTOOR_IMAGE = "ethpandaops/disruptoor:latest"
@@ -114,9 +117,7 @@ DEFAULT_SLASHOOR_IMAGE = "ethpandaops/slashoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:master"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
-DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:6.2.9"
-)
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = "ethpandaops/ethereum-genesis-generator:pq"
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
@@ -150,6 +151,7 @@ ELECTRA_FORK_VERSION = "0x60000038"
 FULU_FORK_VERSION = "0x70000038"
 GLOAS_FORK_VERSION = "0x80000038"
 HEZE_FORK_VERSION = "0x90000038"
+PQ_FORK_VERSION = "0xe0000038"
 
 FAR_FUTURE_EPOCH = 18446744073709551615
 

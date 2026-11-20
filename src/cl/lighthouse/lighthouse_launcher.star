@@ -250,6 +250,11 @@ def get_beacon_config(
         )
     )
 
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        cmd = ["lighthouse-pq-bn"] + cmd[2:]
+        if "--subscribe-all-subnets" not in cmd:
+            cmd.append("--subscribe-all-subnets")
+
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
