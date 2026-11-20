@@ -55,6 +55,7 @@ def get_config(
         "--beacon-nodes=" + ",".join(beacon_http_urls),
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
+        "--init-slashing-protection",
         "--http-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # burn address - If unset, the validator will scream in its logs
