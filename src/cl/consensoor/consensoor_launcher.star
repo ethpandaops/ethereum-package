@@ -150,6 +150,12 @@ def get_beacon_config(
     ):
         cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
 
+    if (
+        network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+        and network_params.xmss_cache_url != ""
+    ):
+        cmd.append("--xmss-cache-url=" + network_params.xmss_cache_url)
+
     bootnode_arg = bootnode_enr_override
     if network_params.network not in constants.PUBLIC_NETWORKS:
         if (

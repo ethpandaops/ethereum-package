@@ -973,6 +973,16 @@ network_params:
   # package on GitHub
   vrf_state_url: ""
 
+  # URL of a file of precomputed leanXMSS tree caches, 14696 bytes per
+  # validator index: the top tree, then the bottom trees 0 (attestations) and
+  # 24576 (slot duties), as written by cache_to_bytes of leanVM bindings
+  # 0.15.0. A validator client loads the caches of its validators from it
+  # instead of building the trees, which takes seconds per validator.
+  # Passed to consensoor, lighthouse, lodestar and nimbus as --xmss-cache-url
+  # (--xmssCacheUrl for lodestar) when set
+  # Defaults to ""
+  xmss_cache_url: ""
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.

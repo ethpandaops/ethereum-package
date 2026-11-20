@@ -94,6 +94,12 @@ def get_config(
     ):
         cmd.append("--vrfStateUrl=" + network_params.vrf_state_url)
 
+    if (
+        network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+        and network_params.xmss_cache_url != ""
+    ):
+        cmd.append("--xmssCacheUrl=" + network_params.xmss_cache_url)
+
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.vc_extra_params])
