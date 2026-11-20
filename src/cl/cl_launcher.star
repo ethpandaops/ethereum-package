@@ -133,7 +133,7 @@ def launch(
             ),
             "get_beacon_config": ethlambda.get_beacon_config,
             "get_cl_context": ethlambda.get_cl_context,
-            "get_blobber_config": cl_shared.get_blobber_config_none,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
     }
 

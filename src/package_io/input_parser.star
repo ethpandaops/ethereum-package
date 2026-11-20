@@ -1596,17 +1596,22 @@ def parse_network_params(plan, input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            # lighthouse, lodestar, prysm, and grandine support blobber
+            # lighthouse, lodestar, prysm, grandine, and ethlambda support blobber
             if participant["cl_type"] not in [
                 constants.CL_TYPE.lighthouse,
                 constants.CL_TYPE.lodestar,
                 constants.CL_TYPE.prysm,
                 constants.CL_TYPE.grandine,
+                constants.CL_TYPE.ethlambda,
             ]:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]
                     )
+                )
+            if participant["vc_type"] == constants.VC_TYPE.ethlambda:
+                fail(
+                    "blobber is not supported for the ethlambda validator client: blobber answers block production in JSON and ethlambda's validator client only decodes SSZ blocks"
                 )
 
         validator_count = participant["validator_count"]
