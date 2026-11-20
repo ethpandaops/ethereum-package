@@ -33,6 +33,9 @@ FORKY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/forky-config/config.ya
 TRACOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/tracoor-config/config.yaml.tmpl"
 )
+SILVER_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/silver-config/silver.toml.tmpl"
+)
 
 # assertoor config
 ASSERTOOR_CONFIG_DIRPATH = "/assertoor-config"
