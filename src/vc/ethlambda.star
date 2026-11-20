@@ -7,6 +7,9 @@ ETHLAMBDA_BINARY_PATH = "/usr/local/bin/ethlambda"
 
 API_TOKEN_FILENAME = "api-token.txt"
 
+REMOTE_SIGNER_VALIDATORS_DIRPATH = "/validator-definitions"
+VALIDATOR_DEFINITIONS_FILENAME = "validator_definitions.yml"
+
 LOG_LEVEL_ENV_VAR = "RUST_LOG"
 
 
@@ -49,11 +52,35 @@ def get_config(
         node_keystore_files.raw_secrets_relative_dirpath,
     )
 
+    setup_cmds = []
+    validators_dirpath = validator_keys_dirpath
+    if remote_signer_context != None:
+        validators_dirpath = REMOTE_SIGNER_VALIDATORS_DIRPATH
+        definition_entry = " ".join(
+            [
+                "printf '%s\\n'",
+                "'- enabled: true'",
+                '"  voting_public_key: \\"${key##*/}\\""',
+                "'  type: web3signer'",
+                "'  url: \"{0}\"'".format(remote_signer_context.http_url),
+            ]
+        )
+        setup_cmds.append(
+            "mkdir -p {0} && for key in {1}/0x*; do {2}; done > {3}".format(
+                validators_dirpath,
+                validator_keys_dirpath,
+                definition_entry,
+                shared_utils.path_join(
+                    validators_dirpath, VALIDATOR_DEFINITIONS_FILENAME
+                ),
+            )
+        )
+
     cmd = [
         ETHLAMBDA_BINARY_PATH,
         "validator",
         "--beacon-nodes=" + ",".join(beacon_http_urls),
-        "--validators-dir=" + validator_keys_dirpath,
+        "--validators-dir=" + validators_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--init-slashing-protection",
         "--http-address=0.0.0.0",
@@ -84,14 +111,12 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
-    setup_cmds = []
-
     if keymanager_enabled:
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         setup_cmds.append(
             "cp {0} {1}".format(
                 constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
-                shared_utils.path_join(validator_keys_dirpath, API_TOKEN_FILENAME),
+                shared_utils.path_join(validators_dirpath, API_TOKEN_FILENAME),
             )
         )
         cmd.extend(keymanager_api_cmd)

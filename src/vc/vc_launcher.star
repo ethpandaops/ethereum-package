@@ -106,9 +106,6 @@ def get_vc_config(
             fail("vero VC requires `use_remote_signer` to be true")
         if keymanager_enabled:
             fail("vero VC doesn't support the Keymanager API")
-    elif vc_type == constants.VC_TYPE.ethlambda:
-        if remote_signer_context != None:
-            fail("`use_remote_signer` flag not supported for ethlambda VC")
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:

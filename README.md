@@ -577,7 +577,7 @@ participants:
     validator_count: null
 
     # Whether to use a remote signer instead of the vc directly handling keys
-    # Note Lighthouse and ethlambda VCs do not support this flag
+    # Note Lighthouse VC does not support this flag
     # Defaults to false
     use_remote_signer: false
 
