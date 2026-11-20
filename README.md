@@ -979,7 +979,9 @@ network_params:
   # 0.15.0. A validator client loads the caches of its validators from it
   # instead of building the trees, which takes seconds per validator.
   # Passed to consensoor, lighthouse, lodestar and nimbus as --xmss-cache-url
-  # (--xmssCacheUrl for lodestar) when set
+  # (--xmssCacheUrl for lodestar) when set. The caches of the first 1024 keys
+  # of the default mnemonic are at
+  # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/e0eeab/b9dec4e1daa17dfe.xmss
   # Defaults to ""
   xmss_cache_url: ""
 
