@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "silver": "ethpandaops/silver:main",
     "ethlambda": "ghcr.io/lambdaclass/ethlambda:latest",
 }
 
@@ -1534,8 +1535,8 @@ def parse_network_params(plan, input_args):
             fail("`use_remote_signer` requires `use_separate_vc`")
 
         if vc_type == "":
-            # Caplin doesn't include a built-in VC, default to lighthouse
-            if cl_type == constants.CL_TYPE.caplin:
+            # Caplin and silver don't include a built-in VC, default to lighthouse
+            if cl_type in (constants.CL_TYPE.caplin, constants.CL_TYPE.silver):
                 vc_type = "lighthouse"
             else:
                 vc_type = cl_type

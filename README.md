@@ -373,8 +373,10 @@ participants:
 
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine and ethlambda
-    # ( ethlambda only supports the mainnet preset )
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
+    # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
+    # and needs `kurtosis run --privileged` for io_uring
+    # ethlambda supports only the mainnet preset
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -385,6 +387,7 @@ participants:
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
+    # - silver: ethpandaops/silver:main
     # - ethlambda: ghcr.io/lambdaclass/ethlambda:latest
     cl_image: ""
 
