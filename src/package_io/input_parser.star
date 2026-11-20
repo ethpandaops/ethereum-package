@@ -2592,6 +2592,8 @@ def apply_buildoor_payload_attributes_flags(participant):
     elif participant["cl_type"] == "nimbus":
         # nimbus does not require flags to emit payload_attributes.
         pass
+    elif participant["cl_type"] == "ethlambda":
+        participant["cl_extra_params"].append("--always-prepare-payload")
 
 
 # Per-participant buildoor: each buildoor_params.instances entry spins up
