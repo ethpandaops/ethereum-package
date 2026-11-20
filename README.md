@@ -967,7 +967,7 @@ network_params:
   # index: the VRF root, then the compact state at slot 0 (4 zero bytes and the
   # 31 siblings of leaf 0). A validator client loads the states of its
   # validators from it instead of hashing each tree in full, which takes
-  # minutes per validator. Passed to consensoor and lodestar
+  # minutes per validator. Passed to consensoor, lighthouse and lodestar
   # Defaults to "", which on a pq network with the default mnemonic resolves to
   # the states of its first 10000 keys in static_files/xmss-keys of this
   # package on GitHub
