@@ -977,7 +977,8 @@ network_params:
   # validator index: the top tree, then the bottom trees 0 (attestations) and
   # 24576 (slot duties), as written by cache_to_bytes of leanVM bindings
   # 0.15.0. A validator client loads the caches of its validators from it
-  # instead of building the trees, which takes seconds per validator.
+  # instead of building the trees, which takes seconds per validator, with a
+  # range request for bytes i * 14696 to (i + 1) * 14696 - 1 of validator i.
   # Passed to consensoor, lighthouse, lodestar and nimbus as --xmss-cache-url
   # (--xmssCacheUrl for lodestar) when set. The caches of the first 1024 keys
   # of the default mnemonic are at
