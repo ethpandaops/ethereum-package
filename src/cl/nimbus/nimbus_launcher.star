@@ -9,7 +9,7 @@ constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/vc_shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
-#  have to to create it
+#  have to create it
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 
 # Port nums
