@@ -28,6 +28,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    ff_handover=None,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -132,6 +133,20 @@ def get_config(
         vc_binary_artifact,
         "/usr/bin/nimbus_validator_client",
         "/usr/bin/nimbus_validator_client",
+    )
+
+    if ff_handover != None:
+        config_args["files"][vc_shared.FF_NIMBUS_MOUNT] = ff_handover.nimbus_artifact
+    vc_shared.apply_ff_handover(
+        config_args,
+        cmd,
+        "nimbus_validator_client",
+        "cp "
+        + vc_shared.FF_NIMBUS_MOUNT
+        + "/slashing_protection.sqlite3* "
+        + validator_keys_dirpath
+        + "/",
+        ff_handover,
     )
 
     vc_shared.apply_resource_limits(config_args, participant)

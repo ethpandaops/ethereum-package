@@ -6,6 +6,9 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/vc_shared.star")
+static_files = import_module("../../static_files/static_files.star")
+
+VALIDATOR_API_TOKEN_FILE = "/tmp/validator-api-token.txt"
 
 GRANDINE_ENTRYPOINT_COMMAND = "grandine"
 
@@ -230,6 +233,18 @@ def get_beacon_config(
             public_ports.update(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
+    # No keys at launch but the keymanager on: validators arrive later through the validator API.
+    keyless_validator_api = (
+        node_keystore_files == None
+        and participant.keymanager_enabled
+        and not participant.use_separate_vc
+    )
+    if keyless_validator_api:
+        cmd.extend(keymanager_api_cmd)
+        cmd.append("--validator-api-token-file=" + VALIDATOR_API_TOKEN_FILE)
+        cmd.append("--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT)
+        used_ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
             participant_index + 1
@@ -263,6 +278,10 @@ def get_beacon_config(
         )
     else:
         cmd_str = "exec " + cmd_str
+    if keyless_validator_api:
+        cmd_str = "printf %s {0} > {1} && {2}".format(
+            validator_api_token(), VALIDATOR_API_TOKEN_FILE, cmd_str
+        )
 
     config_args = {
         "image": participant.cl_image,
@@ -302,6 +321,12 @@ def get_beacon_config(
 
     cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
+
+
+# Grandine reads its validator API token as bare hex.
+def validator_api_token():
+    token = read_file(static_files.KEYMANAGER_PATH_FILEPATH).strip()
+    return token[2:] if token.startswith("0x") else token
 
 
 def get_cl_context(
