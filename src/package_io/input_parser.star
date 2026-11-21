@@ -912,6 +912,9 @@ def input_parser(plan, input_args):
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
             pq_fork_epoch=result["network_params"]["pq_fork_epoch"],
             xmss_pubkey_url=result["network_params"]["xmss_pubkey_url"],
+            attestation_subnet_count_pq=result["network_params"][
+                "attestation_subnet_count_pq"
+            ],
             vrf_state_url=result["network_params"]["vrf_state_url"],
             xmss_cache_url=result["network_params"]["xmss_cache_url"],
             frames_enabled=result["network_params"]["frames_enabled"],
@@ -1875,6 +1878,7 @@ def default_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
         "vrf_state_url": "",
         "xmss_cache_url": "",
         "frames_enabled": False,
@@ -1967,6 +1971,7 @@ def default_minimal_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
         "vrf_state_url": "",
         "xmss_cache_url": "",
         "frames_enabled": False,
