@@ -373,7 +373,9 @@ participants:
 
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, and silver
+    # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
+    # and needs `kurtosis run --privileged` for io_uring
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -384,6 +386,7 @@ participants:
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
+    # - silver: ethpandaops/silver:main
     cl_image: ""
 
     # Path to a local CL binary to inject into the container (Docker only)
