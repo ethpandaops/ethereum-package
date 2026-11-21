@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "silver": "ethpandaops/silver:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -911,6 +912,9 @@ def input_parser(plan, input_args):
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
             pq_fork_epoch=result["network_params"]["pq_fork_epoch"],
             xmss_pubkey_url=result["network_params"]["xmss_pubkey_url"],
+            attestation_subnet_count_pq=result["network_params"][
+                "attestation_subnet_count_pq"
+            ],
             vrf_state_url=result["network_params"]["vrf_state_url"],
             xmss_cache_url=result["network_params"]["xmss_cache_url"],
             frames_enabled=result["network_params"]["frames_enabled"],
@@ -1545,8 +1549,8 @@ def parse_network_params(plan, input_args):
             fail("`use_remote_signer` requires `use_separate_vc`")
 
         if vc_type == "":
-            # Caplin doesn't include a built-in VC, default to lighthouse
-            if cl_type == constants.CL_TYPE.caplin:
+            # Caplin and silver don't include a built-in VC, default to lighthouse
+            if cl_type in (constants.CL_TYPE.caplin, constants.CL_TYPE.silver):
                 vc_type = "lighthouse"
             else:
                 vc_type = cl_type
@@ -1874,6 +1878,7 @@ def default_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
         "vrf_state_url": "",
         "xmss_cache_url": "",
         "frames_enabled": False,
@@ -1966,6 +1971,7 @@ def default_minimal_network_params():
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
         "vrf_state_url": "",
         "xmss_cache_url": "",
         "frames_enabled": False,

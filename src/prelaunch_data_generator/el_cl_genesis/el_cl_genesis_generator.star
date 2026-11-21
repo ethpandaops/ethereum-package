@@ -172,6 +172,7 @@ def new_env_file_for_el_cl_genesis_data(
         "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
         "PQForkEpoch": "{0}".format(network_params.pq_fork_epoch),
         "XMSSPubkeyURL": network_params.xmss_pubkey_url,
+        "AttestationSubnetCountPQ": network_params.attestation_subnet_count_pq,
         "FramesEnabled": "true" if frames_enabled else "false",
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
