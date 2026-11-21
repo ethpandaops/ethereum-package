@@ -263,7 +263,11 @@ def _get_participant_index_by_instance_name(instances, participants):
         for param in participant.cl_extra_params:
             if param.startswith("--execution-endpoint="):
                 execution_endpoint = param.split("=", 1)[1]
-            elif param == "--proof-engine" or param.startswith("--proof-engine="):
+            elif (
+                param == "--proof-engine"
+                or param.startswith("--proof-engine=")
+                or param.startswith("--proof-engine-endpoint=")
+            ):
                 has_proof_engine = True
         if execution_endpoint == None or not has_proof_engine:
             continue
@@ -283,7 +287,7 @@ def _get_participant_index_by_instance_name(instances, participants):
     ) in participant_indexes_by_instance_name.items():
         if len(participant_indexes) != 1:
             fail(
-                "zkboost instance '{0}' requires exactly one participant that sets --execution-endpoint to it and --proof-engine in cl_extra_params, found {1}".format(
+                "zkboost instance '{0}' requires exactly one participant that sets --execution-endpoint to it and --proof-engine or --proof-engine-endpoint in cl_extra_params, found {1}".format(
                     instance_name, len(participant_indexes)
                 )
             )
