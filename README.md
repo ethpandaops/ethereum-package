@@ -373,7 +373,11 @@ participants:
 
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, and silver
+    # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
+    # and needs `kurtosis run --privileged` for io_uring
+    # On a pq network silver starts through `silver-pq-bn`, which runs the leanVM sidecar beside it,
+    # so it needs an image that ships both, such as ethpandaops/silver:pq-devnet-0
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -384,6 +388,7 @@ participants:
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
+    # - silver: ethpandaops/silver:main
     cl_image: ""
 
     # Path to a local CL binary to inject into the container (Docker only)
@@ -962,6 +967,10 @@ network_params:
   # Defaults to "", which on a pq network resolves to static_files/xmss-keys of
   # this package on GitHub, holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
+
+  # Number of attestation subnets on a pq network (ATTESTATION_SUBNET_COUNT_PQ)
+  # Defaults to 16
+  attestation_subnet_count_pq: 16
 
   # URL of a file of precomputed VRF tree states, 1028 bytes per validator
   # index: the VRF root, then the compact state at slot 0 (4 zero bytes and the
