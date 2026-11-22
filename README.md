@@ -976,7 +976,8 @@ network_params:
   # index: the VRF root, then the compact state at slot 0 (4 zero bytes and the
   # 31 siblings of leaf 0). A validator client loads the states of its
   # validators from it instead of hashing each tree in full, which takes
-  # minutes per validator. Passed to consensoor, lighthouse, lodestar and nimbus
+  # minutes per validator. Passed to consensoor, grandine, lighthouse, lodestar
+  # and nimbus
   # Defaults to "", which on a pq network with the default mnemonic resolves to
   # the states of its first 10000 keys in static_files/xmss-keys of this
   # package on GitHub
@@ -988,8 +989,8 @@ network_params:
   # 0.15.0. A validator client loads the caches of its validators from it
   # instead of building the trees, which takes seconds per validator, with a
   # range request for bytes i * 14696 to (i + 1) * 14696 - 1 of validator i.
-  # Passed to consensoor, lighthouse, lodestar and nimbus as --xmss-cache-url
-  # (--xmssCacheUrl for lodestar) when set. The caches of the 10000 keys
+  # Passed to consensoor, grandine, lighthouse, lodestar and nimbus as
+  # --xmss-cache-url (--xmssCacheUrl for lodestar) when set. The caches of the 10000 keys
   # of the default mnemonic are at
   # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss
   # Defaults to ""
@@ -2503,6 +2504,7 @@ spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stabi
 ```
 
 The skill provides:
+
 - Configuration generation for multi-client devnets
 - A reference tool (`kurtosis-ref.sh`) for looking up supported clients, parameters, fork epochs, MEV options, and CI test examples
 - Templates for common setups (mixed clients, custom images, observer nodes, MEV infrastructure)

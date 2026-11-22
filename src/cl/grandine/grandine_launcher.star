@@ -8,6 +8,7 @@ constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/vc_shared.star")
 
 GRANDINE_ENTRYPOINT_COMMAND = "grandine"
+GRANDINE_PQ_ENTRYPOINT_COMMAND = "grandine-pq"
 
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root
@@ -130,8 +131,10 @@ def get_beacon_config(
     else:
         used_ports = shared_utils.get_port_specs(used_port_assignments)
 
+    is_pq = network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+
     cmd = [
-        GRANDINE_ENTRYPOINT_COMMAND,
+        GRANDINE_PQ_ENTRYPOINT_COMMAND if is_pq else GRANDINE_ENTRYPOINT_COMMAND,
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -208,6 +211,15 @@ def get_beacon_config(
         bootnode_enr_override,
     )
 
+    runs_validator = node_keystore_files != None and not participant.use_separate_vc
+
+    if is_pq:
+        if runs_validator and network_params.vrf_state_url != "":
+            cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
+
+        if runs_validator and network_params.xmss_cache_url != "":
+            cmd.append("--xmss-cache-url=" + network_params.xmss_cache_url)
+
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default participant.extra_params is a proto repeated string
         cmd.extend([param for param in participant.cl_extra_params])
@@ -218,7 +230,7 @@ def get_beacon_config(
     if el_context != None:
         files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
-    if node_keystore_files != None and not participant.use_separate_vc:
+    if runs_validator:
         cmd.extend(validator_default_cmd)
         files[
             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
