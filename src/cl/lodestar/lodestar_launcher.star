@@ -57,13 +57,6 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    el_client_rpc_url_str = None
-    if el_context != None:
-        el_client_rpc_url_str = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.rpc_port_num,
-        )
-
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
         participant, el_context, snooper_el_engine_context
@@ -123,7 +116,6 @@ def get_beacon_config(
         "--quicPort={0}".format(discovery_port_quic),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--chain.persistInvalidSszObjects=true",
-        "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
         "--rest=true",
@@ -147,8 +139,6 @@ def get_beacon_config(
     ]
 
     if el_context != None:
-        cmd.append("--eth1=true")
-        cmd.append("--eth1.providerUrls=" + el_client_rpc_url_str)
         cmd.append("--execution.urls=" + EXECUTION_ENGINE_ENDPOINT)
         cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 

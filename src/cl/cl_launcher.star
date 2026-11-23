@@ -9,6 +9,7 @@ grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
 caplin = import_module("./caplin/caplin_launcher.star")
 silver = import_module("./silver/silver_launcher.star")
+ethlambda = import_module("./ethlambda/ethlambda_launcher.star")
 
 cl_shared = import_module("./cl_shared.star")
 constants = import_module("../package_io/constants.star")
@@ -124,6 +125,15 @@ def launch(
             "get_beacon_config": silver.get_beacon_config,
             "get_cl_context": silver.get_cl_context,
             "get_blobber_config": cl_shared.get_blobber_config_none,
+        },
+        constants.CL_TYPE.ethlambda: {
+            "launcher": ethlambda.new_ethlambda_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "get_beacon_config": ethlambda.get_beacon_config,
+            "get_cl_context": ethlambda.get_cl_context,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
     }
 
