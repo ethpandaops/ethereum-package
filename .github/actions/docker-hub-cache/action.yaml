@@ -1,0 +1,20 @@
+name: Docker Hub pull-through cache
+description: Pull Docker Hub images through the ethpandaops pull-through cache
+runs:
+  using: composite
+  steps:
+    # dockerd tries the mirror first for Docker Hub images and falls back to
+    # Docker Hub. Kurtosis pulls through this dockerd, so its images use the
+    # cache too.
+    - name: Use the Docker Hub pull-through cache
+      shell: bash
+      run: |
+        config=/etc/docker/daemon.json
+        current=$(sudo cat "$config" 2>/dev/null || true)
+        [ -n "$current" ] || current='{}'
+        sudo mkdir -p /etc/docker
+        echo "$current" \
+          | jq '."registry-mirrors" = ["https://docker-cache.ethquokkaops.io"]' \
+          | sudo tee "$config"
+        sudo systemctl restart docker
+        docker info --format 'Registry mirrors: {{.RegistryConfig.Mirrors}}'

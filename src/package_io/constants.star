@@ -20,6 +20,8 @@ CL_TYPE = struct(
     grandine="grandine",
     consensoor="consensoor",
     caplin="caplin",
+    silver="silver",
+    ethlambda="ethlambda",
 )
 
 VC_TYPE = struct(
@@ -31,6 +33,7 @@ VC_TYPE = struct(
     vero="vero",
     grandine="grandine",
     consensoor="consensoor",
+    ethlambda="ethlambda",
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
@@ -221,6 +224,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
         "lighthouse_volume_size": 500000,  # 500GB
+        "silver_volume_size": 500000,  # 500GB
+        "ethlambda_volume_size": 500000,  # 500GB
         "teku_volume_size": 500000,  # 500GB
         "nimbus_volume_size": 500000,  # 500GB
         "lodestar_volume_size": 500000,  # 500GB
@@ -238,6 +243,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
         "lighthouse_volume_size": 150000,  # 150GB
+        "silver_volume_size": 150000,  # 150GB
+        "ethlambda_volume_size": 150000,  # 150GB
         "teku_volume_size": 150000,  # 150GB
         "nimbus_volume_size": 150000,  # 150GB
         "lodestar_volume_size": 150000,  # 150GB
@@ -255,6 +262,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
         "lighthouse_volume_size": 100000,  # 100GB
+        "silver_volume_size": 100000,  # 100GB
+        "ethlambda_volume_size": 100000,  # 100GB
         "teku_volume_size": 100000,  # 100GB
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
@@ -272,6 +281,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
         "lighthouse_volume_size": 1000,  # 1GB
+        "silver_volume_size": 1000,  # 1GB
+        "ethlambda_volume_size": 1000,  # 1GB
         "teku_volume_size": 1000,  # 1GB
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
@@ -289,6 +300,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
         "lighthouse_volume_size": 1000,  # 1GB
+        "silver_volume_size": 1000,  # 1GB
+        "ethlambda_volume_size": 1000,  # 1GB
         "teku_volume_size": 1000,  # 1GB
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
@@ -306,6 +319,8 @@ VOLUME_SIZE = {
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
         "lighthouse_volume_size": 100000,  # 100GB
+        "silver_volume_size": 100000,  # 100GB
+        "ethlambda_volume_size": 100000,  # 100GB
         "teku_volume_size": 100000,  # 100GB
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
