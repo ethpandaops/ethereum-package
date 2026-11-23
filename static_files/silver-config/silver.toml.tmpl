@@ -1,0 +1,29 @@
+network = "{{ .Network }}"
+disable_weak_subjectivity_check = {{ .DisableWsCheck }}
+external_ip_v4 = "EXTERNAL_IP"
+discovery_port = {{ .DiscoveryPort }}
+quic_port = {{ .QuicPort }}
+data_column_custody_group_count = {{ .CustodyGroupCount }}
+data_storage_dir = "{{ .DataDir }}"
+beacon_api_bind = ["0.0.0.0:{{ .HttpPort }}"]
+beacon_api_allowed_hosts = ["{{ .ServiceName }}"]
+{{- if .FeeRecipient }}
+suggested_fee_recipient = "{{ .FeeRecipient }}"
+{{- end }}
+
+[engine_config]
+execution_endpoint = "{{ .ExecutionEndpoint }}"
+jwt_secret = "{{ .JwtSecret }}"
+unsafe_no_el = {{ .UnsafeNoEl }}
+
+[chain_config]
+{{- if .CheckpointSyncUrl }}
+checkpoint_sync_urls = ["{{ .CheckpointSyncUrl }}"]
+{{- end }}
+{{- if .OverrideBootstrapEnrs }}
+bootstrap_enrs = [
+{{- range .BootstrapEnrs }}
+  "{{ . }}",
+{{- end }}
+]
+{{- end }}

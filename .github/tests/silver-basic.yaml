@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    cl_type: silver
+  - el_type: geth
+    cl_type: lighthouse
+network_params:
+  preset: mainnet
+  fulu_fork_epoch: 0
+global_log_level: info
+port_publisher:
+  cl:
+    enabled: true
