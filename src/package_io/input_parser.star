@@ -522,6 +522,14 @@ def input_parser(plan, input_args):
             == constants.DEFAULT_MNEMONIC
         ):
             result["network_params"]["vrf_state_url"] = constants.DEFAULT_VRF_STATE_URL
+        if (
+            result["network_params"]["xmss_cache_url"] == ""
+            and result["network_params"]["preregistered_validator_keys_mnemonic"]
+            == constants.DEFAULT_MNEMONIC
+        ):
+            result["network_params"][
+                "xmss_cache_url"
+            ] = constants.DEFAULT_XMSS_CACHE_URL
 
     if result["network_params"]["fulu_fork_epoch"] != 0:
         for bpo_key in [

@@ -991,11 +991,12 @@ network_params:
   # 0.15.0. A validator client loads the caches of its validators from it
   # instead of building the trees, which takes seconds per validator, with a
   # range request for bytes i * 14696 to (i + 1) * 14696 - 1 of validator i.
-  # Passed to consensoor, grandine, lighthouse, lodestar and nimbus as
-  # --xmss-cache-url (--xmssCacheUrl for lodestar) when set. The caches of the 10000 keys
-  # of the default mnemonic are at
+  # Passed to consensoor, ethlambda, grandine, lighthouse and lodestar as
+  # --xmss-cache-url (--xmssCacheUrl for lodestar) and to teku as
+  # --Xvalidators-pq-xmss-cache-url. Nimbus and prysm have no such flag yet.
+  # Defaults to "", which on a pq network with the default mnemonic means the
+  # caches of its first 10000 keys at
   # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss
-  # Defaults to ""
   xmss_cache_url: ""
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze

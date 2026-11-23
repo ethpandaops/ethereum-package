@@ -33,7 +33,6 @@ network_params:
   fulu_fork_epoch: 0
   gloas_fork_epoch: 0
   pq_fork_epoch: 0
-  xmss_cache_url: https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss
 global_log_level: info
 port_publisher:
   cl:
