@@ -1,0 +1,14 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: geth
+    cl_type: ethlambda
+    vc_type: ethlambda
+  - el_type: geth
+    cl_type: lighthouse
+    vc_type: ethlambda
+  - el_type: reth
+    cl_type: ethlambda
+    vc_type: lighthouse
+network_params:
+  preset: minimal

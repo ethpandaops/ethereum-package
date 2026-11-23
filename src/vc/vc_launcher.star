@@ -10,6 +10,7 @@ nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
+ethlambda = import_module("./ethlambda.star")
 vc_shared = import_module("./vc_shared.star")
 
 
@@ -62,6 +63,9 @@ def get_vc_config(
         },
         constants.VC_TYPE.vero: {
             "get_config": vero.get_config,
+        },
+        constants.VC_TYPE.ethlambda: {
+            "get_config": ethlambda.get_config,
         },
     }
 

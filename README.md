@@ -373,7 +373,7 @@ participants:
 
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, and silver
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
     # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
     # and needs `kurtosis run --privileged` for io_uring
     cl_type: lighthouse
@@ -387,6 +387,7 @@ participants:
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     # - silver: ethpandaops/silver:main
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     cl_image: ""
 
     # Path to a local CL binary to inject into the container (Docker only)
@@ -479,7 +480,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and ethlambda
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -492,6 +493,7 @@ participants:
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     vc_image: ""
 
     # Path to a local VC binary to inject into the container (Docker only)
