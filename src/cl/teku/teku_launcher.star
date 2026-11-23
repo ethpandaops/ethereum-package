@@ -228,6 +228,10 @@ def get_beacon_config(
         bootnode_enr_override,
     )
 
+    is_pq = network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+    if is_pq:
+        cmd.append("--Xpq-leanvm-sidecar-binary=/usr/local/bin/leanvm-sidecar")
+
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string
         cmd.extend([param for param in participant.cl_extra_params])
@@ -245,6 +249,16 @@ def get_beacon_config(
 
     if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
+        if is_pq:
+            cmd.append("--Xvalidators-pq-keys-derived-from-bls-key=true")
+            if network_params.vrf_state_url != "":
+                cmd.append(
+                    "--Xvalidators-pq-vrf-state-url=" + network_params.vrf_state_url
+                )
+            if network_params.xmss_cache_url != "":
+                cmd.append(
+                    "--Xvalidators-pq-xmss-cache-url=" + network_params.xmss_cache_url
+                )
         files[
             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
