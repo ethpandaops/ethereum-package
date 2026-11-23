@@ -27,6 +27,7 @@ DEFAULT_CL_IMAGES = {
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
     "silver": "ethpandaops/silver:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -38,6 +39,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -49,6 +51,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -60,6 +63,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -1619,17 +1623,22 @@ def parse_network_params(plan, input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            # lighthouse, lodestar, prysm, and grandine support blobber
+            # lighthouse, lodestar, prysm, grandine, and ethlambda support blobber
             if participant["cl_type"] not in [
                 constants.CL_TYPE.lighthouse,
                 constants.CL_TYPE.lodestar,
                 constants.CL_TYPE.prysm,
                 constants.CL_TYPE.grandine,
+                constants.CL_TYPE.ethlambda,
             ]:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]
                     )
+                )
+            if participant["vc_type"] == constants.VC_TYPE.ethlambda:
+                fail(
+                    "blobber is not supported for the ethlambda validator client: blobber answers block production in JSON and ethlambda's validator client only decodes SSZ blocks"
                 )
 
         validator_count = participant["validator_count"]
@@ -2597,6 +2606,10 @@ def apply_external_builder_flags(participant, mev_url, gas_limit):
         participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
     if participant["vc_type"] == "vero":
         participant["vc_extra_params"].append("--use-external-builder")
+    if participant["cl_type"] == "ethlambda":
+        participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+    if participant["vc_type"] == "ethlambda":
+        participant["vc_extra_params"].append("--builder-proposals")
 
 
 # buildoor builds a payload from the CL's payload_attributes SSE stream, so the
@@ -2621,6 +2634,8 @@ def apply_buildoor_payload_attributes_flags(participant):
     elif participant["cl_type"] == "nimbus":
         # nimbus does not require flags to emit payload_attributes.
         pass
+    elif participant["cl_type"] == "ethlambda":
+        participant["cl_extra_params"].append("--always-prepare-payload")
 
 
 # Per-participant buildoor: each buildoor_params.instances entry spins up
