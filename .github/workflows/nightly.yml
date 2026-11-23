@@ -26,10 +26,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/docker-login
-        with:
-          username: ethpandaops
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: ./.github/actions/docker-hub-cache
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
 
@@ -65,10 +62,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/docker-login
-        with:
-          username: ethpandaops
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: ./.github/actions/docker-hub-cache
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@f64942cbc780df731a731ea9f45765b161d2c8df # v1
         with:
