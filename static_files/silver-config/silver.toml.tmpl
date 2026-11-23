@@ -11,6 +11,10 @@ beacon_api_allowed_hosts = ["{{ .ServiceName }}"]
 suggested_fee_recipient = "{{ .FeeRecipient }}"
 {{- end }}
 
+[metrics]
+enabled = true
+bind = "0.0.0.0:{{ .MetricsPort }}"
+
 [engine_config]
 execution_endpoint = "{{ .ExecutionEndpoint }}"
 jwt_secret = "{{ .JwtSecret }}"
