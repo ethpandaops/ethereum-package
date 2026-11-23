@@ -110,9 +110,13 @@ BUILDOOR_SERVICE_NAME = "buildoor"
 BUILDOOR_API_PORT = 8080
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:master"
 DEFAULT_DORA_PQ_IMAGE = "ethpandaops/dora:pq"
-DEFAULT_XMSS_PUBKEY_URL = "https://raw.githubusercontent.com/ethpandaops/ethereum-package/d4c9a8ace9dd80ca4f9938885345f8f40a646fd0/static_files/xmss-keys"
-DEFAULT_XMSS_CACHE_URL = "https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss"
-DEFAULT_VRF_STATE_URL = "https://raw.githubusercontent.com/ethpandaops/ethereum-package/d4c9a8ace9dd80ca4f9938885345f8f40a646fd0/static_files/xmss-keys/b9dec4e1daa17dfe.vrf"
+DEFAULT_XMSS_PUBKEY_URL = "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev"
+DEFAULT_XMSS_CACHE_URL = (
+    "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss"
+)
+DEFAULT_VRF_STATE_URL = (
+    "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf"
+)
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:master"
 DEFAULT_DISRUPTOOR_IMAGE = "ethpandaops/disruptoor:latest"

@@ -966,8 +966,9 @@ network_params:
   # as those of another mnemonic or beyond the end of the file, are derived.
   # A VRF root covers the 2^31 leaves of its tree, about an hour of CPU time
   # per key, so more than a handful of validators need precomputed keys
-  # Defaults to "", which on a pq network resolves to static_files/xmss-keys of
-  # this package on GitHub, holding the first 10000 keys of the default mnemonic
+  # Defaults to "", which on a pq network resolves to
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev
+  # holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
 
   # Number of attestation subnets on a pq network (ATTESTATION_SUBNET_COUNT_PQ)
@@ -981,8 +982,8 @@ network_params:
   # minutes per validator. Passed to consensoor, grandine, lighthouse, lodestar
   # and nimbus
   # Defaults to "", which on a pq network with the default mnemonic resolves to
-  # the states of its first 10000 keys in static_files/xmss-keys of this
-  # package on GitHub
+  # the states of its first 10000 keys at
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf
   vrf_state_url: ""
 
   # URL of a file of precomputed leanXMSS tree caches, 14696 bytes per
@@ -996,7 +997,7 @@ network_params:
   # --Xvalidators-pq-xmss-cache-url. Nimbus and prysm have no such flag yet.
   # Defaults to "", which on a pq network with the default mnemonic means the
   # caches of its first 10000 keys at
-  # https://panda-uploads-production.devops-539.workers.dev/panda/uploads/dd1a1c/b9dec4e1daa17dfe.xmss
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss
   xmss_cache_url: ""
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
