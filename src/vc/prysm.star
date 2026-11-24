@@ -73,8 +73,10 @@ def get_config(
     # straight to its own Prysm BN: blobber and snooper proxy the REST API only, and
     # --beacon-rpc-provider takes a single endpoint so it cannot express multiple BNs.
     # An explicit REST request also needs the provider URL known by the package.
+    is_pq = network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
     use_beacon_api = (
         "--enable-beacon-rest-api" in participant.vc_extra_params
+        or is_pq
         or cl_context.client_name != constants.CL_TYPE.prysm
         or participant.blobber_enabled
         or beacon_http_urls != [cl_context.beacon_http_url]
@@ -86,6 +88,9 @@ def get_config(
             cmd.append("--enable-beacon-rest-api")
     else:
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
+
+    if is_pq and network_params.vrf_state_url != "":
+        cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
 
     if remote_signer_context == None:
         cmd.extend(

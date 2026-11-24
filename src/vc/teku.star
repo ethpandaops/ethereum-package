@@ -56,6 +56,15 @@ def get_config(
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
 
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        cmd.append("--Xvalidators-pq-keys-derived-from-bls-key=true")
+        if network_params.vrf_state_url != "":
+            cmd.append("--Xvalidators-pq-vrf-state-url=" + network_params.vrf_state_url)
+        if network_params.xmss_cache_url != "":
+            cmd.append(
+                "--Xvalidators-pq-xmss-cache-url=" + network_params.xmss_cache_url
+            )
+
     if network_params.gas_limit > 0:
         cmd.append(
             "--validators-builder-registration-default-gas-limit={0}".format(

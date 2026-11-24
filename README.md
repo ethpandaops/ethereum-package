@@ -376,6 +376,8 @@ participants:
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
     # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
     # and needs `kurtosis run --privileged` for io_uring
+    # On a pq network silver starts through `silver-pq-bn`, which runs the leanVM sidecar beside it,
+    # so it needs an image that ships both, such as ethpandaops/silver:pq-devnet-0
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -947,6 +949,57 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # Post-quantum (consensus-specs `pq` feature) fork epoch
+  # Set to 0, with fulu and gloas at 0 and heze not scheduled, to start the
+  # network on the pq fork: validators are identified by leanXMSS public keys
+  # and every duty is signed with leanXMSS. The EIP-7002, EIP-7251 and EIP-8282
+  # request contracts are replaced with inert stubs in the execution genesis,
+  # so no execution request other than a deposit can be made. Only genesis
+  # activation is supported, any other epoch is rejected. Dora defaults to
+  # ethpandaops/dora:pq when this is set
+  # Defaults to 18446744073709551615
+  pq_fork_epoch: 18446744073709551615
+
+  # Base URL holding precomputed leanXMSS public keys and VRF roots for the
+  # validator mnemonics, as <mnemonic fingerprint>.bin files with 64 bytes per
+  # key index. Only the needed range is fetched; keys that are missing, such
+  # as those of another mnemonic or beyond the end of the file, are derived.
+  # A VRF root covers the 2^31 leaves of its tree, about an hour of CPU time
+  # per key, so more than a handful of validators need precomputed keys
+  # Defaults to "", which on a pq network resolves to
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev
+  # holding the first 10000 keys of the default mnemonic
+  xmss_pubkey_url: ""
+
+  # Number of attestation subnets on a pq network (ATTESTATION_SUBNET_COUNT_PQ)
+  # Defaults to 16
+  attestation_subnet_count_pq: 16
+
+  # URL of a file of precomputed VRF tree states, 1028 bytes per validator
+  # index: the VRF root, then the compact state at slot 0 (4 zero bytes and the
+  # 31 siblings of leaf 0). A validator client loads the states of its
+  # validators from it instead of hashing each tree in full, which takes
+  # minutes per validator. Passed to consensoor, grandine, lighthouse, lodestar
+  # and nimbus
+  # Defaults to "", which on a pq network with the default mnemonic resolves to
+  # the states of its first 10000 keys at
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf
+  vrf_state_url: ""
+
+  # URL of a file of precomputed leanXMSS tree caches, 14696 bytes per
+  # validator index: the top tree, then the bottom trees 0 (attestations) and
+  # 24576 (slot duties), as written by cache_to_bytes of leanVM bindings
+  # 0.15.0. A validator client loads the caches of its validators from it
+  # instead of building the trees, which takes seconds per validator, with a
+  # range request for bytes i * 14696 to (i + 1) * 14696 - 1 of validator i.
+  # Passed to consensoor, ethlambda, grandine, lighthouse and lodestar as
+  # --xmss-cache-url (--xmssCacheUrl for lodestar) and to teku as
+  # --Xvalidators-pq-xmss-cache-url. Nimbus and prysm have no such flag yet.
+  # Defaults to "", which on a pq network with the default mnemonic means the
+  # caches of its first 10000 keys at
+  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss
+  xmss_cache_url: ""
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
@@ -1063,8 +1116,8 @@ network_params:
   bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
-  # Default to "0x00"
-  withdrawal_type: "0x00"
+  # Default to "0x02"
+  withdrawal_type: "0x02"
 
   # Withdrawal address
   # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
@@ -1855,7 +1908,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.9
+  image: ethpandaops/ethereum-genesis-generator:pq
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -2457,6 +2510,7 @@ spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stabi
 ```
 
 The skill provides:
+
 - Configuration generation for multi-client devnets
 - A reference tool (`kurtosis-ref.sh`) for looking up supported clients, parameters, fork epochs, MEV options, and CI test examples
 - Templates for common setups (mixed clients, custom images, observer nodes, MEV infrastructure)

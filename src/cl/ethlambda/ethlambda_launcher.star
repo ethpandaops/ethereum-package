@@ -163,6 +163,9 @@ def get_beacon_config(
         bootnode_enr_override,
     )
 
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        cmd[0] = "ethlambda-pq"
+
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default participant.extra_params is a proto repeated string
         cmd.extend([param for param in participant.cl_extra_params])

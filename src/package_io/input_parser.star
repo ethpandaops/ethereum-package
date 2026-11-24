@@ -503,6 +503,34 @@ def input_parser(plan, input_args):
             "Mock mev is only supported if the first participant is lighthouse client, please use a different client or set mev_type to 'flashbots', 'mev-rs' or 'commit-boost' or make the first participant lighthouse"
         )
 
+    if result["network_params"]["pq_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        if result["network_params"]["pq_fork_epoch"] != 0:
+            fail(
+                "pq_fork_epoch must be 0 or unset, the pq fork only activates at genesis, got {0}".format(
+                    result["network_params"]["pq_fork_epoch"]
+                )
+            )
+        if "image" not in input_args.get("dora_params", {}):
+            result["dora_params"]["image"] = constants.DEFAULT_DORA_PQ_IMAGE
+        if result["network_params"]["xmss_pubkey_url"] == "":
+            result["network_params"][
+                "xmss_pubkey_url"
+            ] = constants.DEFAULT_XMSS_PUBKEY_URL
+        if (
+            result["network_params"]["vrf_state_url"] == ""
+            and result["network_params"]["preregistered_validator_keys_mnemonic"]
+            == constants.DEFAULT_MNEMONIC
+        ):
+            result["network_params"]["vrf_state_url"] = constants.DEFAULT_VRF_STATE_URL
+        if (
+            result["network_params"]["xmss_cache_url"] == ""
+            and result["network_params"]["preregistered_validator_keys_mnemonic"]
+            == constants.DEFAULT_MNEMONIC
+        ):
+            result["network_params"][
+                "xmss_cache_url"
+            ] = constants.DEFAULT_XMSS_CACHE_URL
+
     if result["network_params"]["fulu_fork_epoch"] != 0:
         for bpo_key in [
             "bpo_1_epoch",
@@ -903,6 +931,13 @@ def input_parser(plan, input_args):
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
+            pq_fork_epoch=result["network_params"]["pq_fork_epoch"],
+            xmss_pubkey_url=result["network_params"]["xmss_pubkey_url"],
+            attestation_subnet_count_pq=result["network_params"][
+                "attestation_subnet_count_pq"
+            ],
+            vrf_state_url=result["network_params"]["vrf_state_url"],
+            xmss_cache_url=result["network_params"]["xmss_cache_url"],
             frames_enabled=result["network_params"]["frames_enabled"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -1867,6 +1902,11 @@ def default_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
+        "vrf_state_url": "",
+        "xmss_cache_url": "",
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1907,7 +1947,7 @@ def default_network_params():
         "bpo_5_max_blobs": 72,
         "bpo_5_target_blobs": 48,
         "bpo_5_base_fee_update_fraction": 0,
-        "withdrawal_type": "0x00",
+        "withdrawal_type": "0x02",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
@@ -1955,6 +1995,11 @@ def default_minimal_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "pq_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "xmss_pubkey_url": "",
+        "attestation_subnet_count_pq": 16,
+        "vrf_state_url": "",
+        "xmss_cache_url": "",
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1995,7 +2040,7 @@ def default_minimal_network_params():
         "bpo_5_max_blobs": 72,
         "bpo_5_target_blobs": 48,
         "bpo_5_base_fee_update_fraction": 0,
-        "withdrawal_type": "0x00",
+        "withdrawal_type": "0x02",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,

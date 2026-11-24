@@ -92,6 +92,12 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
 
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        if network_params.vrf_state_url != "":
+            cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
+        if network_params.xmss_cache_url != "":
+            cmd.append("--xmss-cache-url=" + network_params.xmss_cache_url)
+
     keymanager_api_cmd = [
         "--enable-keymanager",
         "--keymanager-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),

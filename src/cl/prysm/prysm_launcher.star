@@ -268,6 +268,9 @@ def get_beacon_config(
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        cmd[0] = "prysm-pq-bn"
+
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:

@@ -175,6 +175,9 @@ def get_beacon_config(
         "${K8S_POD_IP}" if backend == "kubernetes" else port_publisher.cl_nat_exit_ip
     )
     cmd = ["silver", "--config", "/tmp/" + CONFIG_FILENAME]
+    if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
+        # Starts the leanVM sidecar and passes its socket to silver.
+        cmd[0] = "silver-pq-bn"
 
     if len(participant.cl_extra_params) > 0:
         cmd.extend([param for param in participant.cl_extra_params])

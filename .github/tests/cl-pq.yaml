@@ -1,0 +1,31 @@
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:pq-devnet-0
+    supernode: true
+  - cl_type: teku
+    cl_image: ethpandaops/teku:pq-devnet-0
+    supernode: true
+  - cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:pq-devnet-0
+    vc_image: ethpandaops/prysm-validator:pq-devnet-0
+  - cl_type: lodestar
+    cl_image: ethpandaops/lodestar:pq-devnet-0
+  - cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:pq-devnet-0
+  - cl_type: grandine
+    cl_image: ethpandaops/grandine:pq-devnet-0
+  - cl_type: ethlambda
+    cl_image: ethpandaops/ethlambda:pq-devnet-0
+  - cl_type: silver
+    cl_image: ethpandaops/silver:pq-devnet-0
+    vc_type: lighthouse
+    vc_image: ethpandaops/lighthouse:pq-devnet-0
+
+network_params:
+  preset: mainnet
+  gloas_fork_epoch: 0
+  pq_fork_epoch: 0
+  genesis_delay: 120
+
+additional_services:
+  - dora

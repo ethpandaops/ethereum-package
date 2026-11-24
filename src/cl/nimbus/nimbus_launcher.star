@@ -239,6 +239,12 @@ def get_beacon_config(
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
 
+    if (
+        network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
+        and network_params.vrf_state_url != ""
+    ):
+        cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
+
     if len(participant.cl_extra_params) > 0:
         cmd.extend([param for param in participant.cl_extra_params])
 
