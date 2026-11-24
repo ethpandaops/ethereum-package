@@ -113,7 +113,16 @@ def get_config(
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
-        "{0}".format(
+        "--metrics-enabled=true",
+        "--metrics-host=0.0.0.0",
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--min-gas-price=1000000000",
+    ]
+
+    if not any(
+        [param.startswith("--sync-mode") for param in participant.el_extra_params]
+    ):
+        cmd.append(
             "--sync-mode=FULL"
             if (
                 network_params.network in constants.NETWORK_NAME.kurtosis
@@ -121,12 +130,7 @@ def get_config(
             )
             or participant.el_storage_type == "archive"
             else "--sync-mode=SNAP"
-        ),
-        "--metrics-enabled=true",
-        "--metrics-host=0.0.0.0",
-        "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--min-gas-price=1000000000",
-    ]
+        )
 
     # Configure storage type - besu defaults to full (BONSAI), use FOREST for archive
     if participant.el_storage_type == "archive":

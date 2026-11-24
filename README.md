@@ -1357,7 +1357,9 @@ zkboost_params:
   #     "mock"     - proves nothing, and submits a mock proof with the public values of the payload
   #                  and random proof bytes, which a CL without a mock proof verifier rejects
   #   proof_type (required): identifies the EL client + zkVM combination
-  #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
+  #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk",
+  #     "zesu-zisk", "nimbus-sp1", "nimbus-zisk", "nethermind-sp1", "nethermind-zisk",
+  #     "zilkworm-sp1", "zesu-openvm", "zesu-sp1", "reth-pico"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
   #
   # ere-specific fields (only for kind: ere):
@@ -1393,8 +1395,8 @@ zkboost_params:
   #         - dict: explicit per-backend override
   #           e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
   #   env: extra environment variables as a map (default {})
-  #     Entries override the defaults RUST_LOG=info and, for ZisK, ERE_ZISK_SETUP_ON_INIT=1
-  #     and a RUST_LOG with the ZisK modules at warn.
+  #     Entries override the defaults RUST_LOG=info, for OpenVM, ERE_OPENVM_SETUP_ON_INIT=1 and, for ZisK,
+  #     ERE_ZISK_SETUP_ON_INIT=1 and a RUST_LOG with the ZisK modules at warn.
   #   endpoint: HTTP URL of a running ere-server. If set, nothing is launched.
   #
   # mock-specific fields (only for kind: mock):
