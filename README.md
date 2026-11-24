@@ -2,7 +2,7 @@
 
 ![Run of the Ethereum Network Package](run.gif)
 
-This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
+This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbots' `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
 You now have the ability to spin up a private Ethereum testnet or public network (e.g. mainnet, sepolia, hoodi) with a single command. This package is designed to be used for testing, validation, and development of Ethereum clients, and is not intended for production use. For more details check network_params.network in the [configuration section](./README.md#configuration).
 
@@ -24,8 +24,8 @@ Optional features (enabled via flags or parameter files at runtime):
   - `commit-boost` - Commit-boost based infrastructure
   - `mock` - Mock builder for testing
   - [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-emulation).
-- Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
-- Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
+- Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network to log responses & requests between the EL engine API and the CL client.
+- Specify extra parameters to be passed in for any of the CL client Beacon, CL client validator, and/or EL client containers
 - Specify the required parameters for the nodes to reach an external block building network
 - Generate keystores for each node in parallel
 - Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon`) to serve the chifra REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). The scraper isn't started automatically; POST `/scrape` (or run `chifra scrape` against the same data dir) when you want to build the local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/). Auto-tunes scrape parameters for devnets vs public networks.
@@ -67,11 +67,11 @@ When running on a public testnet using a cloud provider's Kubernetes cluster, th
 
 To mitigate these issues, you can use the `el_volume_size` and `cl_volume_size` flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
 
-For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
+For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self-hosting your own Kubernetes cluster with fast persistent storage.
 
 ### Shadowforking
 
-In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Hoodi testnet, you can use the following command:
+In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that the `persistent` configuration parameter has to be enabled for shadowforks to work! The current limitation on k8s is that it only works on a single-node cluster. For example, to shadowfork the Hoodi testnet, you can use the following command:
 
 ```yaml
 ...
@@ -300,9 +300,9 @@ participants:
     el_binary_path: ""
 
     # The log level string that this participant's EL client should log at
-    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # If this is an empty string then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # If this is not an empty string, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
     # Set to "custom" (Besu only) to disable global logging settings and leave it up to the client configuration,
     # for example, when using a custom log4j2.xml file
@@ -310,7 +310,7 @@ participants:
 
     # The storage type for the EL client: "full" or "archive"
     # IMPORTANT: Consider updating el_volume_size if you set this
-    # If this is emptystring, each client will use its default behavior:
+    # If this is an empty string, each client will use its default behavior:
     #   - reth, erigon: default to archive (use "full" to save space)
     #   - geth, besu, nethermind: default to full (use "archive" to keep historical data)
     #   - ethereumjs, ethrex, nimbus-eth1: unused (full only?)
@@ -351,13 +351,13 @@ participants:
     el_tolerations: []
 
     # Persistent storage size for the EL client container (in MB)
-    # IMPORTANT: Consider settings this if you are setting el_storage_type
+    # IMPORTANT: Consider setting this if you are setting el_storage_type
     # Defaults to 0, which means that the default size for the client will be used
     # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
     el_volume_size: 0
 
     # Resource management for el containers
-    # CPU is milicores
+    # CPU is millicores
     # RAM is in MB
     # Defaults to 0, which results in no resource limits
     el_min_cpu: 0
@@ -406,9 +406,9 @@ participants:
     cl_binary_path: ""
 
     # The log level string that this participant's CL client should log at
-    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # If this is an empty string then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # If this is not an empty string, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
     # Set to "custom" (Teku only) to disable global logging settings and leave it up to the client configuration,
     # for example, when using a custom log4j.xml file
@@ -418,7 +418,7 @@ participants:
     cl_extra_env_vars: {}
 
     # A list of optional extra labels that will be passed to the CL client Beacon container.
-    # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+    # Example: cl_extra_labels: {"ethereum-package.partition": "1"}
     cl_extra_labels: {}
 
     # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
@@ -439,7 +439,7 @@ participants:
 
     # A list of tolerations that will be passed to the CL client container
     # Only works with Kubernetes
-    # Example: el_tolerations:
+    # Example: cl_tolerations:
     # - key: "key"
     #   operator: "Equal"
     #   value: "value"
@@ -454,7 +454,7 @@ participants:
     cl_volume_size: 0
 
     # Resource management for cl containers
-    # CPU is milicores
+    # CPU is millicores
     # RAM is in MB
     # Defaults to 0, which results in no resource limits
     cl_min_cpu: 0
@@ -512,17 +512,17 @@ participants:
     vc_binary_path: ""
 
     # The log level string that this participant's validator client should log at
-    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # If this is an empty string then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # If this is not an empty string, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
     vc_log_level: ""
 
     # A list of optional extra env_vars the vc container should spin up with
     vc_extra_env_vars: {}
 
-    # A list of optional extra labels that will be passed to the validator client validator container.
-    # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
+    # A list of optional extra labels that will be passed to the validator client container.
+    # Example: vc_extra_labels: {"ethereum-package.partition": "1"}
     vc_extra_labels: {}
 
     # A list of optional extra params that will be passed to the validator client container for modifying its behaviour
@@ -543,7 +543,7 @@ participants:
 
     # A list of tolerations that will be passed to the validator container
     # Only works with Kubernetes
-    # Example: el_tolerations:
+    # Example: vc_tolerations:
     # - key: "key"
     #   operator: "Equal"
     #   value: "value"
@@ -553,7 +553,7 @@ participants:
     vc_tolerations: []
 
     # Resource management for vc containers
-    # CPU is milicores
+    # CPU is millicores
     # RAM is in MB
     # Defaults to 0, which results in no resource limits
     vc_min_cpu: 0
@@ -572,7 +572,7 @@ participants:
     vc_beacon_node_indices: null
 
     # Count of the number of validators you want to run for a given participant
-    # Default to null, which means that the number of validators will be using the
+    # Defaults to null, which means that the number of validators will be using the
     # network parameter num_validator_keys_per_node
     validator_count: null
 
@@ -595,7 +595,7 @@ participants:
     remote_signer_extra_env_vars: {}
 
     # A list of optional extra labels that will be passed to the remote signer container.
-    # Example; remote_signer_extra_labels: {"ethereum-package.partition": "1"}
+    # Example: remote_signer_extra_labels: {"ethereum-package.partition": "1"}
     remote_signer_extra_labels: {}
 
     # A list of optional extra params that will be passed to the remote signer container for modifying its behaviour
@@ -613,7 +613,7 @@ participants:
     remote_signer_tolerations: []
 
     # Resource management for remote signer containers
-    # CPU is milicores
+    # CPU is millicores
     # RAM is in MB
     # Defaults to 0, which results in no resource limits
     remote_signer_min_cpu: 0
@@ -641,24 +641,24 @@ participants:
     tolerations: []
 
     # Count of nodes to spin up for this participant
-    # Default to 1
+    # Defaults to 1
     count: 1
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
-    # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
+    # Defaults to null and then set to global ethereum_metrics_exporter_enabled (false)
     ethereum_metrics_exporter_enabled: null
 
     # Enables Xatu Sentry for this participant. Can be set globally.
-    # Defaults null and then set to global xatu_sentry_enabled (false)
+    # Defaults to null and then set to global xatu_sentry_enabled (false)
     xatu_sentry_enabled: null
 
     # Prometheus additional configuration for a given participant prometheus target.
     # Execution, beacon and validator client targets on prometheus will include this
     # configuration.
     prometheus_config:
-      # Scrape interval to be used. Default to 15 seconds
+      # Scrape interval to be used. Defaults to 15 seconds
       scrape_interval: 15s
-      # Additional labels to be added. Default to empty
+      # Additional labels to be added. Defaults to empty
       labels: {}
 
     # Buildoor (a self-contained block builder) is configured independently of the
@@ -690,7 +690,7 @@ participants:
 
     # Participant flag for keymanager api
     # This will open up http ports to your validator services!
-    # Defaults null and then set to default global keymanager_enabled (false)
+    # Defaults to null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
     # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
@@ -738,7 +738,7 @@ network_params:
   # The network ID of the network.
   network_id: "3151908"
 
-  # The address of the staking contract address on the Eth1 chain
+  # The address of the staking contract on the Eth1 chain
   deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 
   # Number of seconds per slot on the Beacon chain
@@ -864,7 +864,7 @@ network_params:
   # Defaults to 2048
   eth1_follow_distance: 2048
 
-  # The number of epochs to wait validators to be able to withdraw
+  # The number of epochs to wait for validators to be able to withdraw
   # Defaults to 256 epochs ~27 hours
   min_validator_withdrawability_delay: 256
 
@@ -878,7 +878,7 @@ network_params:
   deploy_eip8282_contracts: true
 
   # The period of the shard committee
-  # Defaults to 256 epoch ~27 hours
+  # Defaults to 256 epochs ~27 hours
   shard_committee_period: 256
 
   # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
@@ -1004,7 +1004,7 @@ network_params:
   perfect_peerdas_enabled: false
 
   # Gas limit for the network
-  # Default to 0, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
+  # Defaults to 0, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
   # Example: gas_limit: 60000000
@@ -1063,19 +1063,19 @@ network_params:
   bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
-  # Default to "0x00"
+  # Defaults to "0x00"
   withdrawal_type: "0x00"
 
   # Withdrawal address
-  # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
+  # Defaults to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
 
   # Validator balance (available ranges: 32-2048)
-  # Default to 32 ETH
+  # Defaults to 32 ETH
   validator_balance: 32
 
   # Minimum number of epochs for data column sidecars requests
-  # Default to 4096
+  # Defaults to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
   # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
@@ -1084,11 +1084,11 @@ network_params:
   # these builders first, in launch order, so they skip the lifecycle deposit; note
   # that per spec (is_active_builder) a genesis builder can only bid once epoch 1 is
   # finalized (deposit_epoch 0 < finalized_checkpoint.epoch), i.e. from ~epoch 3.
-  # Default to 0
+  # Defaults to 0
   builder_count: 0
 
   # Balance of each builder in ETH
-  # Default to 100 ETH
+  # Defaults to 100 ETH
   builder_balance: 100
 
   # Mnemonic used to derive builder BLS keys. Genesis-registered builders use
@@ -1228,7 +1228,7 @@ prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"
   # Resource management for prometheus container
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 10
   max_cpu: 1000
@@ -1249,7 +1249,7 @@ grafana_params:
   # pointing at your own repo instead.
   additional_dashboards: []
   # Resource management for grafana container
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 10
   max_cpu: 1000
@@ -1380,7 +1380,7 @@ zkboost_params:
 # Configuration place for tempo tracing backend
 tempo_params:
   # Resource management for tempo container
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 10
   max_cpu: 1000
@@ -1480,11 +1480,11 @@ snooper_params:
 ethereum_metrics_exporter_enabled: false
 
 # Parallelizes keystore generation so that each node has keystores being generated in their own container
-# This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+# This will result in a larger number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
 parallel_keystore_generation: false
 
 # Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
-# Default to false
+# Defaults to false
 disable_peer_scoring: false
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
@@ -1559,7 +1559,7 @@ mempool_bridge_params:
 #              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
 #              DEPRECATED: this single shared-builder mode will be dropped after the gloas fork. Use
 #              `buildoor_params.instances` for dedicated per-participant builders instead.
-# We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
+# We have seen instances of multibuilder instances failing to start mev-relay-api with non-zero epochs
 mev_type: null
 
 # Parameters if MEV is used
@@ -1595,9 +1595,9 @@ mev_params:
   # Prometheus additional configuration for the mev builder participant.
   # Execution, beacon and validator client targets on prometheus will include this configuration.
   mev_builder_prometheus_config:
-    # Scrape interval to be used. Default to 15 seconds
+    # Scrape interval to be used. Defaults to 15 seconds
     scrape_interval: 15s
-    # Additional labels to be added. Default to empty
+    # Additional labels to be added. Defaults to empty
     labels: {}
   # Image to use for mock mev
   mock_mev_image: ethpandaops/rustic-builder:main
@@ -1706,7 +1706,7 @@ nginx_port: 9090
 
 # Global tolerations that will be passed to all containers (unless overridden by a more specific toleration)
 # Only works with Kubernetes
-# Example: tolerations:
+# Example: global_tolerations:
 # - key: "key"
 #   operator: "Equal"
 #   value: "value"
@@ -1728,7 +1728,7 @@ keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
 # When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync
-# Default to false
+# Defaults to false
 checkpoint_sync_enabled: false
 
 # Global flag to set checkpoint sync url
@@ -1739,7 +1739,7 @@ spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
   # Resource management for spamoor
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 10
   max_cpu: 1000
@@ -1775,7 +1775,7 @@ disruptoor_params:
   # The image to use for disruptoor
   image: ethpandaops/disruptoor:latest
   # Resource management for disruptoor
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 100
   max_cpu: 1000
@@ -1821,7 +1821,7 @@ slashoor_params:
   # The image to use for slashoor
   image: ethpandaops/slashoor:latest
   # Resource management for slashoor
-  # CPU is milicores
+  # CPU is millicores
   # RAM is in MB
   min_cpu: 100
   max_cpu: 1000
@@ -2256,14 +2256,14 @@ participants:
 
 ## Custom labels for Docker and Kubernetes
 
-There are 6 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
+There are 6 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example of these labels is as follows:
 
 Execution Layer (EL) nodes:
 
 ```sh
   "kurtosistech.com.custom/ethereum-package.client": "geth",
   "kurtosistech.com.custom/ethereum-package.client-image": "ethereum-client-go-latest",
-  "kurtosistech.com.custom/ethereum-package.client-language:": "go",
+  "kurtosistech.com.custom/ethereum-package.client-language": "go",
   "kurtosistech.com.custom/ethereum-package.client-type": "execution",
   "kurtosistech.com.custom/ethereum-package.connected-client": "lighthouse",
   "kurtosistech.com.custom/ethereum-package.node-index": "1",
@@ -2274,7 +2274,7 @@ Consensus Layer (CL) nodes - Beacon:
 ```sh
   "kurtosistech.com.custom/ethereum-package.client": "lighthouse",
   "kurtosistech.com.custom/ethereum-package.client-image": "sigp-lighthouse-latest",
-  "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
+  "kurtosistech.com.custom/ethereum-package.client-language": "rust",
   "kurtosistech.com.custom/ethereum-package.client-type": "beacon",
   "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
   "kurtosistech.com.custom/ethereum-package.node-index": "1",
@@ -2285,7 +2285,7 @@ Consensus Layer (CL) nodes - Validator:
 ```sh
   "kurtosistech.com.custom/ethereum-package.client": "lighthouse",
   "kurtosistech.com.custom/ethereum-package.client-image": "sigp-lighthouse-latest",
-  "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
+  "kurtosistech.com.custom/ethereum-package.client-language": "rust",
   "kurtosistech.com.custom/ethereum-package.client-type": "validator",
   "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
   "kurtosistech.com.custom/ethereum-package.node-index": "1",
@@ -2293,14 +2293,14 @@ Consensus Layer (CL) nodes - Validator:
 
 - `ethereum-package.client` describes which client is running on the node.
 - `ethereum-package.client-image` describes the image that is used for the client.
-- `ethereum-package.client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
+- `ethereum-package.client-type` describes the type of client that is running on the node (`execution`, `beacon` or `validator`).
 - `ethereum-package.connected-client` describes the CL/EL client that is connected to the EL/CL client.
 - `ethereum-package.client-language` describes the implementation language of the running service.
 - `ethereum-package.node-index` describes the index of the node (participant) that the service belongs to.
 
 ## Proposer Builder Separation (PBS) emulation
 
-To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
+To spin up the network of Ethereum nodes with an external block building network (using Flashbots' `mev-boost` protocol), simply use:
 
 ```bash
 kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "flashbots"}'
@@ -2308,11 +2308,11 @@ kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "flashbots"}'
 
 Starting your network up with `"mev_type": "flashbots"` will instantiate and connect the following infrastructure to your network:
 
-1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
+1. `Flashbots' block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
 2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
 4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
-5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
+5. `mev-boost` - open-source middleware instantiated for each EL/CL pair in the network, including the builder
 
 The package also supports other MEV implementations:
 
@@ -2326,7 +2326,7 @@ Each implementation provides different features and performance characteristics 
 <details>
     <summary>Caveats when using "mev_type": "flashbots"</summary>
 
-- Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
+- Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the setup. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
 - After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
 - Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
 
@@ -2402,7 +2402,7 @@ For this to work, we need a network of 16 nodes running, so each node would cust
 
 Here's a table of the private keys that can be used to create the nodes:
 
-| nodeId | sep256k1 privKey | columns |
+| nodeId | secp256k1 privKey | columns |
 |--------|-------------|---------|
 | 0x9908...4159 | 0x86e8...4c8d | 17, 51, 52, 76, 103, 113, 117, 118 |
 | 0xacd4...84e1 | 0xe156...c0da | 24, 35, 78, 80, 101, 107, 114, 122 |

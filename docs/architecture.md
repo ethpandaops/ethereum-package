@@ -31,7 +31,7 @@ The main function is the package's entrypoint, where parameters are received fro
 
 ## [Package I/O][package-io]
 
-This particular package has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a YAML or JSON-serialized string, and arrive to the package's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `package_io` directory, so you'll want to visit this directory if you want to:
+This particular package has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a YAML or JSON-serialized string, and arrive at the package's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `package_io` directory, so you'll want to visit this directory if you want to:
 
 - View or change parameters that the package can receive
 - Change the default values of package parameters
@@ -55,9 +55,9 @@ We'll explain these phases one by one.
 
 ### Generating EL and CL client data
 
-All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in a single genesis generation environment config files found in [`static_files`](../static_files/genesis-generation-config/el-cl/values.env.tmpl).
+All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in a single genesis generation environment config file found in [`static_files`](../static_files/genesis-generation-config/el-cl/values.env.tmpl).
 
-CL clients, like EL clients also have a genesis and config files that they need. This is created at the same time as the EL genesis files.
+CL clients, like EL clients, also have genesis and config files that they need. These are created at the same time as the EL genesis files.
 
 Then the validator keys are generated. A tool called [eth2-val-tools](https://github.com/protolambda/eth2-val-tools) is used to generate the keys. The keys are then stored as a file artifact.
 
@@ -69,15 +69,15 @@ Next, we plug the generated genesis data [into EL client "launchers"](https://gi
 
 Once CL genesis data and keys have been created, the CL client nodes are started via [the CL client launchers](https://github.com/ethpandaops/ethereum-package/tree/main/src/cl). Just as with EL clients:
 
-- CL client launchers implement come with a `launch` method
+- CL client launchers come with a `launch` method
 - One CL client launcher exists per client type (e.g. [Nimbus](https://github.com/ethpandaops/ethereum-package/tree/main/src/cl/nimbus), [Lighthouse](https://github.com/ethpandaops/ethereum-package/tree/main/src/cl/lighthouse))
 - Launched CL node information is tracked in [a `cl_context` struct](https://github.com/ethpandaops/ethereum-package/blob/main/src/cl/cl_context.star)
 
-There are only two major difference between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
+There are only two major differences between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
 
 ## Auxiliary Services
 
-After the Ethereum network is up and running, this package starts several auxiliary containers to make it easier to work with the Ethereum network. At time of writing, these are:
+After the Ethereum network is up and running, this package starts several auxiliary containers to make it easier to work with the Ethereum network. At the time of writing, these are:
 
 - [Forkmon](https://github.com/ethpandaops/ethereum-package/tree/main/src/forkmon), a "fork monitor" web UI for visualizing the CL clients' forks
 - [Prometheus](https://github.com/ethpandaops/ethereum-package/tree/main/src/prometheus) for collecting client node metrics
