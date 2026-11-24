@@ -29,7 +29,7 @@ additional_services:
   - tempo
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.12.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.20.0
   zkvms:
     - kind: mock
       proof_type: reth-sp1
