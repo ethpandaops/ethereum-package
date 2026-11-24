@@ -67,6 +67,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
+    "py3signer": "ghcr.io/serenita-org/py3signer:master",
     "web3signer": "consensys/web3signer:latest",
 }
 
