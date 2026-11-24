@@ -45,6 +45,10 @@ ERE_GUESTS_DEP_NAME = "stateless-validator-common"
 # Default env applied to every `kind: ere` entry.
 ERE_SERVER_DEFAULT_ENV = {"RUST_LOG": "info"}
 
+# OpenVM-specific Ere server defaults. The server sets the program up before it
+# binds, so the first prove does not run past the proof timeout.
+OPENVM_DEFAULT_ENV = {"ERE_OPENVM_SETUP_ON_INIT": "1"}
+
 # ZisK-specific Ere server defaults.
 ZISK_DEFAULT_SHM_SIZE_MIB = 32768
 ZISK_DEFAULT_ULIMITS = {"memlock": -1}
@@ -52,6 +56,8 @@ ZISK_DEFAULT_ENV = {
     "RUST_LOG": "info,asm_runner=warn,executor=warn,mem_planner_cpp=warn,proofman=warn,rom_setup=warn,sm_rom=warn,zisk=warn",
     "ERE_ZISK_SETUP_ON_INIT": "1",
 }
+# The ZisK server downloads its proving key before it binds.
+ZISK_READY_TIMEOUT = "1800s"
 
 
 def launch_zkboost(
@@ -354,7 +360,10 @@ def _launch_ere_server(
     }
 
     env_vars = dict(ERE_SERVER_DEFAULT_ENV)
-    if zkvm_kind == "zisk":
+    if zkvm_kind == "openvm":
+        for key, value in OPENVM_DEFAULT_ENV.items():
+            env_vars[key] = value
+    elif zkvm_kind == "zisk":
         for key, value in ZISK_DEFAULT_ENV.items():
             env_vars[key] = value
     for key, value in zkvm.get("env", {}).items():
@@ -393,7 +402,11 @@ def _launch_ere_server(
                 field="code",
                 assertion="==",
                 target_value=200,
-                timeout=ERE_SERVER_READY_TIMEOUT,
+                timeout=(
+                    ZISK_READY_TIMEOUT
+                    if zkvm_kind == "zisk"
+                    else ERE_SERVER_READY_TIMEOUT
+                ),
                 interval=ERE_SERVER_READY_INTERVAL,
             ),
         ),

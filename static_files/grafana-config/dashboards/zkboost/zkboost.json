@@ -4,7 +4,7 @@
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
+  "graphTooltip": 1,
   "id": null,
   "links": [],
   "panels": [
@@ -46,7 +46,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 3,
         "x": 0,
         "y": 1
       },
@@ -73,7 +73,7 @@
           "refId": "A"
         }
       ],
-      "title": "Programs Loaded",
+      "title": "Prover",
       "type": "stat"
     },
     {
@@ -86,29 +86,46 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "No"
+                },
+                "1": {
+                  "text": "Yes"
+                }
+              }
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
-          }
+          },
+          "unit": "none"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 4,
+        "x": 3,
         "y": 1
       },
-      "id": 2,
+      "id": 40,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -123,69 +140,21 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(zkboost_http_requests_in_flight{service=~\"$service\"})",
-          "legendFormat": "In Flight",
-          "refId": "A"
-        }
-      ],
-      "title": "Requests In Flight",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "reqps"
+          "expr": "up{service=~\"$service\"}",
+          "legendFormat": "Up",
+          "refId": "A",
+          "instant": true
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 1
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
         {
-          "expr": "sum(rate(zkboost_http_requests_total{service=~\"$service\"}[$__rate_interval]))",
-          "legendFormat": "RPS",
-          "refId": "A"
+          "expr": "zkboost_validator_ready{service=~\"$service\"}",
+          "legendFormat": "Validator",
+          "refId": "B",
+          "instant": true
         }
       ],
-      "title": "Request Rate",
-      "type": "stat"
+      "title": "Ready",
+      "type": "stat",
+      "description": "Up means Prometheus reaches zkboost. Validator means zkboost is ready to prove and sign."
     },
     {
       "datasource": {
@@ -207,25 +176,25 @@
               },
               {
                 "color": "yellow",
-                "value": 0.01
+                "value": 36
               },
               {
                 "color": "red",
-                "value": 0.05
+                "value": 60
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "s"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 7,
+        "x": 7,
         "y": 1
       },
-      "id": 4,
+      "id": 41,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -243,13 +212,79 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "(sum(rate(zkboost_http_requests_total{service=~\"$service\",status=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(zkboost_http_requests_total{service=~\"$service\"}[$__rate_interval]))",
-          "legendFormat": "Error Rate",
+          "expr": "time() - (zkboost_latest_payload_timestamp_seconds{service=~\"$service\"} > 0)",
+          "legendFormat": "Age",
           "refId": "A"
         }
       ],
-      "title": "Error Rate (5xx)",
-      "type": "stat"
+      "title": "Payload Age",
+      "type": "stat",
+      "description": "Time since the slot start of the newest valid payload. It grows when the CL stops sending payloads."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 7,
+        "x": 14,
+        "y": 1
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "zkboost_queue_depth{service=~\"$service\", proof_type=~\"$proof_type\"}",
+          "legendFormat": "{{proof_type}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Queue Depth",
+      "type": "stat",
+      "description": "Proofs waiting for a prover, per proof type."
     },
     {
       "datasource": {
@@ -276,8 +311,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 3,
+        "x": 21,
         "y": 1
       },
       "id": 5,
@@ -318,7 +353,7 @@
       },
       "id": 101,
       "panels": [],
-      "title": "HTTP Metrics",
+      "title": "Engine API",
       "type": "row"
     },
     {
@@ -347,7 +382,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -375,11 +410,117 @@
           },
           "unit": "reqps"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_newPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_forkchoiceUpdatedV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadBodies/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getBlobsV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_exchangeCapabilities/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getClientVersionV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 8,
         "x": 0,
         "y": 6
       },
@@ -407,7 +548,7 @@
           "refId": "A"
         }
       ],
-      "title": "Request Rate by Endpoint",
+      "title": "Request Rate by Method",
       "type": "timeseries"
     },
     {
@@ -436,7 +577,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -464,12 +605,136 @@
           },
           "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_newPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_forkchoiceUpdatedV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadBodies/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getBlobsV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_exchangeCapabilities/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getClientVersionV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ p50$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 6
       },
       "id": 7,
@@ -496,17 +761,12 @@
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(zkboost_http_request_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, endpoint))",
-          "legendFormat": "{{endpoint}} p95",
-          "refId": "B"
-        },
-        {
           "expr": "histogram_quantile(0.99, sum(rate(zkboost_http_request_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, endpoint))",
           "legendFormat": "{{endpoint}} p99",
           "refId": "C"
         }
       ],
-      "title": "Request Latency by Endpoint",
+      "title": "Request Latency by Method",
       "type": "timeseries"
     },
     {
@@ -535,7 +795,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -545,7 +805,7 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -563,13 +823,137 @@
           },
           "unit": "reqps"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_newPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_forkchoiceUpdatedV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getPayloadBodies/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getBlobsV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_exchangeCapabilities/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^engine_getClientVersionV/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ [45][0-9][0-9]$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 14
+        "w": 8,
+        "x": 16,
+        "y": 6
       },
       "id": 8,
       "options": {
@@ -590,101 +974,12 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_http_requests_total{service=~\"$service\"}[$__rate_interval])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "sum(rate(zkboost_http_requests_total{service=~\"$service\"}[$__rate_interval])) by (endpoint, status)",
+          "legendFormat": "{{endpoint}} {{status}}",
           "refId": "A"
         }
       ],
       "title": "Request Rate by Status Code",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 14
-      },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "expr": "sum(zkboost_http_requests_in_flight{service=~\"$service\"}) by (endpoint)",
-          "legendFormat": "{{endpoint}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Requests In Flight",
       "type": "timeseries"
     },
     {
@@ -693,11 +988,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 14
       },
-      "id": 105,
+      "id": 108,
       "panels": [],
-      "title": "Witness Fetch",
+      "title": "Payload & Witness",
       "type": "row"
     },
     {
@@ -708,7 +1003,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "#7EB26D",
+            "mode": "fixed"
           },
           "custom": {
             "axisBorderShow": false,
@@ -726,7 +1022,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -740,7 +1036,8 @@
             },
             "thresholdsStyle": {
               "mode": "off"
-            }
+            },
+            "axisSoftMin": 0
           },
           "mappings": [],
           "thresholds": {
@@ -752,17 +1049,77 @@
               }
             ]
           },
-          "unit": "ops"
+          "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "late payloads per minute"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "opm"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 60
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.scaleDistribution",
+                "value": {
+                  "type": "linear"
+                }
+              },
+              {
+                "id": "custom.axisSoftMin",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 12,
         "x": 0,
-        "y": 23
+        "y": 15
       },
-      "id": 30,
+      "id": 45,
       "options": {
         "legend": {
           "calcs": [
@@ -781,13 +1138,25 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_witness_fetch_total{service=~\"$service\"}[$__rate_interval])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(zkboost_payload_arrival_delay_seconds_bucket{service=~\"$service\"}[$__rate_interval])))",
+          "legendFormat": "p50",
           "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(zkboost_payload_arrival_delay_seconds_bucket{service=~\"$service\"}[$__rate_interval])))",
+          "legendFormat": "p99",
+          "refId": "B"
+        },
+        {
+          "expr": "(sum(clamp_min(zkboost_payload_arrival_delay_seconds_count{service=~\"$service\"} - zkboost_payload_arrival_delay_seconds_count{service=~\"$service\"} offset $__interval, 0)) - sum(clamp_min(zkboost_payload_arrival_delay_seconds_bucket{service=~\"$service\", le=\"12.0\"} - zkboost_payload_arrival_delay_seconds_bucket{service=~\"$service\", le=\"12.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "late payloads per minute",
+          "refId": "C",
+          "interval": "1m"
         }
       ],
-      "title": "Witness Fetch Rate",
-      "type": "timeseries"
+      "title": "engine_newPayloadV5 Arrival",
+      "type": "timeseries",
+      "description": "Time from the slot start until zkboost receives the payload. Bars show the payloads later than 12 s per minute."
     },
     {
       "datasource": {
@@ -815,7 +1184,158 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VALID"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "INVALID|error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SYNCING"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ACCEPTED"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 46,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(zkboost_new_payload_total{service=~\"$service\"}[$__rate_interval]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "engine_newPayloadWithWitnessV5 Status",
+      "type": "timeseries",
+      "description": "EL answers to new payloads. Only VALID payloads are proven."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -847,8 +1367,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
+        "w": 12,
+        "x": 0,
         "y": 23
       },
       "id": 31,
@@ -875,8 +1395,9 @@
           "refId": "A"
         }
       ],
-      "title": "Witness Fetch Duration",
-      "type": "timeseries"
+      "title": "engine_newPayloadWithWitnessV5 Duration",
+      "type": "timeseries",
+      "description": "Mean round trip of the calls that returned a witness."
     },
     {
       "datasource": {
@@ -904,7 +1425,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -936,8 +1457,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
+        "w": 12,
+        "x": 12,
         "y": 23
       },
       "id": 32,
@@ -977,7 +1498,7 @@
       },
       "id": 102,
       "panels": [],
-      "title": "Prove Operations",
+      "title": "Prover Overview",
       "type": "row"
     },
     {
@@ -1006,7 +1527,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1032,14 +1553,638 @@
               }
             ]
           },
-          "unit": "ops"
+          "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ p50$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 12,
         "x": 0,
+        "y": 32
+      },
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le, proof_type) (rate(zkboost_queue_wait_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])))",
+          "legendFormat": "{{proof_type}} p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le, proof_type) (rate(zkboost_queue_wait_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])))",
+          "legendFormat": "{{proof_type}} p99",
+          "refId": "B"
+        }
+      ],
+      "title": "Queue Wait",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "opm"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/\\(error\\)$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/\\(timeout\\)$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    0,
+                    10
+                  ],
+                  "fill": "dot"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ dispatch failed /"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    5,
+                    2,
+                    5
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
         "y": 32
       },
       "id": 10,
@@ -1061,12 +2206,17 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_prove_total{service=~\"$service\"}[$__rate_interval])) by (proof_type, status)",
+          "expr": "60 * (sum(rate(zkboost_prove_total{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (proof_type, status))",
           "legendFormat": "{{proof_type}} ({{status}})",
           "refId": "A"
+        },
+        {
+          "expr": "60 * (sum by (proof_type, reason) (rate(zkboost_proof_dispatch_failures_total{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) > 0)",
+          "legendFormat": "{{proof_type}} dispatch failed ({{reason}})",
+          "refId": "B"
         }
       ],
-      "title": "Prove Operations Rate",
+      "title": "Prove Rate",
       "type": "timeseries"
     },
     {
@@ -1095,7 +2245,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1109,7 +2259,9 @@
             },
             "thresholdsStyle": {
               "mode": "line"
-            }
+            },
+            "axisSoftMin": 0,
+            "axisSoftMax": 13
           },
           "mappings": [],
           "thresholds": {
@@ -1121,19 +2273,263 @@
               },
               {
                 "color": "red",
-                "value": 9
+                "value": 12
               }
             ]
           },
           "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ p50$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 32
+        "w": 12,
+        "x": 0,
+        "y": 40
       },
       "id": 11,
       "options": {
@@ -1154,23 +2550,19 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(zkboost_prove_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
+          "expr": "histogram_quantile(0.50, sum(rate(zkboost_prove_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (le, proof_type))",
           "legendFormat": "{{proof_type}} p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(zkboost_prove_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
-          "legendFormat": "{{proof_type}} p95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(zkboost_prove_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
+          "expr": "histogram_quantile(0.99, sum(rate(zkboost_prove_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (le, proof_type))",
           "legendFormat": "{{proof_type}} p99",
           "refId": "C"
         }
       ],
       "title": "Prove Duration",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Prove time of successful proofs. Red is one slot (12 s)."
     },
     {
       "datasource": {
@@ -1198,7 +2590,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1226,13 +2618,239 @@
           },
           "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 32
+        "w": 12,
+        "x": 12,
+        "y": 40
       },
       "id": 12,
       "options": {
@@ -1253,7 +2871,7 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_prove_proof_bytes_sum{service=~\"$service\"}[$__rate_interval])) by (proof_type) / sum(rate(zkboost_prove_proof_bytes_count{service=~\"$service\"}[$__rate_interval])) by (proof_type)",
+          "expr": "sum(rate(zkboost_prove_proof_bytes_sum{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (proof_type) / sum(rate(zkboost_prove_proof_bytes_count{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (proof_type)",
           "legendFormat": "{{proof_type}} avg",
           "refId": "A"
         }
@@ -1309,13 +2927,271 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "+Inf": {
+                        "index": 0,
+                        "text": "> 120s"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "(.+)",
+                      "result": {
+                        "index": 1,
+                        "text": "$1s"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 48
       },
       "id": 27,
       "options": {
@@ -1347,321 +3223,37 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"0.5\"}[$__range]))",
-          "format": "table",
+          "expr": "sum by (le, proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__range]))",
+          "format": "heatmap",
           "instant": true,
+          "legendFormat": "{{le}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"1.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"0.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"1.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"1.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"2.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"1.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"2.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"2.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"3.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"2.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"3.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"3.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"4.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"3.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"4.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"4.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "I"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"5.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"4.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "J"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"5.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"5.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "K"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"6.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"5.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "L"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"6.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"6.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "M"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"7.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"6.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "N"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"7.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"7.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "O"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"8.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"7.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "P"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"8.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"8.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "Q"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"9.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"8.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "R"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"9.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"9.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "S"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"10.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"9.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "T"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"10.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"10.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "U"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"11.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"10.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "V"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"11.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"11.0\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "W"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"12.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{service=~\"$service\",le=\"11.5\"}[$__range]))",
-          "format": "table",
-          "instant": true,
-          "refId": "X"
         }
       ],
       "title": "Prove Duration Distribution",
       "transformations": [
         {
-          "id": "merge",
-          "options": {}
-        },
-        {
-          "id": "organize",
+          "id": "reduce",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "instance": true,
-              "job": true,
-              "le": true,
-              "status": true
-            },
-            "indexByName": {
-              "Value #A": 1,
-              "Value #B": 2,
-              "Value #C": 3,
-              "Value #D": 4,
-              "Value #E": 5,
-              "Value #F": 6,
-              "Value #G": 7,
-              "Value #H": 8,
-              "Value #I": 9,
-              "Value #J": 10,
-              "Value #K": 11,
-              "Value #L": 12,
-              "Value #M": 13,
-              "Value #N": 14,
-              "Value #O": 15,
-              "Value #P": 16,
-              "Value #Q": 17,
-              "Value #R": 18,
-              "Value #S": 19,
-              "Value #T": 20,
-              "Value #U": 21,
-              "Value #V": 22,
-              "Value #W": 23,
-              "Value #X": 24,
-              "proof_type": 0
-            },
-            "renameByName": {
-              "Value #A": "0.5s",
-              "Value #B": "1.0s",
-              "Value #C": "1.5s",
-              "Value #D": "2.0s",
-              "Value #E": "2.5s",
-              "Value #F": "3.0s",
-              "Value #G": "3.5s",
-              "Value #H": "4.0s",
-              "Value #I": "4.5s",
-              "Value #J": "5.0s",
-              "Value #K": "5.5s",
-              "Value #L": "6.0s",
-              "Value #M": "6.5s",
-              "Value #N": "7.0s",
-              "Value #O": "7.5s",
-              "Value #P": "8.0s",
-              "Value #Q": "8.5s",
-              "Value #R": "9.0s",
-              "Value #S": "9.5s",
-              "Value #T": "10.0s",
-              "Value #U": "10.5s",
-              "Value #V": "11.0s",
-              "Value #W": "11.5s",
-              "Value #X": "12.0s",
-              "proof_type": "Proof Type"
-            }
+            "mode": "seriesToRows",
+            "reducers": [
+              "lastNotNull"
+            ],
+            "includeTimeField": false,
+            "labelsToFields": true
           }
         },
         {
-          "id": "transpose",
-          "options": {}
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "proof_type",
+            "rowField": "Field",
+            "valueField": "Last *"
+          }
         }
       ],
-      "type": "barchart"
+      "type": "barchart",
+      "description": "Successful proofs per prove duration bucket in the selected time range."
     },
     {
       "datasource": {
@@ -1689,7 +3281,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1700,6 +3292,652 @@
             "stacking": {
               "group": "A",
               "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            },
+            "axisSoftMin": 0,
+            "axisSoftMax": 13
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 12
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ p50$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "id": 48,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le, proof_type) (rate(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])))",
+          "legendFormat": "{{proof_type}} p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le, proof_type) (rate(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])))",
+          "legendFormat": "{{proof_type}} p99",
+          "refId": "B"
+        }
+      ],
+      "title": "Proof Latency",
+      "type": "timeseries",
+      "description": "Time from the slot start until a proof is accepted. Red is one slot (12 s)."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Proof results per proof type in the selected time range. On time means accepted within 12 s of the slot start.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "noValue": "N/A",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "On time %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 95
+                    },
+                    {
+                      "color": "green",
+                      "value": 99
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Late|.* failed"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 65
+      },
+      "id": 43,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "sum by (proof_type) (increase(zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"}[$__range]))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        },
+        {
+          "expr": "100 * sum by (proof_type) (increase(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"}[$__range])) / (sum by (proof_type) (increase(zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"}[$__range])) > 0)",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        },
+        {
+          "expr": "sum by (proof_type) (increase(zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"}[$__range])) - sum by (proof_type) (increase(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"}[$__range]))",
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        },
+        {
+          "expr": "sum by (proof_type) (increase(zkboost_proof_dispatch_failures_total{service=~\"$service\", proof_type=~\"$proof_type\"}[$__range]))",
+          "refId": "D",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        },
+        {
+          "expr": "sum by (proof_type) (increase(zkboost_prove_total{service=~\"$service\", proof_type=~\"$proof_type\", status=~\"error|timeout\"}[$__range]))",
+          "refId": "E",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        },
+        {
+          "expr": "sum by (proof_type) (increase(zkboost_submission_total{service=~\"$service\", proof_type=~\"$proof_type\", status=\"error\"}[$__range]))",
+          "refId": "F",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "legendFormat": ""
+        }
+      ],
+      "title": "Proof Outcomes",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "proof_type": 0,
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5,
+              "Value #F": 6
+            },
+            "renameByName": {
+              "proof_type": "Proof type",
+              "Value #A": "Accepted",
+              "Value #B": "On time %",
+              "Value #C": "Late",
+              "Value #D": "Dispatch failed",
+              "Value #E": "Prove failed",
+              "Value #F": "Submission failed"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 71
+      },
+      "id": 109,
+      "panels": [],
+      "repeat": "proof_type",
+      "title": "Prover - $proof_type",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "id": 47,
+      "interval": "1m",
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "showColorScale": false,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "s"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "expr": "sum by (le) (clamp_min(zkboost_prove_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"} - zkboost_prove_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"} offset $__interval, 0))",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Prove Duration ($proof_type)",
+      "type": "heatmap",
+      "description": "Successful proofs per prove duration bucket and time step."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 1,
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -1715,24 +3953,97 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "opm"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "within 12 s"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "12 to 36 s"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "36 s to 2 min"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2 to 10 min"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "over 10 min"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 48
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 72
       },
-      "id": 33,
+      "id": 44,
       "options": {
         "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
+          "calcs": [],
+          "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
@@ -1744,13 +4055,294 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_queue_wait_duration_seconds_sum{service=~\"$service\"}[$__rate_interval])) by (proof_type) / sum(rate(zkboost_queue_wait_duration_seconds_count{service=~\"$service\"}[$__rate_interval])) by (proof_type)",
-          "legendFormat": "{{proof_type}} avg",
+          "expr": "(sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "within 12 s",
           "refId": "A"
+        },
+        {
+          "expr": "(sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"36.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"36.0\"} offset $__interval, 0)) - sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"12.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "12 to 36 s",
+          "refId": "B"
+        },
+        {
+          "expr": "(sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"120.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"120.0\"} offset $__interval, 0)) - sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"36.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"36.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "36 s to 2 min",
+          "refId": "C"
+        },
+        {
+          "expr": "(sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"600.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"600.0\"} offset $__interval, 0)) - sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"120.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"120.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "2 to 10 min",
+          "refId": "D"
+        },
+        {
+          "expr": "(sum(clamp_min(zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"} - zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"} offset $__interval, 0)) - sum(clamp_min(zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"600.0\"} - zkboost_proof_slot_latency_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\", le=\"600.0\"} offset $__interval, 0))) * 60000 / $__interval_ms",
+          "legendFormat": "over 10 min",
+          "refId": "E"
         }
       ],
-      "title": "Queue Wait",
-      "type": "timeseries"
+      "title": "Late Proof ($proof_type)",
+      "type": "timeseries",
+      "description": "Accepted proofs per minute, by time from the slot start.",
+      "interval": "1m"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            },
+            "axisSoftMin": 0,
+            "axisSoftMax": 13
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 12
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "payload arrival"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 40
+              },
+              {
+                "id": "custom.gradientMode",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "witness fetch"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 40
+              },
+              {
+                "id": "custom.gradientMode",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "queue wait"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 40
+              },
+              {
+                "id": "custom.gradientMode",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "prove"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 40
+              },
+              {
+                "id": "custom.gradientMode",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "submission"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 40
+              },
+              {
+                "id": "custom.gradientMode",
+                "value": "none"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "accepted"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 81
+      },
+      "id": 49,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "sum(clamp_min(zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"payload_arrival\"} - zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"payload_arrival\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"payload_arrival\"} - zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"payload_arrival\"} offset $__rate_interval, 0))",
+          "legendFormat": "payload arrival",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(clamp_min(zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"witness_fetch\"} - zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"witness_fetch\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"witness_fetch\"} - zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"witness_fetch\"} offset $__rate_interval, 0))",
+          "legendFormat": "witness fetch",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(clamp_min(zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"queue_wait\"} - zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"queue_wait\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"queue_wait\"} - zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"queue_wait\"} offset $__rate_interval, 0))",
+          "legendFormat": "queue wait",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(clamp_min(zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"prove\"} - zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"prove\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"prove\"} - zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"prove\"} offset $__rate_interval, 0))",
+          "legendFormat": "prove",
+          "refId": "D"
+        },
+        {
+          "expr": "sum(clamp_min(zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"submission\"} - zkboost_proof_step_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\", step=\"submission\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"submission\"} - zkboost_proof_step_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\", step=\"submission\"} offset $__rate_interval, 0))",
+          "legendFormat": "submission",
+          "refId": "E"
+        },
+        {
+          "expr": "sum(clamp_min(zkboost_proof_slot_latency_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\"} - zkboost_proof_slot_latency_seconds_sum{service=~\"$service\", proof_type=~\"$proof_type\"} offset $__rate_interval, 0)) / sum(clamp_min(zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"} - zkboost_proof_slot_latency_seconds_count{service=~\"$service\", proof_type=~\"$proof_type\"} offset $__rate_interval, 0))",
+          "legendFormat": "accepted",
+          "refId": "F"
+        }
+      ],
+      "title": "Proof Latency ($proof_type)",
+      "type": "timeseries",
+      "description": "Mean time of each step of the proofs accepted at that time, stacked. The dashed line is their mean time from the slot start."
     },
     {
       "collapsed": false,
@@ -1758,7 +4350,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 90
       },
       "id": 106,
       "panels": [],
@@ -1791,7 +4383,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1817,15 +4409,259 @@
               }
             ]
           },
-          "unit": "ops"
+          "unit": "opm"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/\\(error\\)$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 57
+        "y": 91
       },
       "id": 34,
       "options": {
@@ -1846,7 +4682,7 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(zkboost_submission_total{service=~\"$service\"}[$__rate_interval])) by (proof_type, status)",
+          "expr": "60 * (sum(rate(zkboost_submission_total{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (proof_type, status))",
           "legendFormat": "{{proof_type}} ({{status}})",
           "refId": "A"
         }
@@ -1880,95 +4716,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 57
-      },
-      "id": 35,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "expr": "sum(rate(zkboost_proof_reused_total{service=~\"$service\"}[$__rate_interval])) by (proof_type)",
-          "legendFormat": "{{proof_type}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Proofs Reused",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1996,13 +4744,257 @@
           },
           "unit": "s"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/ p50$/"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 65
+        "x": 12,
+        "y": 91
       },
       "id": 36,
       "options": {
@@ -2023,23 +5015,19 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(zkboost_submission_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
+          "expr": "histogram_quantile(0.50, sum(rate(zkboost_submission_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (le, proof_type))",
           "legendFormat": "{{proof_type}} p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(zkboost_submission_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
-          "legendFormat": "{{proof_type}} p95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(zkboost_submission_duration_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
+          "expr": "histogram_quantile(0.99, sum(rate(zkboost_submission_duration_seconds_bucket{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (le, proof_type))",
           "legendFormat": "{{proof_type}} p99",
           "refId": "C"
         }
       ],
       "title": "Submission Duration",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Time to submit an accepted proof, retries included."
     },
     {
       "datasource": {
@@ -2067,7 +5055,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -2080,8 +5068,10 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line"
-            }
+              "mode": "off"
+            },
+            "axisSoftMin": 0,
+            "axisSoftMax": 1
           },
           "mappings": [],
           "thresholds": {
@@ -2090,24 +5080,246 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 12
               }
             ]
           },
-          "unit": "s"
+          "unit": "opm"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7EB26D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EAB839",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^ethrex-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#6ED0E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EF843C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F78C1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#BA43A9",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#705DA0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#508642",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nimbus-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#CCA300",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#447EBC",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^nethermind-zisk( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#C15C17",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zilkworm-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E5A8E2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-openvm( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#B7DBAB",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^zesu-sp1( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#AEA2E0",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^reth-pico( |$)/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E24D42",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 65
+        "x": 0,
+        "y": 99
       },
-      "id": 37,
+      "id": 35,
       "options": {
         "legend": {
           "calcs": [
@@ -2126,22 +5338,12 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(zkboost_proof_latency_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
-          "legendFormat": "{{proof_type}} p50",
+          "expr": "60 * (sum(rate(zkboost_proof_reused_total{service=~\"$service\", proof_type=~\"$proof_type\"}[$__rate_interval])) by (proof_type))",
+          "legendFormat": "{{proof_type}}",
           "refId": "A"
-        },
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(zkboost_proof_latency_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
-          "legendFormat": "{{proof_type}} p95",
-          "refId": "B"
-        },
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(zkboost_proof_latency_seconds_bucket{service=~\"$service\"}[$__rate_interval])) by (le, proof_type))",
-          "legendFormat": "{{proof_type}} p99",
-          "refId": "C"
         }
       ],
-      "title": "Proof Latency",
+      "title": "Proofs Reused",
       "type": "timeseries"
     },
     {
@@ -2150,7 +5352,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 107
       },
       "id": 103,
       "panels": [],
@@ -2309,7 +5511,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 108
       },
       "id": 25,
       "options": {
@@ -2474,7 +5676,7 @@
         "h": 16,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 116
       },
       "id": 23,
       "options": {
@@ -2545,6 +5747,29 @@
         "query": {
           "qryType": 1,
           "query": "label_values(zkboost_build_info, service)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(zkboost_queue_depth{service=~\"$service\"}, proof_type)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "proof_type",
+        "label": "Proof type",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(zkboost_queue_depth{service=~\"$service\"}, proof_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
