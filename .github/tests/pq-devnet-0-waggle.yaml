@@ -11,8 +11,8 @@ participants:
   - el_type: geth
     cl_type: silver
     cl_image: ethpandaops/silver:pq-devnet-0-waggle
-    vc_type: lighthouse
-    vc_image: ethpandaops/lighthouse:pq-devnet-0
+    vc_type: prysm
+    vc_image: ethpandaops/prysm-validator:pq-devnet-0-waggle
     count: 2
 
 network_params:
