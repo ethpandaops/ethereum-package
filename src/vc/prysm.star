@@ -92,6 +92,9 @@ def get_config(
     if is_pq and network_params.vrf_state_url != "":
         cmd.append("--vrf-state-url=" + network_params.vrf_state_url)
 
+    if is_pq and network_params.xmss_cache_url != "":
+        cmd.append("--xmss-cache-url=" + network_params.xmss_cache_url)
+
     if remote_signer_context == None:
         cmd.extend(
             [
