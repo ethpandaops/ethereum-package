@@ -185,6 +185,11 @@ def get_config(
     )
     if bootnode_arg != None:
         cmd.append(bootnode_arg)
+    elif (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
+        cmd.append("--bootnodes=")
 
     if otel_otlp_grpc_url != None:
         cmd.append("--rpc.telemetry")
