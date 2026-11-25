@@ -1,0 +1,23 @@
+participants:
+  - el_type: geth
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:pq-devnet-0-waggle
+    vc_image: ethpandaops/prysm-validator:pq-devnet-0-waggle
+    count: 2
+  - el_type: geth
+    cl_type: silver
+    cl_image: ethpandaops/silver:pq-devnet-0-waggle
+    vc_type: lighthouse
+    vc_image: ethpandaops/lighthouse:pq-devnet-0
+    count: 2
+
+network_params:
+  preset: mainnet
+  gloas_fork_epoch: 0
+  pq_fork_epoch: 0
+  genesis_delay: 120
+
+additional_services:
+  - dora
+  - prometheus
+  - grafana
