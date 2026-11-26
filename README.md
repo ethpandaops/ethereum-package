@@ -967,7 +967,7 @@ network_params:
   # A VRF root covers the 2^31 leaves of its tree, about an hour of CPU time
   # per key, so more than a handful of validators need precomputed keys
   # Defaults to "", which on a pq network resolves to
-  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev
+  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev
   # holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
 
@@ -983,7 +983,7 @@ network_params:
   # and nimbus
   # Defaults to "", which on a pq network with the default mnemonic resolves to
   # the states of its first 10000 keys at
-  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf
+  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.vrf
   vrf_state_url: ""
 
   # URL of a file of precomputed leanXMSS tree caches, 14696 bytes per
@@ -997,8 +997,16 @@ network_params:
   # --Xvalidators-pq-xmss-cache-url. Nimbus and prysm have no such flag yet.
   # Defaults to "", which on a pq network with the default mnemonic means the
   # caches of its first 10000 keys at
-  # https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss
+  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.xmss
   xmss_cache_url: ""
+
+  # Staggered aggregation on a pq network. Aggregators stop collecting
+  # attestations at their cutoff and broadcast at their due time, each
+  # aggregator_delay_bps after the one before it in the aggregation committee.
+  # Defaults to 4000 (40% of the slot), 6000 (60%) and 500 (5%)
+  aggregation_cutoff_bps: 4000
+  aggregate_due_bps_pq: 6000
+  aggregator_delay_bps: 500
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)

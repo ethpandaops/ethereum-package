@@ -8,7 +8,7 @@ constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/vc_shared.star")
 
 GRANDINE_ENTRYPOINT_COMMAND = "grandine"
-GRANDINE_PQ_ENTRYPOINT_COMMAND = "grandine-pq"
+GRANDINE_PQ_ENTRYPOINT_COMMAND = "$(command -v grandine-pq || echo grandine)"
 
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root

@@ -19,7 +19,13 @@ network_params:
   preset: mainnet
   gloas_fork_epoch: 0
   pq_fork_epoch: 0
+  xmss_pubkey_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev
+  vrf_state_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf
+  xmss_cache_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss
   genesis_delay: 120
+
+ethereum_genesis_generator_params:
+  image: ethpandaops/ethereum-genesis-generator@sha256:296c352575e5d6cb2bf22e179165f21c39a8114f27804540c2b84bf806820e33
 
 additional_services:
   - dora

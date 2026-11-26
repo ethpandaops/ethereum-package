@@ -110,12 +110,12 @@ BUILDOOR_SERVICE_NAME = "buildoor"
 BUILDOOR_API_PORT = 8080
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:master"
 DEFAULT_DORA_PQ_IMAGE = "ethpandaops/dora:pq"
-DEFAULT_XMSS_PUBKEY_URL = "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev"
+DEFAULT_XMSS_PUBKEY_URL = "https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev"
 DEFAULT_XMSS_CACHE_URL = (
-    "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss"
+    "https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.xmss"
 )
 DEFAULT_VRF_STATE_URL = (
-    "https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf"
+    "https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.vrf"
 )
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:master"

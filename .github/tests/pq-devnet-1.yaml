@@ -25,6 +25,9 @@ network_params:
   preset: mainnet
   gloas_fork_epoch: 0
   pq_fork_epoch: 0
+  aggregation_cutoff_bps: 4000
+  aggregate_due_bps_pq: 6000
+  aggregator_delay_bps: 500
   genesis_delay: 120
 
 additional_services:
