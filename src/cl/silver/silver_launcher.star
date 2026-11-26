@@ -176,8 +176,7 @@ def get_beacon_config(
     )
     cmd = ["silver", "--config", "/tmp/" + CONFIG_FILENAME]
     if network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH:
-        # Starts the leanVM sidecar and passes its socket to silver.
-        cmd[0] = "silver-pq-bn"
+        cmd[0] = "$(command -v silver-pq-bn || echo silver)"
 
     if len(participant.cl_extra_params) > 0:
         cmd.extend([param for param in participant.cl_extra_params])
