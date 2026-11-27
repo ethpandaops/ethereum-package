@@ -230,7 +230,7 @@ def get_beacon_config(
 
     is_pq = network_params.pq_fork_epoch != constants.FAR_FUTURE_EPOCH
     if is_pq:
-        cmd.append("--Xpq-leanvm-sidecar-binary=/usr/local/bin/leanvm-sidecar")
+        cmd.append("--Xpq-leanvm-enabled")
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string
