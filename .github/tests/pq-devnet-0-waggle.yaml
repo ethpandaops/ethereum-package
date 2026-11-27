@@ -11,9 +11,9 @@ network_params:
   preset: mainnet
   gloas_fork_epoch: 0
   pq_fork_epoch: 0
-  xmss_pubkey_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev
-  vrf_state_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.vrf
-  xmss_cache_url: https://pub-9ca7c570d1d646ab9412620dce6f55d2.r2.dev/b9dec4e1daa17dfe.xmss
+  xmss_pubkey_url: https://pq-keys.ethpandaops.io/public/v0/kurtosis/10000
+  vrf_state_url: https://pq-keys.ethpandaops.io/public/v0/kurtosis/10000/b9dec4e1daa17dfe.vrf
+  xmss_cache_url: https://pq-keys.ethpandaops.io/public/v0/kurtosis/10000/b9dec4e1daa17dfe.xmss
   genesis_delay: 120
 
 ethereum_genesis_generator_params:

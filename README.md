@@ -967,7 +967,7 @@ network_params:
   # A VRF root covers the 2^31 leaves of its tree, about an hour of CPU time
   # per key, so more than a handful of validators need precomputed keys
   # Defaults to "", which on a pq network resolves to
-  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev
+  # https://pq-keys.ethpandaops.io/public/v1/kurtosis/10000
   # holding the first 10000 keys of the default mnemonic
   xmss_pubkey_url: ""
 
@@ -983,7 +983,7 @@ network_params:
   # and nimbus
   # Defaults to "", which on a pq network with the default mnemonic resolves to
   # the states of its first 10000 keys at
-  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.vrf
+  # https://pq-keys.ethpandaops.io/public/v1/kurtosis/10000/b9dec4e1daa17dfe.vrf
   vrf_state_url: ""
 
   # URL of a file of precomputed leanXMSS tree caches, 14696 bytes per
@@ -997,7 +997,7 @@ network_params:
   # --Xvalidators-pq-xmss-cache-url. Nimbus and prysm have no such flag yet.
   # Defaults to "", which on a pq network with the default mnemonic means the
   # caches of its first 10000 keys at
-  # https://pub-50ade5e92a1f4b649d79a462cb5836ac.r2.dev/b9dec4e1daa17dfe.xmss
+  # https://pq-keys.ethpandaops.io/public/v1/kurtosis/10000/b9dec4e1daa17dfe.xmss
   xmss_cache_url: ""
 
   # Staggered aggregation on a pq network. Aggregators stop collecting
