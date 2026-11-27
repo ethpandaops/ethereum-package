@@ -144,7 +144,7 @@ network_params:
   bpo_5_max_blobs: 72
   bpo_5_target_blobs: 48
   bpo_5_base_fee_update_fraction: 0
-  withdrawal_type: "0x00"
+  withdrawal_type: "0x02"
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
@@ -271,7 +271,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.2.9
+  image: ethpandaops/ethereum-genesis-generator:6.2.10
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
