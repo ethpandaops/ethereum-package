@@ -96,7 +96,7 @@ def launch_participant_network(
         # network_params.frames_enabled is set or any participant runs a
         # "frame" or "bogota" image, disable the Heze fork on the CL side
         # (FRAMES_ENABLED=true) while the EL still activates bogota at
-        # HEZE_FORK_EPOCH.
+        # HEZE_FORK_EPOCH. network_params.focil_with_frames keeps Heze on.
         frames_enabled = network_params.frames_enabled
         for participant in args_with_right_defaults.participants:
             images = [participant.el_image, participant.cl_image, participant.vc_image]
@@ -115,6 +115,7 @@ def launch_participant_network(
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
             frames_enabled,
+            network_params.focil_with_frames,
             global_tolerations,
             global_node_selectors,
         )

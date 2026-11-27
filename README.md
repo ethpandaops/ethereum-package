@@ -954,6 +954,12 @@ network_params:
   # Defaults to false
   frames_enabled: false
 
+  # Keeps the Heze fork (FOCIL) on the CL side when frames are enabled, so
+  # FOCIL and frames run together. Nethermind also gets EIP-8141 scheduled at
+  # the bogota time, since its Bogota fork does not include frames.
+  # Defaults to false
+  focil_with_frames: false
+
 
   # Preset for the network
   # Default: "mainnet"
