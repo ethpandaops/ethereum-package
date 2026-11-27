@@ -13,6 +13,7 @@ reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
+fukuii = import_module("./fukuii/fukuii_launcher.star")
 
 
 def launch(
@@ -112,6 +113,14 @@ def launch(
             ),
             "get_config": ethrex.get_config,
             "get_el_context": ethrex.get_el_context,
+        },
+        constants.EL_TYPE.fukuii: {
+            "launcher": fukuii.new_fukuii_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "get_config": fukuii.get_config,
+            "get_el_context": fukuii.get_el_context,
         },
     }
 
