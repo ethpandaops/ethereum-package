@@ -57,9 +57,6 @@ def get_beacon_config(
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
-    if network_params.preset != "mainnet":
-        fail("silver supports only the mainnet preset")
-
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, RUST_LOG_LEVELS
     )
