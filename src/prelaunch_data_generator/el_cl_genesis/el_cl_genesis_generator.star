@@ -22,6 +22,7 @@ def generate_el_cl_genesis_data(
     total_num_validator_keys_to_preregister,
     latest_block,
     frames_enabled=False,
+    focil_with_frames=False,
     global_tolerations=[],
     global_node_selectors={},
 ):
@@ -38,7 +39,7 @@ def generate_el_cl_genesis_data(
         shadowfork_file,
         network_params,
         genesis_generator_params.extra_env,
-        frames_enabled,
+        frames_enabled and not focil_with_frames,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -124,6 +125,7 @@ def generate_el_cl_genesis_data(
         genesis_validators_root.output,
         osaka_time.output,
         shadowfork_block_height,
+        frames_enabled and focil_with_frames,
     )
 
     return result

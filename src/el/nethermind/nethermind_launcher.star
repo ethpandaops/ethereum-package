@@ -197,13 +197,45 @@ def get_config(
         "node_selectors": node_selectors,
     }
 
-    el_shared.apply_el_binary_override(
-        config_args,
-        el_binary_artifact,
-        "/nethermind/nethermind",
-        "/nethermind/nethermind",
-        cmd,
-    )
+    if launcher.el_cl_genesis_data.eip8141_at_bogota:
+        patched_genesis_path = "/tmp/genesis.json"
+        quoted_args = " ".join(
+            [
+                "'"
+                + arg.replace(
+                    constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER, patched_genesis_path
+                )
+                + "'"
+                for arg in cmd
+            ]
+        )
+        if el_binary_artifact != None:
+            launch = "cp /opt/bin/{0} /nethermind/nethermind && exec /nethermind/nethermind {1}".format(
+                el_binary_artifact.filename, quoted_args
+            )
+        else:
+            launch = "if [ -x ./entrypoint.sh ]; then exec ./entrypoint.sh {0}; else exec ./nethermind {0}; fi".format(
+                quoted_args
+            )
+        script = (
+            "T=$(grep -o '\"bogotaTime\": *[0-9]*' {0} | grep -o '[0-9]*$'); "
+            + '[ -n "$T" ] || {{ echo "no bogotaTime in {0}"; exit 1; }}; '
+            + 'sed "s/\\"config\\": *{{/\\"config\\": {{\\"eip8141PrototypeTime\\": $T, \\"eip8250PrototypeTime\\": $T, \\"eip8272PrototypeTime\\": $T,/" {0} > {1}; '
+            + 'echo "eip8141/8250/8272PrototypeTime=$T"; grep -oE "eip8(141|250|272)PrototypeTime[^0-9]*[0-9]+" {1}; '
+        ).format(
+            constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER,
+            patched_genesis_path,
+        ) + launch
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [script]
+    else:
+        el_shared.apply_el_binary_override(
+            config_args,
+            el_binary_artifact,
+            "/nethermind/nethermind",
+            "/nethermind/nethermind",
+            cmd,
+        )
 
     el_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

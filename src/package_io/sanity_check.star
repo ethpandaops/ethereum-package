@@ -252,6 +252,7 @@ SUBCATEGORY_PARAMS = {
         "gloas_fork_epoch",
         "heze_fork_epoch",
         "frames_enabled",
+        "focil_with_frames",
         "network_sync_base_url",
         "force_snapshot_sync",
         "shadowfork_block_height",
