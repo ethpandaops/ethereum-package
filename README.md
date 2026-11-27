@@ -583,7 +583,7 @@ participants:
 
   # Remote signer Specific flags
     # The type of remote signer that should be used
-    # Valid values are web3signer
+    # Valid values are py3signer and web3signer
     # Defaults to web3signer
     remote_signer_type: "web3signer"
 

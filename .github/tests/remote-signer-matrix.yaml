@@ -7,5 +7,6 @@ participants_matrix:
   vc:
     - vc_type: prysm
   remote_signer:
+    - remote_signer_type: py3signer
     - remote_signer_type: web3signer
       remote_signer_image: consensys/web3signer:develop

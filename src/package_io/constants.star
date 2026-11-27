@@ -36,7 +36,10 @@ VC_TYPE = struct(
     ethlambda="ethlambda",
 )
 
-REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
+REMOTE_SIGNER_TYPE = struct(
+    py3signer="py3signer",
+    web3signer="web3signer",
+)
 
 GLOBAL_LOG_LEVEL = struct(
     info="info",
@@ -64,6 +67,7 @@ HTTP_PORT_ID = "http"
 TORRENT_PORT_ID = "torrent"
 PROFILING_PORT_ID = "profiling"
 VALIDATOR_HTTP_PORT_ID = "http-validator"
+REMOTE_SIGNER_HTTP_PORT_ID = "http-signer"
 METRICS_PORT_ID = "metrics"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engine-ws"
@@ -348,6 +352,7 @@ CLIENT_LANGUAGES = {
     # Validator Clients (VC) - inherit from CL clients
     "vero": "python",
     # Remote Signers
+    "py3signer": "python",
     "web3signer": "java",
 }
 
