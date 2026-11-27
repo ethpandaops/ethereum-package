@@ -730,9 +730,9 @@ network_params:
   # Network name, used to enable syncing of alternative networks
   # Defaults to "kurtosis"
   # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "hoodi")
-  # You can sync any devnet by setting this to its name (e.g. "glamsterdam-devnet-N", "fusaka-devnet-N", "glamsterdam-msf-N")
-  # Devnets are looked up in cartographoor (https://github.com/ethpandaops/cartographoor), which lists every
-  # ethpandaops devnet; names it does not list yet resolve to <devnet_repo>/<category>-devnets/network-configs/<rest>
+  # You can sync any devnet by setting this to its name (e.g. "peerdas-devnet-N", "fusaka-devnet-N", "berlinterop-devnet-N")
+  # Devnet names outside the "-devnet-N" / "-hsf-N" / "-gsf-N" / "-ssf-N" convention (e.g. "glamsterdam-msf-N") are
+  # looked up in cartographoor (https://github.com/ethpandaops/cartographoor), which lists every ethpandaops devnet
   # You can sync from another running kurtosis enclave by setting this to "kt-<host>:<nginx-port>"
   # (see "Syncing one enclave from another" above)
   network: "kurtosis"

@@ -1,5 +1,7 @@
 #!/bin/sh
 # Fetches a devnet's network-configs metadata bundle into /network-configs.
+# Used for devnet names outside the -devnet-N / -{hsf,gsf,ssf}-N convention,
+# which src/shared_utils calculate_devnet_url cannot map to a repository.
 #
 # The devnet is located through cartographoor's networks.json index (which maps
 # every ethpandaops devnet name to its repository, path and branch). Networks it

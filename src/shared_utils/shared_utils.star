@@ -220,6 +220,36 @@ def get_final_genesis_timestamp(plan, padding):
     return result.output
 
 
+# Returns the GitHub metadata locator for devnet names following the
+# <category>-devnet-N / <category>-{hsf,gsf,ssf}-N convention, None otherwise.
+def calculate_devnet_url(network, repo):
+    sf_suffix_mapping = {"hsf": "-hsf-", "gsf": "-gsf-", "ssf": "-ssf-"}
+    shadowfork = "sf-" in network
+    network_parts = None
+
+    if shadowfork:
+        for suffix, delimiter in sf_suffix_mapping.items():
+            if delimiter in network:
+                network_parts = network.split(delimiter, 1)
+                network_type = suffix
+    else:
+        network_parts = network.split("-devnet-", 1)
+        network_type = "devnet"
+
+    if network_parts == None or len(network_parts) < 2:
+        return None
+
+    devnet_name, devnet_number = network_parts[0], network_parts[1]
+    devnet_category = devnet_name.split("-")[0]
+    devnet_subname = (
+        devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
+    )
+
+    return "github.com/{0}/{1}-devnets/network-configs/{2}{3}-{4}/metadata".format(
+        repo, devnet_category, devnet_subname, network_type, devnet_number
+    )
+
+
 def get_client_names(participant, index, participant_contexts, participant_configs):
     index_str = zfill_custom(index + 1, len(str(len(participant_contexts))))
     participant_config = participant_configs[index]
