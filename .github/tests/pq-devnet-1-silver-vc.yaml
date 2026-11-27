@@ -1,0 +1,33 @@
+# silver's validator client on a PQ-from-genesis network, against silver's
+# beacon node and a lighthouse one. Validators 0-47 run in the participants;
+# keep at least 32 per epoch so no beacon committee is empty.
+participants:
+  - el_type: ethrex
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:pq-devnet-1
+    vc_image: ethpandaops/lighthouse:pq-devnet-1
+    supernode: true
+    validator_count: 16
+  - el_type: ethrex
+    cl_type: silver
+    cl_image: ethpandaops/silver:pq-devnet-1
+    vc_type: silver
+    validator_count: 16
+  - el_type: ethrex
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:pq-devnet-1
+    vc_type: silver
+    vc_image: ethpandaops/silver:pq-devnet-1
+    validator_count: 16
+
+network_params:
+  preset: mainnet
+  gloas_fork_epoch: 0
+  pq_fork_epoch: 0
+  aggregation_cutoff_bps: 4000
+  aggregate_due_bps_pq: 6000
+  aggregator_delay_bps: 500
+  genesis_delay: 120
+
+additional_services:
+  - dora

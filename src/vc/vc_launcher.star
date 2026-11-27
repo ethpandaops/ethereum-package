@@ -11,6 +11,7 @@ prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
 ethlambda = import_module("./ethlambda.star")
+silver = import_module("./silver.star")
 vc_shared = import_module("./vc_shared.star")
 
 
@@ -66,6 +67,9 @@ def get_vc_config(
         },
         constants.VC_TYPE.ethlambda: {
             "get_config": ethlambda.get_config,
+        },
+        constants.VC_TYPE.silver: {
+            "get_config": silver.get_config,
         },
     }
 

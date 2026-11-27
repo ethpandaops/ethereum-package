@@ -374,7 +374,8 @@ participants:
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
-    # silver needs a `-minimal` image for the minimal preset, has no validator client of its own (defaults to a lighthouse VC)
+    # silver needs a `-minimal` image for the minimal preset, runs no validator client in the beacon node
+    # (defaults to a lighthouse VC; `vc_type: silver` runs silver's own, PQ-only validator client)
     # and needs `kurtosis run --privileged` for io_uring
     # On a pq network silver starts through `silver-pq-bn`, which runs the leanVM sidecar beside it,
     # so it needs an image that ships both, such as ethpandaops/silver:pq-devnet-0
@@ -482,8 +483,11 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and ethlambda
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero, ethlambda and silver
     # ( The prysm validator only works with a prysm CL client )
+    # ( silver signs PQ duties only: it needs `pq_fork_epoch: 0` and the mainnet preset, follows one beacon node,
+    #   and has no keymanager API or remote signer support. It reads the network's genesis.ssz, `xmss_cache_url`
+    #   and `vrf_state_url`. )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
 
@@ -496,6 +500,8 @@ participants:
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
     # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
+    # - silver: ethpandaops/silver:main (on a pq network, use an image that ships `silver-vc`,
+    #   such as ethpandaops/silver:pq-devnet-1)
     vc_image: ""
 
     # Path to a local VC binary to inject into the container (Docker only)
