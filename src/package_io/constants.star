@@ -186,6 +186,10 @@ NETWORK_ID = {
     "hoodi": "560048",
 }
 
+# Index of every ethpandaops devnet (name -> repository, path, branch),
+# published by github.com/ethpandaops/cartographoor
+CARTOGRAPHOOR_NETWORKS_URL = "https://ethpandaops-platform-production-cartographoor.ams3.cdn.digitaloceanspaces.com/networks.json"
+
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
     "ephemery": "https://checkpoint-sync.ephemery.ethpandaops.io/",
