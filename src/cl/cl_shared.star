@@ -36,8 +36,12 @@ def get_execution_engine_endpoint(participant, el_context, snooper_el_engine_con
 def get_beacon_data_directory(
     beacon_service_name, participant, network_params, volume_size_key
 ):
+    # Networks without their own entry (devnets, whatever their name) use the
+    # devnets sizes
     network_volume_key = (
-        "devnets" if "devnet" in network_params.network else network_params.network
+        network_params.network
+        if network_params.network in constants.VOLUME_SIZE
+        else "devnets"
     )
     return Directory(
         persistent_key="data-{0}".format(beacon_service_name),

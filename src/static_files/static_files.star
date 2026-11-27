@@ -21,6 +21,11 @@ NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmp
 NGINX_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enode.txt.tmpl"
 NGINX_EL_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/el_enr_list.txt.tmpl"
 
+# Devnet network-configs fetcher (cartographoor lookup + GitHub download)
+FETCH_DEVNET_NETWORK_CONFIGS_SCRIPT_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/devnet-config/fetch_network_configs.sh"
+)
+
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"

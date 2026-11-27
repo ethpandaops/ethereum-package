@@ -27,7 +27,9 @@ def get_discovery_ports(public_ports_for_component, discovery_port_num):
 # Returns the EL data volume size: the participant's override when set,
 # otherwise the network-dependent default for the given EL type.
 def get_volume_size(participant, network, el_type):
-    volume_size_key = "devnets" if "devnet" in network else network
+    # Networks without their own entry (devnets, whatever their name) use the
+    # devnets sizes
+    volume_size_key = network if network in constants.VOLUME_SIZE else "devnets"
     return (
         int(participant.el_volume_size)
         if int(participant.el_volume_size) > 0
