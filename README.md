@@ -374,7 +374,7 @@ participants:
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine, silver, and ethlambda
-    # silver supports only the mainnet preset, has no validator client of its own (defaults to a lighthouse VC)
+    # silver needs a `-minimal` image for the minimal preset, has no validator client of its own (defaults to a lighthouse VC)
     # and needs `kurtosis run --privileged` for io_uring
     # On a pq network silver starts through `silver-pq-bn`, which runs the leanVM sidecar beside it,
     # so it needs an image that ships both, such as ethpandaops/silver:pq-devnet-0
