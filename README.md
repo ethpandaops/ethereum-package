@@ -268,7 +268,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 participants:
   # EL(Execution Layer) Specific flags
     # The type of EL client that should be started
-    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, None
+    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, xone, None
     # Use el_type: None to run the participant without an execution client (CL-only; execution-endpoint and JWT secret are omitted)
   - el_type: geth
 
@@ -282,6 +282,7 @@ participants:
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ethpandaops/ethrex:main
+    # - xone: xonesh/xone:latest
     el_image: ""
 
     # Path to a local EL binary to inject into the container (Docker only)

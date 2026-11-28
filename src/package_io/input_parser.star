@@ -15,6 +15,7 @@ DEFAULT_EL_IMAGES = {
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ethpandaops/ethrex:main",
+    "xone": "xonesh/xone:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -415,7 +416,7 @@ def input_parser(plan, input_args):
 
     # Check for shadowfork + archive mode and unsupported client + archive mode combinations
     is_shadowfork = "shadowfork" in result["network_params"]["network"]
-    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus", "xone"]
 
     for idx, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
