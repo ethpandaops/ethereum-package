@@ -8,6 +8,7 @@ EL_TYPE = struct(
     ethereumjs="ethereumjs",
     nimbus="nimbus",
     ethrex="ethrex",
+    xone="xone",
     none="none",
 )
 
@@ -231,6 +232,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 500000,  # 500GB
         "grandine_volume_size": 500000,  # 500GB
         "ethrex_volume_size": 500000,  # 500GB
+        "xone_volume_size": 500000,  # 500GB
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
@@ -250,6 +252,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 150000,  # 150GB
         "grandine_volume_size": 150000,  # 150GB
         "ethrex_volume_size": 150000,  # 150GB
+        "xone_volume_size": 150000,  # 150GB
     },
     "devnets": {
         "geth_volume_size": 100000,  # 100GB
@@ -269,6 +272,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
         "ethrex_volume_size": 100000,  # 100GB
+        "xone_volume_size": 100000,  # 100GB
     },
     "ephemery": {
         "geth_volume_size": 5000,  # 5GB
@@ -288,6 +292,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
         "ethrex_volume_size": 1000,  # 1GB
+        "xone_volume_size": 1000,  # 1GB
     },
     "kurtosis": {
         "geth_volume_size": 5000,  # 5GB
@@ -307,6 +312,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
         "ethrex_volume_size": 1000,  # 1GB
+        "xone_volume_size": 1000,  # 1GB
     },
     "hoodi": {
         "geth_volume_size": 100000,  # 100GB
@@ -326,6 +332,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
         "ethrex_volume_size": 100000,  # 100GB
+        "xone_volume_size": 100000,  # 100GB
     },
 }
 # Language mapping for client implementations
@@ -339,6 +346,7 @@ CLIENT_LANGUAGES = {
     "reth-builder": "rust",
     "ethereumjs": "javascript",
     "nimbus": "nim",
+    "xone": "rust",
     # Consensus Layer (CL) clients
     "lighthouse": "rust",
     "teku": "java",
