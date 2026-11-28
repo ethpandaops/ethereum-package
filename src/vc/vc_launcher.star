@@ -14,6 +14,15 @@ ethlambda = import_module("./ethlambda.star")
 vc_shared = import_module("./vc_shared.star")
 
 
+FF_HANDOVER_VC_TYPES = (
+    constants.VC_TYPE.lighthouse,
+    constants.VC_TYPE.lodestar,
+    constants.VC_TYPE.nimbus,
+    constants.VC_TYPE.prysm,
+    constants.VC_TYPE.teku,
+)
+
+
 def get_vc_config(
     plan,
     launcher,
@@ -41,6 +50,7 @@ def get_vc_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    ff_handover=None,
 ):
     if node_keystore_files == None:
         return None
@@ -119,6 +129,13 @@ def get_vc_config(
         )
 
     get_config = vc_launchers[vc_type]["get_config"]
+    ff_kwargs = {}
+    if ff_handover != None:
+        if vc_type not in FF_HANDOVER_VC_TYPES:
+            fail(
+                "fast_forward does not support the {0} validator client".format(vc_type)
+            )
+        ff_kwargs["ff_handover"] = ff_handover
 
     config = get_config(
         plan=plan,
@@ -145,6 +162,7 @@ def get_vc_config(
         tempo_otlp_grpc_url=tempo_otlp_grpc_url,
         otel_otlp_grpc_url=otel_otlp_grpc_url,
         vc_binary_artifact=vc_binary_artifact,
+        **ff_kwargs
     )
 
     return config
